@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html>
+	<!--Version 4.4-->
+	<!--Bibliography
+			All astronomical formulae sourced directly from:
+				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
+			Astrological Symbols from the Google Noto Project.
+			Design largely based on that of the Prague Astronomical Clock.
+			Otherwise, this code and the images it produces are the copyrighted works of Joshua.
+	-->
+	<head>
+		<title>Astronomical Clock</title>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<style>
+			* {
+				font-family: Arial;
+			}
+			body {
+				margin: 0;
+				/*background-color: #000000;*/
+				overflow: hidden;
+			}
+			canvas {
+				display: block;
+				margin: auto;
+				margin-top: 80px;
+			}
+			#footer {
+				position: absolute;
+				bottom: 0;
+				right: 0;
+				top: 0;
+				/*opacity: 0;*/
+				width: 320px;
+				background-color: #dddddd;
+				padding: 0 25px;
+				overflow: auto;
+				/*box-shadow: -4px 0 8px 0 rgba(0, 0, 0, 0.2), -6px 0 20px 0 rgba(0, 0, 0, 0.19);*/
+				transition: right 0.5s;
+			}
+			#footer:hover {
+				/*opacity: 1;*/
+			}
+			.options {
+				font-size: 20px;
+				padding: 0;
+				margin: 0;
+				line-height: 1.75;
+			}
+			input[type=checkbox] {
+				height: 15px;
+				width: 15px;
+				margin: 0;
+				margin-top: 5px;
+				cursor: pointer;
+				background-color: #ffffff;
+			}
+			select {
+				cursor: pointer;
+				width: 190px;
+				background-color: #ffffff;
+			}
+			select, input[type=number] {
+				height: 30px;
+			}
+			select, input[type=number], #auto, .preset, .btn {
+				font-size: inherit;
+				border: none;
+				border-radius: 5px;
+				text-align: center;
+			}
+			input[type=number], #auto {
+				width: 70px;
+			}
+			select:focus, input[type=number]:focus {
+				outline: none;
+			}
+			select, input[type=number] {
+				padding: 0 5px;
+			}
+			#auto, .preset {
+				background-color: #cccccc;
+				padding: 5px 10px;
+				cursor: pointer;
+				transition: background-color 0.1s;
+			}
+			#auto:hover, .preset:hover, #arrow:hover {
+				background-color: #999999;
+			}
+			#auto:active, .preset:active, #arrow:active {
+				background-color: #bbbbbb;
+			}
+			#zone:disabled {
+				background: #dddddd;
+				color: #000000;
+			}
+			#suggest {
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 200px;
+				text-align: center;
+				font-size: 20px;
+				background-color: #dddddd;
+				border-bottom-left-radius: 10px;
+				padding: 30px 10px;
+			}
+			#presetBox {
+				display: flex;
+				flex-flow: row wrap;
+				margin-bottom: 5px;
+			}
+			.preset {
+				flex-grow: 1;
+				flex-shrink: 0;
+				margin: 3px;
+				font-size: 20px;
+			}
+			label {
+				cursor: pointer;
+			}
+			#arrow {
+				position: absolute;
+				right: 370px;
+				bottom: 50vh;
+				cursor: pointer;
+				background-color: #cccccc;
+				border-bottom-left-radius: 50px;
+				border-top-left-radius: 50px;
+				padding: 5px 10px 5px 20px;
+				font-size: 40px;
+				font-family: Arial;
+				transition: right 0.5s;
+			}
+			@media only screen and (max-aspect-ratio: 1/1) {
+				#arrow {
+					bottom: auto;
+					top: 15px;
+				}
+			}
+		</style>
+	</head>
+	<body onLoad="start()" onkeydown="key(event)">
+		<script>
+			var canvas, ctx, r, r2, i, sky, points;
+			var signs = ["\u2648", "\u2649", "\u264a", "\u264b", "\u264c", "\u264d", "\u264e", "\u264f", "\u2650", "\u2651", "\u2652", "\u2653"];
+			var stars = ["★", "★", "★", "★", "★", "★", "★", "★", "★", "★", "★", "✯"];
+			var roman = ["N", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
+			var planets = [];
+			var Planet = function (name, T, eps, po, e, a, i, leo, thet_0, v_0, symbol, colour, radius) {
+				this.name = name;
+				this.T = T;
+				this.eps = eps;
+				this.po = po;
+				this.e = e;
+				this.a = a;
+				this.i = i;
+				this.leo = leo;
+				this.thet_0 = thet_0;
+				this.v_0 = v_0;
+				this.colour = colour;
+				this.radius = radius;
+				this.symbol = symbol;
+			}
+			planets[0] = new Planet("Mercury", 0.24085, 75.5671, 77.612, 0.205627, 0.387098, 7.0051, 48.449, 6.74, -0.42, "\u263f", "#808080", 2.5);
+			planets[1] = new Planet("Venus", 0.615207, 272.30044, 131.54, 0.006812, 0.723329, 3.3947, 76.769, 16.92, -4.4, "\u2640", "#ffcc00", 3);
+			var earth = new Planet("Earth", 0.999996, 99.556772, 103.2055, 0.016671, 0.999985);
+			planets[2] = new Planet("Mars", 1.880765, 109.09646, 336.217, 0.093348, 1.523689, 1.8497, 49.632, 9.36, -1.52, "\u2642", "#ff0000", 2.75);
+			planets[3] = new Planet("Jupiter", 11.857911, 337.917132, 14.6633, 0.048907, 5.20278, 1.3035, 100.595, 196.74, -9.4, "\u2643", "#feac49", 6);
+			planets[4] = new Planet("Saturn", 29.310579, 172.398316, 89.567, 0.053853, 9.51134, 2.4873, 113.752, 165.6, -8.88, "\u2644", "#d6b977", 5);
+			planets[5] = new Planet("Uranus", 84.039492, 356.1354, 172.884833, 0.046321, 19.21814, 0.773059, 73.926961, 65.8, -7.19, "\u26e2", "#a8eef0", 4); //eps value is incorrect in referenced book. Correct value sourced from: https://www.cambridge.org/files/4113/6680/1018/pawycos-errata.pdf
+			planets[6] = new Planet("Neptune", 165.84539, 326.895127, 23.07, 0.010483, 30.1985, 1.7673, 131.879, 62.2, -6.87, "\u2646", "#0000ff", 4);
+			var JulianDate = function (y, m, d, h = 0, min = 0, s = 0, ms = 0) {
+				var y2 = y;
+				var m2 = m;
+				if (m <= 2) {
+					y2--;
+					m2 += 12;
+				}
+				var A, B, C, D;
+				if (y2 > 1582 || y2 === 1582 && m2 > 10 || y2 === 1582 && m2 === 10 && d > 15) {
+					A = Math.trunc(y2 / 100);
+					B = 2 - A + Math.trunc(A / 4);
+				} else {
+					B = 0;
+				}
+				if (y2 < 0) {
+					C = Math.trunc(365.25 * y2 - 0.75);
+				} else {
+					C = Math.trunc(365.25 * y2);
+				}
+				D = Math.trunc(30.6001 * (m2 + 1));
+				return B + C + D + d + 1720994.5 + h / 24 + min / 1440 + s / 86400 + ms / 86400000;
+			}
+			var mod = function (num, p = 360) {
+				var n = num;
+				if (n < 0) {
+					n = p - (-1 * n) % p;
+				}
+				return n % p;
+			}
+			var deg = function (radians) {
+				return radians * 180 / Math.PI;
+			}
+			var rad = function (degrees) {
+				return degrees * Math.PI / 180;
+			}
+			var sin = function (x) {
+				return Math.sin(rad(x));
+			}
+			var cos = function (x) {
+				return Math.cos(rad(x));
+			}
+			var tan = function (x) {
+				return Math.tan(rad(x));
+			}
+			var asin = function (x) {
+				return deg(Math.asin(x));
+			}
+			var acos = function (x) {
+				return deg(Math.acos(x));
+			}
+			var atan = function (x) {
+				return deg(Math.atan(x));
+			}
+			var atan2 = function (y, x) {
+				return deg(Math.atan2(y, x));
+			}
+			var dist = function (dec) {
+				//return cos((90 - dec) / 2) * r / 0.95;
+				if (document.getElementById("proj").value === "1") {
+					return (dec / 180 * Number(document.getElementById("pole").value) + 0.5) * canvas.width / 1.8;
+				} else {
+					return cos(dec) / (1 + Number(document.getElementById("pole").value) * sin(dec)) * r / 1.8;
+				}
+			}
+			var invdist = function (pixels) {
+				//return 90 - deg(Math.acos(pixels * 0.95 / r)) * 2;
+				if (document.getElementById("proj").value === "1") {
+					return (pixels * 1.8 / canvas.width - 0.5) * 180 * Number(document.getElementById("pole").value);
+				} else {
+					var y = pixels * 1.8 / r;
+					return 2 * atan(-1 * Number(document.getElementById("pole").value) * (y - 1) / (y + 1));
+				}
+			}
+			var Nutation = function (JD) { //in obliquity (eps)
+				var T = (JD - 2415020) / 36525;
+				var A = 100.002136 * T;
+				var L = (279.6967 + 360 * (A - Math.floor(A))) % 360;
+				var B = 5.372617 * T;
+				var leo = 259.1833 - 360 * (B - Math.floor(B));
+				leo = mod(leo);
+				return (9.2 * cos(leo) + 0.5 * cos(2 * L)) / 3600;
+			}
+			var obliquity = function (JD) {
+				var T = (JD - 2451545) / 36525;
+				var DE = 46.815 * T + 0.0006 * T * T - 0.00181 * T * T * T;
+				var eps = 23.439292 - DE / 3600;
+				//eps += Nutation(JD);
+				return eps;
+			}
+			var EcToEq = function (eclipticLong, eclipticLat, JD, LMST) { //Ecliptic coordinates to hour angle.
+				var eps = obliquity(JD);
+				var RA = atan2(sin(eclipticLong) * cos(eps) - tan(eclipticLat) * sin(eps), cos(eclipticLong));
+				var dec = asin(sin(eclipticLat) * cos(eps) + cos(eclipticLat) * sin(eps) * sin(eclipticLong));
+				return {RA: mod(RA), dec: dec, H: mod(LMST - RA)};
+			}
+			var EqToEc = function (RA, dec, JD) {
+				var eps = obliquity(JD);
+				var lambda = atan2(sin(RA) * cos(eps) + tan(dec) * sin(eps), cos(RA));
+				var beta = asin(sin(dec) * cos(eps) - cos(dec) * sin(eps) * sin(RA));
+				return {l: lambda, b: beta};
+			}
+			var drawArc = function (dec1, dec2, H1, H2, ac = -1) {
+				var distance = dist((dec1 + dec2) / 2);
+				var anti = false;
+				if (ac === 1) {
+					anti = true;
+				}
+				if (distance < r) {
+					ctx.beginPath();
+					ctx.arc(0, 0, distance, rad(mod(H1 - 90)), rad(mod(H2 - 90)), anti);
+					ctx.stroke();
+				}
+			}
+			var numeralMemory = [];
+			var loadNumerals = function () {
+				for (var i = 1; i <= 24; i++) {
+					numeralMemory[i] = document.createElement('canvas');
+					var mctx = numeralMemory[i].getContext("2d");
+					numeralMemory[i].width = r * 10;
+					numeralMemory[i].height = r;
+					mctx.textBaseline = "middle";
+					mctx.textAlign = "center";
+					mctx.font = "bold " + r + "px Times";
+					mctx.fillStyle = "#ffffff"
+					mctx.fillText(roman[i], r * 10 / 2, r / 2);
+				}
+			}
+			var GST = function (decHours, JD) {
+				var S = JD - 2451545;
+				var T = S / 36525;
+				var T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * T * T);
+				var GMST = T0 + decHours * 1.002737909;
+				return mod(GMST, 24) * 360 / 24;
+			}
+			var lastSkyLat = "N/A";
+			var lastSkyPole = "N/A";
+			var lastSkyProj = "N/A";
+			var lastLat = "N/A";
+			var lastPole = "N/A";
+			var lastProj = "N/A";
+			var run = function () {
+				var longitude = Number(document.getElementById("long").value);
+				var latitude = Number(document.getElementById("lat").value);
+				var now = new Date();
+				var JD = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+				var JD0 = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate());
+				var tilt = obliquity(JD);
+				//The stars:
+				var GMST = GST((JD - JD0) * 24, JD0);
+				var LMST = mod(GMST + longitude);
+				//The Sun:
+				var T = (JD - 2415020) / 36525;
+				var eps_g = mod(279.6966778 + 36000.76892 * T + 0.0003025 * T * T);
+				var po_g = mod(281.2208444 + 1.719175 * T + 0.000452778 * T * T);
+				var e = mod(0.01675104 - 0.0000418 * T - 0.000000126 * T * T);
+				var M_sun = mod(eps_g - po_g);
+				var E = rad(M_sun);
+				var del = E - e * Math.sin(E) - rad(M_sun);
+				while (Math.abs(del) > 0.000001) {
+					E -= del / (1 - e * Math.cos(E));
+					del = E - e * Math.sin(E) - rad(M_sun);
+				}
+				E = deg(E);
+				var v = mod(2 * atan(Math.sqrt((1 + e) / (1 - e)) * tan(E / 2)));
+				var lam_sun = mod(v + po_g);
+				var SUN = EcToEq(lam_sun, 0, JD, LMST);
+				//Sunset
+				var cosSS = -1 * (sin(latitude) * sin(SUN.dec)) / (cos(latitude) * cos(SUN.dec));
+				var SUNSET = 0;
+				if (Math.abs(cosSS) <= 1) {
+					SUNSET = acos(cosSS);
+				}
+				//The Moon:
+				var D = JD - 2455196.5;
+				var l = mod(13.1763966 * D + 91.929336);
+				var M_m = mod(l - 0.1114041 * D - 130.143076);
+				var N = mod(291.682547 - 0.0529539 * D);
+				var C = l - lam_sun;
+				var E_v = 1.2739 * sin(2 * C - M_m);
+				var A_e = 0.1858 * sin(M_sun);
+				var A_3 = 0.37 * sin(M_sun);
+				var M_m2 = M_m + E_v - A_e - A_3;
+				var E_c = 6.2886 * sin(M_m2);
+				var A_4 = 0.214 * sin(2 * M_m2);
+				var l2 = l + E_v + E_c - A_e - A_4;
+				var V = 0.6583 * sin(2 * (l2 - lam_sun));
+				var l3 = l2 + V;
+				var N2 = N - 0.16 * sin(M_sun);
+				var lam_m = atan2(sin(l3 - N2) * cos(5.145396), cos(l3 - N2)) + N2;
+				var beta_m = asin(sin(l3 - N2) * sin(5.145396));
+				var MOON = EcToEq(lam_m, beta_m, JD, LMST);
+				var Dragon = mod(N2);
+				//Moon Phase:
+				var phase = mod(l3 - lam_sun);
+				//Planets
+				var PLANET = [];
+				if (true) {
+					for (var i = 0; i < planets.length; i++) {
+						var N_p = mod(360 / 365.242191 * D / planets[i].T);
+						var M_p = N_p + planets[i].eps - planets[i].po;
+						var v_p = mod(M_p + 360 / Math.PI * planets[i].e * sin(M_p));
+						var l_p = mod(v_p + planets[i].po);
+						var lr = planets[i].a * (1 - planets[i].e * planets[i].e) / (1 + planets[i].e * cos(v_p));
+						var N_E = mod(360 / 365.242191 * D / earth.T);
+						var M_E = N_E + earth.eps - earth.po;
+						var v_E = mod(M_E + 360 / Math.PI * earth.e * sin(M_E));
+						var L = mod(v_E + earth.po);
+						var bR = earth.a * (1 - earth.e * earth.e) / (1 + earth.e * cos(v_E));
+						var psi = asin(sin(l_p - planets[i].leo) * sin(planets[i].i));
+						var l2 = atan2(sin(l_p - planets[i].leo) * cos(planets[i].i), cos(l_p - planets[i].leo)) + planets[i].leo;
+						var lr2 = lr * cos(psi);
+						var lam;
+						if (i > 1) {
+							lam = mod(atan(bR * sin(l2 - L) / (lr2 - bR * cos(l2 - L))) + l2);
+						} else {
+							lam = mod(180 + L + atan(lr2 * sin(L - l2) / (bR - lr2 * cos(L - l2))));
+						}
+						var beta = mod(atan(lr2 * tan(psi) * sin(lam - l2) / (bR * sin(l2 - L))));
+						PLANET[i] = EcToEq(lam, beta, JD, LMST);
+					}
+				}
+				//Display
+				if (true) {
+					var pole = Number(document.getElementById("pole").value) * Number(document.getElementById("proj").value);
+					var project = Number(document.getElementById("proj").value);
+					var timeZone;
+					if (document.getElementById("autoZone").checked) {
+						timeZone = now.getTimezoneOffset() / -60;
+						document.getElementById("zone").value = timeZone;
+					} else {
+						timeZone = document.getElementById("zone").value;
+					}
+					ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
+					var distance;
+					var radec = false;
+					if (Math.abs(latitude) >= 90 - tilt) {
+						document.getElementById("italian").checked = false;
+					}
+					if (document.getElementById("italian").checked) {
+						if (document.getElementById("dots").checked || document.getElementById("numbers").checked) {
+							document.getElementById("inside").checked = true;
+						}
+						if (document.getElementById("hand").checked) {
+							document.getElementById("time").value = "0";
+						}
+					}
+					/*if (document.getElementById("sky").checked || document.getElementById("zodiac").checked || document.getElementById("lines").checked || document.getElementById("ecliptic").checked || document.getElementById("horizon").checked || document.getElementById("hours").checked || document.getElementById("inside").checked) {
+						radec = true;
+					}*/
+					radec = true;
+					var justStars = false;
+					if (document.getElementById("zodiac").checked && !document.getElementById("sky").checked && !document.getElementById("lines").checked && !document.getElementById("horizon").checked && !document.getElementById("hours").checked && !document.getElementById("inside").checked) {
+						justStars = true;
+					}
+					//Sky
+					if (document.getElementById("sky").checked) {
+						if (latitude != lastSkyLat || pole != lastSkyPole || project != lastSkyProj) {
+							sky = ctx.createImageData(canvas.width, canvas.height);
+							for (i = 0; i < sky.data.length; i += 4) {
+								var pixel = Math.floor(i / 4);
+								var pixelY =  canvas.width / 2 - Math.floor(pixel / canvas.width);
+								var pixelX = pixel % canvas.width - canvas.width / 2;
+								var rrr = Math.sqrt(pixelX * pixelX + pixelY * pixelY);
+								var theta = atan2(pixelY, pixelX);
+								if (rrr < r) {
+									sky.data[i + 3] = 255;
+									var dec = invdist(rrr);
+									var H = mod(90 - theta);
+									var a = asin(sin(dec) * sin(latitude) + cos(dec) * cos(latitude) * cos(H));
+									var RGB;
+									if (a >= 0) {
+										RGB = [135, 206, 235];
+									} else if (a >= -6) {
+										RGB = [255, 153, 51];
+										//RGB = [0, 0, 255];
+									} else if (a >= -12) {
+										RGB = [0, 0, 128];
+									} else if (a >= -18) {
+										RGB = [0, 0, 64];
+									} else {
+										RGB = [0, 0, 0];
+									}
+									sky.data[i] = RGB[0];
+									sky.data[i + 1] = RGB[1];
+									sky.data[i + 2] = RGB[2];
+								}
+							}
+						}
+						lastSkyLat = latitude;
+						lastSkyPole = pole;
+						lastSkyProj = project;
+						ctx.putImageData(sky, 0, 0);
+					} else {
+						if (document.getElementById("lines").checked || document.getElementById("horizon").checked || document.getElementById("hours").checked || document.getElementById("inside").checked) {
+							ctx.fillStyle = "#87ceeb";
+						} else {
+							ctx.fillStyle = "#00001a";
+						}
+						ctx.beginPath();
+						ctx.arc(0, 0, r, 0, 2 * Math.PI);
+						ctx.fill();
+					}
+					//Equator and Tropics
+					ctx.fillStyle = "#c0c0c0";
+					ctx.strokeStyle = "#999999";
+					ctx.lineWidth = r / 100;
+					if (document.getElementById("lines").checked) {
+						ctx.beginPath();
+						ctx.arc(0, 0, dist(0), 0, 2 * Math.PI);
+						ctx.stroke();
+						ctx.beginPath();
+						ctx.arc(0, 0, dist(tilt), 0, 2 * Math.PI);
+						ctx.stroke();
+						ctx.beginPath();
+						ctx.arc(0, 0, dist(-1 * tilt), 0, 2 * Math.PI);
+						ctx.stroke();
+					}
+					//Horizon & Unequal hours
+					ctx.fillStyle = "#ffffff";
+					ctx.strokeStyle = "#ffffff";
+					if (document.getElementById("horizon").checked || document.getElementById("hours").checked) {
+						if (document.getElementById("hours").checked && !document.getElementById("horizon").checked && !document.getElementById("sky").checked) {
+							document.getElementById("horizon").checked = true;
+						}
+						ctx.strokeStyle = "#999999";
+						ctx.lineWidth = r / 150;
+						var circle = dist(Math.sign(latitude) * 90 - latitude);
+						if (document.getElementById("hours").checked && latitude != 0 && circle < r) {
+							ctx.beginPath();
+							ctx.arc(0, 0, circle, 0, 2 * Math.PI);
+							ctx.stroke();
+						}
+						if (latitude != lastLat || pole != lastPole || project != lastProj) {
+							points = [];
+							if (Math.abs(latitude) < 13) {
+								for (i = 0; i <= 180 * 4; i++) {
+									var dec = i / 4 - 90;
+									var cosH = -1 * (sin(0) - sin(latitude) * sin(dec)) / (cos(latitude) * cos(dec));
+									var distance = dist(dec);
+									if (Math.abs(cosH) <= 1 && distance <= r) {
+										var H = deg(Math.acos(cosH));
+										points[points.length] = {H: H, dist: distance};
+									}
+								}
+							} else {
+								for (i = 0; i <= 180 * 8; i++) {
+									var H = i / 8;
+									var dec = deg(Math.atan(cos(H) / tan(latitude)));
+									var distance = dist(dec);
+									if (distance <= r) {
+										points[points.length] = {H: H, dist: distance};
+									}
+								}
+							}
+							lastLat = latitude;
+							lastPole = pole;
+							lastProj = project;
+						}
+						if (true) {
+							ctx.lineWidth = r / 200;
+							ctx.strokeStyle = "#999999";
+							ctx.fillStyle = "#ffffff";
+							for (i = 0; i < points.length; i++) {
+								var H = points[i].H;
+								var distance = points[i].dist;
+								if (document.getElementById("horizon").checked) {
+									ctx.beginPath();
+									ctx.arc(distance * sin(H), distance * cos(H), r / 200, 0, 2 * Math.PI);
+									ctx.fill();
+									ctx.beginPath();
+									ctx.arc(distance * sin(360 - H), distance * cos(360 - H), r / 200, 0, 2 * Math.PI);
+									ctx.fill();
+								}
+								if (document.getElementById("hours").checked && i != 0) {
+									var lastH = points[i - 1].H;
+									var lastDistance = points[i - 1].dist;
+									for (var j = 0; j <= 5; j++) {
+										var H2 = (180 - H) * j / 6;
+										var lastH2 = (180 - lastH) * j / 6;
+										ctx.beginPath();
+										ctx.moveTo(lastDistance * sin(lastH2), -1 * lastDistance * cos(lastH2));
+										ctx.lineTo(distance * sin(H2), -1 * distance * cos(H2));
+										ctx.stroke();
+										if (j != 0) {
+											ctx.beginPath();
+											ctx.moveTo(lastDistance * sin(360 - lastH2), -1 * lastDistance * cos(360 - lastH2));
+											ctx.lineTo(distance * sin(360 - H2), -1 * distance * cos(360 - H2));
+											ctx.stroke();
+										}
+									}
+								}
+							}
+							if (document.getElementById("horizon").checked && latitude != 0 && document.getElementById("hours").checked) {
+								ctx.fillStyle = "#ffffff";
+								var w = -1;
+								if (pole * Math.sign(latitude) === 1) {
+									w = 1;
+								}
+								w = -1;
+								distance = dist(atan(w / tan(latitude))) * w;
+								if (Math.abs(distance) < r) {
+									ctx.beginPath();
+									ctx.arc(0, distance, r / 200, 0, 2 * Math.PI);
+									ctx.fill();
+								}
+							}
+						}
+					}
+					//Numbers
+					if (document.getElementById("numbers").checked) {
+						var num = document.getElementById("num").value;
+						distance = 1.1 * r;
+						ctx.fillStyle = "#000000";
+						var font = (r / 7.5).toString();
+						if (document.getElementById("inside").checked) {
+							distance = 0.9 * r;
+							ctx.fillStyle = "#666666";
+							font = (r / 8).toString();
+						}
+						if (num === "3") {
+							ctx.font = font + "px Times";
+						} else {
+							ctx.font = font + "px Arial";
+						}
+						for (i = 0; i < 24; i++) {
+							var ang = i * 360 / 24;
+							if (document.getElementById("rotate").checked) {
+								ctx.rotate(rad(ang + 180));
+							}
+							var n = i;
+							if (num === "2" || num === "3") {
+								if (n === 0) {
+									n = 12;
+								} else if (n >= 13) {
+									n -= 12;
+								}
+							}
+							if (num === "3") {
+								n = roman[n];
+							} else {
+								n = n.toString();
+							}
+							if (document.getElementById("rotate").checked) {
+								ctx.fillText(n, 0, -1 * distance);
+								ctx.rotate(-1 * rad(ang + 180));
+							} else {
+								ctx.fillText(n, -1 * distance * sin(ang), distance * cos(ang));
+							}
+						}
+					}
+					//Dots
+					if (document.getElementById("dots").checked) {
+						distance = 1.02 * r;
+						ctx.fillStyle = "#000000";
+						if (document.getElementById("inside").checked) {
+							distance = 0.98 * r;
+							ctx.fillStyle = "#666666";
+						}
+						if (document.getElementById("quart").checked) {
+							for (i = 0; i < 24 * 4; i++) {
+								if (i % 4 != 0) {
+									var ang = i * 360 / 24 / 4;
+									ctx.beginPath();
+									ctx.arc(-1 * distance * sin(ang), distance * cos(ang), r / 200, 0, 2 * Math.PI);
+									ctx.fill();
+								}
+							}
+						}
+						for (i = 0; i < 24; i++) {
+							var ang = i * 360 / 24;
+							ctx.beginPath();
+							ctx.arc(-1 * distance * sin(ang), distance * cos(ang), r / 100, 0, 2 * Math.PI);
+							ctx.fill();
+						}
+					}
+					//Italian hours
+					if (document.getElementById("italian").checked) {
+						ctx.strokeStyle = "#000000";
+						ctx.fillStyle = "#222222";
+						ctx.beginPath();
+						ctx.arc(0, 0, 0.43 * canvas.width, 0, 2 * Math.PI);
+						ctx.arc(0, 0, 0.49 * canvas.width, 0, 2 * Math.PI, true);
+						ctx.fill();
+						ctx.fillStyle = "#ffffff";
+						ctx.font = r * 0.12 + "px Arial";
+						if (document.getElementById("czechStyle").value === "2") {
+							ctx.font = r * 0.14 + "px Old English Text MT";
+						}
+						for (var i = 1; i <= 24; i++) {
+							var ang = i * 360 / 24 + SUNSET;
+							ctx.rotate(rad(ang));
+							if (document.getElementById("czechStyle").value === "1") {
+								var mheight = r * 0.12;
+								var mwidth = mheight * 5;
+								ctx.drawImage(numeralMemory[i], mwidth / -2, -0.46 * canvas.width - mheight / 2, mwidth, mheight);
+							} else {
+								ctx.fillText(i.toString(), 0, -0.46 * canvas.width);
+							}
+							if (true) {
+								ctx.beginPath();
+								ctx.arc(0, -0.43 * canvas.width, r / 100, 0, 2 * Math.PI);
+								ctx.fill();
+							}
+							ctx.rotate(-1 * rad(ang));
+						}
+					}
+					//Stars
+					ctx.fillStyle = "#ccad00";
+					ctx.strokeStyle = "#ccad00";
+					ctx.lineCap = "round";
+					if (document.getElementById("sidereal").checked) {
+						distance = 1.1 * r;
+						if (document.getElementById("inside").checked) {
+							distance = 0.9 * r;
+						}
+						ctx.lineWidth = r / 100;
+						ctx.beginPath();
+						ctx.moveTo(0, 0);
+						ctx.lineTo(distance * sin(LMST), -1 * distance * cos(LMST));
+						ctx.stroke();
+					}
+					ctx.font = r / 7.5 + "px Emoji";
+					if (document.getElementById("zodiac").checked && project === 1) {
+						var symPos = 0;
+						var ringTop = 16;
+						var ringTop2 = ringTop;
+						var ringBottom = -16;
+						var offset = 16 * pole;
+						if (justStars) {
+							ringTop = 90;
+							ringBottom = -90;
+							offset = 90 * pole;
+							if (document.getElementById("ecliptic").checked) {
+								symPos = -16 * pole;
+							}
+						} else if (document.getElementById("ecliptic").checked) {
+							symPos = -16 * pole;
+							ringTop = 8 * pole;
+							ringTop2 = 0;
+							ringBottom = -32 * pole;
+							offset = 32 * pole;
+						}
+						var star;
+						if (!justStars) {
+							ctx.fillStyle = "#00001a";
+							if (document.getElementById("trans").checked) {
+								ctx.fillStyle += "af";
+							}
+							ctx.beginPath();
+							for (var i = 0; i <= 360 * 2; i++) {
+								star = EcToEq(i / 2, ringBottom, JD, LMST);
+								distance = dist(star.dec);
+								if (i === 0) {
+									ctx.moveTo(distance * sin(star.H), -1 * distance * cos(star.H));
+								} else {
+									ctx.lineTo(distance * sin(star.H), -1 * distance * cos(star.H));
+								}
+							}
+							for (var i = 0; i <= 360 * 2; i++) {
+								star = EcToEq(360 - i / 2, ringTop2, JD, LMST);
+								distance = dist(star.dec);
+								ctx.lineTo(distance * sin(star.H), -1 * distance * cos(star.H));
+							}
+							ctx.closePath();
+							ctx.fill();
+							ctx.fillStyle = "#ccad00";
+							for (var i = 0; i < 360 * 4; i++) {
+								star = EcToEq(i / 4, ringBottom, JD, LMST);
+								distance = dist(star.dec);
+								ctx.beginPath();
+								ctx.arc(distance * sin(star.H), -1 * distance * cos(star.H), r / 400, 0, 2 * Math.PI);
+								ctx.fill();
+								star = EcToEq(i / 4, ringTop, JD, LMST);
+								distance = dist(star.dec);
+								ctx.beginPath();
+								ctx.arc(distance * sin(star.H), -1 * distance * cos(star.H), r / 400, 0, 2 * Math.PI);
+								ctx.fill();
+							}
+						}
+						for (var i = 0; i < 12; i++) {
+							star = EcToEq(i * 30 + 15, symPos, JD, LMST);
+							ctx.rotate(rad(star.H));
+							distance = dist(star.dec);
+							ctx.fillText(signs[i], 0, -1 * distance);
+							ctx.rotate(rad(360 - star.H));
+							for (var j = 0; j <= Math.abs(ringTop - ringBottom) * 3; j++) {
+								star = EcToEq(i * 30, j / 3 * pole - offset, JD, LMST);
+								distance = dist(star.dec);
+								if (distance > 0 && distance < r) {
+									ctx.beginPath();
+									ctx.arc(distance * sin(star.H), -1 * distance * cos(star.H), r / 400, 0, 2 * Math.PI);
+									ctx.fill();
+								}
+							}
+						}
+					} else if (document.getElementById("zodiac").checked && project === -1) {
+						var star = EcToEq(pole * 90, 0, JD, LMST);
+						var star2 = EcToEq(pole * -90, 0, JD, LMST);
+						var distance = dist(star.dec);
+						var distance2 = dist(star2.dec);
+						var centre = {H: star.H, dist: (distance + distance2) / 2 - distance2, rad: (distance + distance2) / 2, unit: distance2 / 8 * 1.2};
+						centre.x = centre.dist * sin(centre.H);
+						centre.y = -1 * centre.dist * cos(centre.H);
+						var symPos = 0;
+						var ringTop = 2;
+						var ringTop2 = ringTop;
+						var ringBottom = -2;
+						if (document.getElementById("ecliptic").checked) {
+							symPos = -2;
+							ringTop = 1;
+							ringTop2 = 0;
+							ringBottom = -4;
+						}
+						if (!justStars) {
+							ctx.fillStyle = "#00001a";
+							if (document.getElementById("trans").checked) {
+								ctx.fillStyle += "af";
+							}
+							ctx.strokeStyle = "#ccad00";
+							ctx.beginPath();
+							ctx.arc(centre.x, centre.y, centre.rad + ringTop2 * centre.unit, 0, 2 * Math.PI);
+							ctx.arc(centre.x, centre.y, centre.rad + ringBottom * centre.unit, 0, 2 * Math.PI, true);
+							ctx.fill();
+							ctx.lineWidth = r / 200;
+							ctx.beginPath();
+							ctx.arc(centre.x, centre.y, centre.rad + ringTop * centre.unit, 0, 2 * Math.PI);
+							ctx.stroke();
+							ctx.beginPath();
+							ctx.arc(centre.x, centre.y, centre.rad + ringBottom * centre.unit, 0, 2 * Math.PI);
+							ctx.stroke();
+						}
+						ctx.fillStyle = "#ccad00";
+						for (var i = 0; i < 12; i++) {
+							for (var j = 0; j <= 180 * 5; j++) {
+								var starL = EcToEq(i * 30, j / 5 - 90, JD, LMST);
+								var distanceL = dist(starL.dec);
+								var starX = distanceL * sin(starL.H);
+								var starY = -1 * distanceL * cos(starL.H);
+								var distanceC = Math.sqrt((starX - centre.x) ** 2 + (starY - centre.y) ** 2);
+								if (distanceC > centre.rad + ringBottom * centre.unit && distanceC < centre.rad + ringTop * centre.unit && !justStars || distanceL > 0 && distanceL < r && justStars) {
+									ctx.beginPath();
+									ctx.arc(starX, starY, r / 400, 0, 2 * Math.PI);
+									ctx.fill();
+								}
+							}
+							var starS, distanceS;
+							if (document.getElementById("ecliptic").checked) {
+								var j = 0;
+								var starX, starY, distanceC;
+								do {
+									starS = EcToEq(i * 30 + 15, j / -5 * pole, JD, LMST);
+									distanceS = dist(starS.dec);
+									starX = distanceS * sin(starS.H);
+									starY = -1 * distanceS * cos(starS.H);
+									distanceC = Math.sqrt((starX - centre.x) ** 2 + (starY - centre.y) ** 2);
+									j++;
+								} while (distanceC > centre.rad + symPos * centre.unit);
+							} else {
+								starS = EcToEq(i * 30 + 15, 0, JD, LMST);
+								distanceS = dist(starS.dec);
+							}
+							var newX = distanceS * sin(starS.H) - centre.x;
+							var newY = -1 * distanceS * cos(starS.H) - centre.y;
+							var newA = Math.atan2(newX, -1 * newY);
+							ctx.rotate(newA);
+							ctx.fillText(signs[i], distanceS * sin(starS.H - deg(newA)), -1 * distanceS * cos(starS.H - deg(newA)));
+							ctx.rotate(-1 * newA);
+						}
+					} else if (!radec) {
+						ctx.lineWidth = r / 200;
+						ctx.font = r / 7.5 + "px Arial";
+						for (i = 0; i < 12; i++) {
+							var a = i * Math.PI / 6 - LMST / 360 * 2 * Math.PI;
+							ctx.beginPath();
+							ctx.moveTo(0, 0);
+							ctx.lineTo(r * Math.sin(a), r * Math.cos(a));
+							ctx.stroke();
+						}
+						ctx.fillStyle = "#ccad00";
+						ctx.rotate(rad(LMST) + Math.PI / 12);
+						for (i = 11; i >= 0; i--) {
+							ctx.fillText("\u2605", 0, -13 / 15 * r);
+							ctx.rotate(Math.PI / 6);
+						}
+						ctx.rotate(rad(360 - LMST) - Math.PI / 12);
+					}
+					//Ecliptic
+					if (document.getElementById("ecliptic").checked) {
+						ctx.fillStyle = "#ccad00";
+						for (var i = 0; i < 360 * 3; i++) {
+							star = EcToEq(i / 3, 0, JD, LMST);
+							distance = dist(star.dec);
+							ctx.beginPath();
+							ctx.arc(distance * sin(star.H), -1 * distance * cos(star.H), r / 200, 0, 2 * Math.PI);
+							ctx.fill();
+						}
+					}
+					//Dragon hand
+					if (document.getElementById("dragon").checked) {
+						var head = EcToEq(Dragon, 0, JD, LMST).H;
+						var tail = EcToEq(mod(Dragon + 180), 0, JD, LMST).H;
+						ctx.strokeStyle = "#006600";
+						ctx.fillStyle = "#006600";
+						var Len = 0.95 * r;
+						var triwidth = r / 40;
+						var triheight = r / 20;
+						var triheight2 = r / 15;
+						ctx.lineWidth = r / 100;
+						ctx.beginPath();
+						ctx.moveTo(0, 0);
+						ctx.lineTo((Len - triheight) * sin(head), -1 * (Len - triheight) * cos(head));
+						ctx.stroke();
+						ctx.beginPath();
+						ctx.moveTo(0, 0);
+						ctx.lineTo(Len * sin(tail), -1 * Len * cos(tail));
+						ctx.stroke();
+						var Len2 = Math.sqrt((Len - triheight2) * (Len - triheight2) + triwidth * triwidth);
+						var hp = deg(Math.atan(triwidth / (Len - triheight2)));
+						ctx.beginPath();
+						ctx.moveTo(Len2 * sin(head - hp), -1 * Len2 * cos(head - hp));
+						ctx.lineTo((Len - triheight) * sin(head), -1 * (Len - triheight) * cos(head));
+						ctx.lineTo(Len2 * sin(head + hp), -1 * Len2 * cos(head + hp));
+						ctx.lineTo(Len * sin(head), -1 * Len * cos(head));
+						ctx.closePath();
+						ctx.fill();
+					}
+					//The Moon
+					var factor = 1;
+					if (document.getElementById("smaller").checked) {
+						factor = 0.75;
+					}
+					var rm = Math.floor(r2 * factor) * 5;
+					var rm2 = r2 * factor;
+					if (radec) {
+						distance = dist(MOON.dec);
+						if (document.getElementById("pointer").value === "1") {
+							distance -= r2 * factor;
+						}
+					} else {
+						distance = 0.4 * r;
+					}
+					var side = true;
+					if (phase > 180) {
+						side = false;
+						phase -= 180;
+					}
+					var img = ctx.createImageData(2 * rm, 2 * rm);
+					for (var i = 0; i < img.data.length; i += 4) {
+						var pixel = Math.floor(i / 4);
+						var row = Math.floor(pixel / (2 * rm)) - rm;
+						pixel %= 2 * rm;
+						pixel -= rm;
+						var slice = Math.sqrt(rm * rm - row * row);
+						if (pixel > -1 * slice && pixel < slice) {
+							var divide = pixel > slice * cos(phase);
+							img.data[i + 3] = 255;
+							if (divide && side || !divide && !side) {
+								img.data[i] = 255;
+								img.data[i + 1] = 255;
+								img.data[i + 2] = 255;
+							}
+						}
+					}
+					var memory = document.createElement('canvas');
+					var mctx = memory.getContext("2d");
+					memory.width = rm * 2;
+					memory.height = rm * 2;
+					mctx.putImageData(img, 0, 0);
+					ctx.rotate(rad(MOON.H));
+					ctx.drawImage(memory, -1 * rm2, -1 * distance - rm2, rm2 * 2, rm2 * 2);
+					ctx.rotate(rad(360 - MOON.H));
+					memory.remove();
+					//Hour hand
+					ctx.lineCap = "round";
+					if (document.getElementById("hand").checked) {
+						var hourAngle = SUN.H;
+						ctx.strokeStyle = "#ffff00";
+						if (document.getElementById("time").value != "0") {
+							hourAngle = now.getUTCHours() / 24 + now.getUTCMinutes() / 1440 + now.getUTCSeconds() / 86400 + now.getUTCMilliseconds() / 86400000;
+							if (document.getElementById("time").value === "1") {
+								hourAngle += timeZone / 24;
+								ctx.strokeStyle = "#ffd700";
+							} else {
+								hourAngle += longitude / 360;
+								ctx.strokeStyle = "#ffe000";
+							}
+							hourAngle = (hourAngle * 360 + 180) % 360;
+						}
+						ctx.lineWidth = r / 75;
+						ctx.beginPath();
+						ctx.moveTo(0, 0);
+						ctx.lineTo(1.1 * r * sin(hourAngle), -1.1 * r * cos(hourAngle));
+						ctx.stroke();
+					}
+					//The Sun
+					var sunPoints = 9;
+					if (document.getElementById("pointer").value === "1") {
+						factor *= 1.5;
+					}
+					if (radec) {
+						distance = dist(SUN.dec);
+						if (document.getElementById("pointer").value === "1") {
+							distance -= r2 * factor;
+						}
+					} else {
+						distance = 0.6 * r;
+					}
+					if (document.getElementById("pointer").value === "1") {
+						for (i = 0; i < sunPoints; i++) {
+							var a = i * 360 / sunPoints + SUN.H - 180 / sunPoints + 270;
+							ctx.fillStyle = "#ffd700";
+							ctx.fillStyle = "#ffff50";
+							ctx.fillStyle = "#ffe000";
+							if (i === 0 && (document.getElementById("time").value != "0" || !document.getElementById("hand").checked)) {
+								ctx.fillStyle = "#ffff00";
+							}
+							ctx.beginPath();
+							ctx.moveTo(distance * sin(SUN.H) + r2 * factor / 2 * cos(a), -1 * distance * cos(SUN.H) + r2 * factor / 2 * sin(a));
+							ctx.lineTo(distance * sin(SUN.H) + r2 * factor * cos(a + 180 / sunPoints), -1 * distance * cos(SUN.H) + r2 * factor * sin(a + 180 / sunPoints));
+							ctx.lineTo(distance * sin(SUN.H) + r2 * factor / 2 * cos(a + 360 / sunPoints), -1 * distance * cos(SUN.H) + r2 * factor / 2 * sin(a + 360 / sunPoints));
+							ctx.closePath();
+							ctx.fill();
+						}
+						factor /= 2;
+					}
+					ctx.fillStyle = "#ffff00";
+					ctx.fillStyle = "#ffff00";
+					ctx.beginPath();
+					ctx.arc(distance * sin(SUN.H), -1 * distance * cos(SUN.H), r2 * factor, 0, 2 * Math.PI);
+					ctx.fill();
+					ctx.strokeStyle = "#333300";
+					ctx.lineWidth = r / 200;
+					if (document.getElementById("pointer").value === "1") {
+						ctx.beginPath();
+						ctx.arc(distance * sin(SUN.H), -1 * distance * cos(SUN.H), r2 * factor, 0, 2 * Math.PI);
+						ctx.stroke();
+					}
+					//Planets
+					var planetRadius = 4;
+					if (document.getElementById("planets").checked) {
+						ctx.lineWidth = r / 150;
+						ctx.font = r / 15 + "px Symbols";
+						for (i = PLANET.length - 1; i >= 0 ; i--) {
+							if (radec) {
+								distance = dist(PLANET[i].dec);
+								if (document.getElementById("pointer").value === "1") {
+									distance -= (r2 / 2 * planetRadius / 6);
+								}
+							} else {
+								distance = 0.7 * r + r2 / 2 * planets[0].radius / 6;
+								for (var j = 0; j < i; j++) {
+									distance += r2 / 2 * planets[j].radius / 6;
+								}
+							}
+							ctx.fillStyle = planets[i].colour;
+							ctx.beginPath();
+							ctx.arc(distance * sin(PLANET[i].H), -1 * distance * cos(PLANET[i].H), r2 / 2 * planetRadius / 6, 0, 2 * Math.PI);
+							ctx.fill();
+							if (i === 4) {
+								ctx.strokeStyle = "#caa54e";
+								var ringAngle = deg(Math.atan(r2 * planetRadius / 6 / distance));
+								var ringRad = Math.sqrt((r2 * planetRadius / 6) * (r2 * planetRadius / 6) + distance * distance);
+								ctx.beginPath();
+								ctx.moveTo(ringRad * sin(PLANET[i].H - ringAngle), -1 * ringRad * cos(PLANET[i].H - ringAngle));
+								ctx.lineTo(ringRad * sin(PLANET[i].H + ringAngle), -1 * ringRad * cos(PLANET[i].H + ringAngle));
+								ctx.stroke();
+							}
+							if (document.getElementById("symbols").checked) {
+								ctx.fillStyle = "#ffffff";
+								ctx.fillStyle = "#000000";
+								ctx.rotate(rad(PLANET[i].H));
+								ctx.fillText(planets[i].symbol, 0, -1 * distance + r / 100);
+								ctx.rotate(-1 * rad(PLANET[i].H));
+							}
+						}
+					}
+					//The Earth
+					ctx.fillStyle = "#006699";
+					ctx.beginPath();
+					ctx.arc(0, 0, r2, 0, 2 * Math.PI);
+					ctx.fill();
+				}
+				var waitTime = 1000;
+				if (document.getElementById("lowPower").checked) {
+					waitTime = 10000;
+				}
+				setTimeout(run, waitTime);
+			}
+			var success = function (position) {
+				document.getElementById("long").value = position.coords.longitude;
+				document.getElementById("lat").value = position.coords.latitude;
+			}
+			var auto = function () {
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(success);
+				} else { 
+					alert("Sorry, couldn't find your location.");
+				}
+			}
+			var start = function () {
+				var now = new Date();
+				var l = -1 * now.getTimezoneOffset() / 4;
+				document.getElementById("long").value = l;
+				document.getElementById("zone").value = l * 15;
+				canvas = document.getElementById("clock");
+				ctx = canvas.getContext("2d");
+				canvas.width = Math.min(window.innerWidth, window.innerHeight - 160);
+				canvas.height = canvas.width;
+				ctx.translate(canvas.width / 2, canvas.height / 2);
+				r = canvas.width * 0.42;
+				r2 = r * 0.1;
+				ctx.textBaseline = "middle";
+				ctx.textAlign = "center";
+				loadNumerals();
+				run();
+			}
+			var check = function (id) {
+				document.getElementById(id).checked = true;
+			}
+			var uncheck = function (id) {
+				document.getElementById(id).checked = false;
+			}
+			var value = function (id, val) {
+				document.getElementById(id).value = val;
+			}
+			var preset = function (k) {
+				if (k === "p") {
+					uncheck("planets");
+					check("smaller");
+					value("pointer", "1");
+					check("numbers");
+					value("num", "3");
+					check("rotate");
+					uncheck("dots");
+					check("italian");
+					value("czechStyle", "2");
+					check("hand");
+					uncheck("dragon");
+					check("sidereal");
+					check("zodiac");
+					uncheck("trans");
+					check("ecliptic");
+					check("lines");
+					check("hours");
+					check("horizon");
+					check("sky");
+					value("proj", "-1");
+				} else if (k === "w") {
+					check("planets");
+					uncheck("smaller");
+					value("pointer", "1");
+					check("numbers");
+					value("num", "3");
+					check("rotate");
+					check("dots");
+					check("quart");
+					uncheck("italian");
+					uncheck("inside");
+					check("hand");
+					value("time", "1");
+					check("dragon");
+					check("sidereal");
+					check("zodiac");
+					uncheck("trans");
+					check("ecliptic");
+					uncheck("horizon");
+					check("lines");
+					check("hours");
+					check("sky");
+					value("proj", "-1");
+				} else if (k === "i") {
+					uncheck("planets");
+					uncheck("smaller");
+					value("pointer", "0");
+					uncheck("numbers");
+					uncheck("dots");
+					check("italian");
+					uncheck("inside");
+					value("czechStyle", "1");
+					check("hand");
+					uncheck("dragon");
+					uncheck("sidereal");
+					check("zodiac");
+					uncheck("ecliptic");
+					uncheck("horizon");
+					uncheck("lines");
+					uncheck("hours");
+					uncheck("sky");
+					value("proj", "-1");
+				} else if (k === "g") {
+					uncheck("planets");
+					uncheck("smaller");
+					value("pointer", "1");
+					check("numbers");
+					check("rotate");
+					value("num", "1");
+					check("dots");
+					uncheck("quart");
+					uncheck("italian");
+					uncheck("inside");
+					check("hand");
+					value("time", "1");
+					check("dragon");
+					check("sidereal");
+					check("zodiac");
+					uncheck("trans");
+					uncheck("ecliptic");
+					uncheck("horizon");
+					check("lines");
+					uncheck("hours");
+					uncheck("sky");
+					value("proj", "-1");
+				} else if (k === "b") {
+					uncheck("planets");
+					uncheck("smaller");
+					value("pointer", "0");
+					check("numbers");
+					check("rotate");
+					value("num", "3");
+					check("dots");
+					uncheck("quart");
+					uncheck("italian");
+					uncheck("inside");
+					uncheck("hand");
+					uncheck("dragon");
+					uncheck("sidereal");
+					uncheck("zodiac");
+					uncheck("ecliptic");
+					uncheck("horizon");
+					check("lines");
+					uncheck("hours");
+					uncheck("sky");
+				} else if (k === "e") {
+					uncheck("planets");
+					uncheck("smaller");
+					value("pointer", "1");
+					check("numbers");
+					uncheck("rotate");
+					value("num", "2");
+					uncheck("dots");
+					uncheck("italian");
+					uncheck("inside");
+					check("hand");
+					value("time", "1");
+					uncheck("dragon");
+					uncheck("sidereal");
+					check("zodiac");
+					check("trans");
+					uncheck("ecliptic");
+					check("horizon");
+					check("lines");
+					uncheck("hours");
+					check("sky");
+					value("proj", "-1");
+				} else if (k === "z") {
+					check("planets");
+					uncheck("smaller");
+					value("pointer", "1");
+					check("numbers");
+					uncheck("rotate");
+					value("num", "2");
+					check("dots");
+					check("quart");
+					uncheck("italian");
+					uncheck("inside");
+					uncheck("hand");
+					uncheck("dragon");
+					check("sidereal");
+					check("zodiac");
+					uncheck("ecliptic");
+					uncheck("horizon");
+					uncheck("lines");
+					uncheck("hours");
+					uncheck("sky");
+					value("proj", "-1");
+				} else if (k === "s") {
+					check("planets");
+					uncheck("smaller");
+					value("pointer", "1");
+					check("numbers");
+					uncheck("rotate");
+					value("num", "1");
+					check("dots");
+					check("quart");
+					uncheck("italian");
+					uncheck("inside");
+					check("hand");
+					value("time", "0");
+					uncheck("dragon");
+					uncheck("sidereal");
+					uncheck("zodiac");
+					uncheck("ecliptic");
+					check("horizon");
+					check("lines");
+					check("sky");
+					check("hours");
+					value("proj", "-1");
+				} else if (k === "o") {
+					check("planets");
+					uncheck("smaller");
+					value("pointer", "0");
+					uncheck("numbers");
+					uncheck("dots");
+					uncheck("italian");
+					uncheck("hand");
+					uncheck("dragon");
+					uncheck("sidereal");
+					uncheck("zodiac");
+					uncheck("ecliptic");
+					uncheck("horizon");
+					uncheck("lines");
+					check("sky");
+					uncheck("hours");
+					value("proj", "-1");
+				} else if (k === "a") {
+					auto();
+				} else if (k === "n") {
+					proj();
+				}
+			}
+			var key = function (event) {
+				var k = event.key.toLowerCase();
+				preset(k);
+			}
+			var proj = function () {
+				document.getElementById("pole").value = -1 * Number(document.getElementById("pole").value);
+			}
+			var autoZone = function () {
+				if (document.getElementById("autoZone").checked) {
+					document.getElementById("zone").disabled = true;
+				} else {
+					document.getElementById("zone").disabled = false;
+				}
+			}
+			var hidden = false;
+			var hide = function () {
+				if (hidden) {
+					document.getElementById("footer").style.right = "0";
+					document.getElementById("arrow").style.right = "370px";
+					document.getElementById("arrow").innerHTML = "&rsaquo;";
+					hidden = false;
+				} else {
+					document.getElementById("footer").style.right = "-370px";
+					document.getElementById("arrow").style.right = "0";
+					document.getElementById("arrow").innerHTML = "&lsaquo;";
+					hidden = true;
+				}
+			}
+		</script>
+		<canvas id="clock"></canvas>
+		<p id="credit">Based on a variety of astronomical clocks, most notably the <a href="https://en.wikipedia.org/wiki/Prague_astronomical_clock">Prague Astronomical Clock</a> in Prague, Czechia.<br>&copy; Joshua, 2021.</p>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<div id="title">
+			<p id="titlep">Astronomical Clock</p>
+		</div>
+		<div id="arrow" tabindex=0 onClick="hide()">&rsaquo;</div>
+		<div id="footer">
+			<p class="options">
+				<b>Location</b>
+				<br>Latitude: <input type="number" max="90" min="-90" id="lat" value="0">&#176;
+				<br>Longitude: <input type="number" max="180" min="-180" id="long">&#176;
+				<br>
+				<b>Time zone</b> 
+				<br>UTC+<input type="number" max="14" min="-12" id="zone" disabled> &nbsp;(<input id="autoZone" type="checkbox" checked onChange="autoZone()"><label for="autoZone"> Auto</label>)
+				<br><b>Presets</b><br>
+			</p>
+				<div id="presetBox">
+					<div class="preset" onClick="preset('w')">The&nbsp;works</div>
+					<div class="preset" onClick="preset('p')">Prague</div>
+					<div class="preset" onClick="preset('g')">German</div>
+					<div class="preset" onClick="preset('i')">Italian</div>
+					<div class="preset" onClick="preset('e')">Elegant</div>
+					<div class="preset" onClick="preset('o')">Open&nbsp;skies</div>
+					<div class="preset" onClick="preset('z')">Zodiac</div>
+					<div class="preset" onClick="preset('s')">Sky</div>
+					<div class="preset" onClick="preset('n')">Switch&nbsp;poles</div>
+				</div>
+			<p class="options">
+				<b>Options</b>
+				<br>
+				<input id="planets" type="checkbox"><label for="planets"> Planets</label> &nbsp;(<input id="symbols" type="checkbox"><label for="symbols"> Symbols</label>)
+				<br><input id="smaller" type="checkbox"><label for="smaller"> Smaller Sun & Moon</label>
+				<br>Position of object:
+				<select id="pointer" style="width: 95px">
+					<option value="0">Centre</option>
+					<option value="1" selected>Outer edge</option>
+				</select>
+				<br><input id="numbers" type="checkbox" checked><label for="numbers"> Hour numbers</label>
+				<br>&nbsp; &nbsp;<select id="num" style="width: 185px">
+					<option value="1">24hr numbers</option>
+					<option value="2">12hr numbers</option>
+					<option value="3">Roman numerals</option>
+				</select>
+				<br>&nbsp; &nbsp;<input id="rotate" type="checkbox"><label for="rotate"> Rotate</label>
+				<br>&nbsp; &nbsp;<input id="inside" type="checkbox"><label for="inside"> On face</label>
+				<br><input id="dots" type="checkbox"><label for="dots"> Hour markers</label> &nbsp;(<input id="quart" type="checkbox" checked><label for="quart"> Quartered</label>)
+				<br><input id="italian" type="checkbox"><label for="italian"> Italian hours</label> &nbsp;(<select id="czechStyle" style="width: 95px">
+					<!--<option value="0">Arabic numerals</option>-->
+					<option value="2">Arabic numerals</option>
+					<option value="1">Roman numerals</option>
+				</select>)
+				<br><input id="hand" type="checkbox" checked><label for="hand"> Hour hand</label> &nbsp;(<select id="time" style="width: 125px">
+					<option value="0">Local apparent time</option>
+					<option value="2">Local mean time</option>
+					<option value="1" selected>Standard mean time</option>
+				</select>)
+				<br><input id="dragon" type="checkbox"><label for="dragon"> Dragon hand</label>
+				<br><input id="sidereal" type="checkbox"><label for="sidereal"> Sidereal hand</label>
+				<br><input id="zodiac" type="checkbox" checked><label for="zodiac"> Zodiac</label> &nbsp;(<input id="trans" type="checkbox"><label for="trans"> Transparent</label>)
+				<br><input id="ecliptic" type="checkbox" checked><label for="ecliptic"> Ecliptic</label>
+				<br><input id="lines" type="checkbox" checked><label for="lines"> Equator & Tropics</label>
+				<br><input id="hours" type="checkbox"><label for="hours"> Unequal hours</label>
+				<br><input id="horizon" type="checkbox"><label for="horizon"> Horizon</label>
+				<br><input id="sky" type="checkbox"><label for="sky"> Sky</label>
+				<br>Projection: <select id="proj" style="width: 160px" onChange="proj()">
+					<option value="-1">Stereographic</option>
+					<option value="1">Azimuthal Equidistant</option>
+				</select>
+				<br>&nbsp; &nbsp;about the <select id="pole" style="width: 150px">
+					<option value="-1">North Pole</option>
+					<option value="1">South Pole</option>
+				</select>
+				<br><input id="lowPower" type="checkbox"><label for="lowPower"> Low power mode</label>
+			</p>
+		</div>
+	</body>
+</html>
