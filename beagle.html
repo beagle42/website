@@ -224,12 +224,12 @@
 								index[i].score += 1 / index[i].name.length;
 								if (j != 0 && k != 0) {
 									if (query.charAt(j - 1) === index[i].name.charAt(k - 1).toLowerCase()) {
-										index[i].score += 0.25 / index[i].name.length;
-									}
-								}
-								if (j != query.length - 1 && k != index[i].name.length - 1) {
-									if (query.charAt(j + 1) === index[i].name.charAt(k + 1).toLowerCase()) {
-										index[i].score += 0.25 / index[i].name.length;
+										index[i].score += 0.5 / index[i].name.length;
+										if (j != 1 && k != 1) {
+											if (query.charAt(j - 2) === index[i].name.charAt(k - 2).toLowerCase()) {
+												index[i].score += 0.25 / index[i].name.length;
+											}
+										}
 									}
 								}
 							}
