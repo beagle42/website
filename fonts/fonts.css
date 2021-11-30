@@ -22,3 +22,7 @@
 	font-family: Cuneiform;
 	src: url(NotoSansCuneiform-Regular.ttf);
 }
+@font-face {
+	font-family: OldEnglish;
+	src: url(OLDENGL.ttf);
+}
