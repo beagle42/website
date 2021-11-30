@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+	<!--Version 1.1-->
+	<head>
+		<title>Equation of Time</title>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<style>
+			* {
+				font-family: Arial;
+			}
+			body {
+				margin: 0;
+			}
+			#header {
+				text-align: center;
+				height: 60px;
+				font-size: 60px;
+				padding: 10px 80px;
+			}
+			@media only screen and (max-width: 800px) {
+				#header {
+					height: 30px;
+					font-size: 30px;
+					padding: 25px 80px;
+				}
+			}
+			.box {
+				margin: 0;
+				padding: 0;
+				float: left;
+			}
+			#value {
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body onLoad="start()">
+		<script>
+			var graph, dial, ana, gtx, dtx, atx, i;
+			var Month = function (name, len) {
+				this.name = name;
+				this.len = len;
+			}
+			var months = [new Month("JAN", 31), new Month("FEB", 28), new Month("MAR", 31), new Month("APR", 30), new Month("MAY", 31), new Month("JUN", 30), new Month("JUL", 31), new Month("AUG", 31), new Month("SEP", 30), new Month("OCT", 31), new Month("NOV", 30), new Month("DEC", 31),];
+			var mod = function (num, p = 360) {
+				var n = num;
+				if (n < 0) {
+					n = p - (-1 * n) % p;
+				}
+				return n % p;
+			}
+			var deg = function (radians) {
+				return radians * 180 / Math.PI;
+			}
+			var rad = function (degrees) {
+				return degrees * Math.PI / 180;
+			}
+			var sin = function (x) {
+				return Math.sin(rad(x));
+			}
+			var cos = function (x) {
+				return Math.cos(rad(x));
+			}
+			var tan = function (x) {
+				return Math.tan(rad(x));
+			}
+			var asin = function (x) {
+				return deg(Math.asin(x));
+			}
+			var acos = function (x) {
+				return deg(Math.acos(x));
+			}
+			var atan = function (x) {
+				return deg(Math.atan(x));
+			}
+			var atan2 = function (y, x) {
+				return deg(Math.atan2(y, x));
+			}
+			var JulianDate = function (y, m, d, h = 0, min = 0, s = 0, ms = 0) {
+				var y2 = y;
+				var m2 = m;
+				if (m <= 2) {
+					y2--;
+					m2 += 12;
+				}
+				var A, B, C, D;
+				if (y2 > 1582 || y2 === 1582 && m2 > 10 || y2 === 1582 && m2 === 10 && d > 15) {
+					A = Math.trunc(y2 / 100);
+					B = 2 - A + Math.trunc(A / 4);
+				} else {
+					B = 0;
+				}
+				if (y2 < 0) {
+					C = Math.trunc(365.25 * y2 - 0.75);
+				} else {
+					C = Math.trunc(365.25 * y2);
+				}
+				D = Math.trunc(30.6001 * (m2 + 1));
+				return B + C + D + d + 1720994.5 + h / 24 + min / 1440 + s / 86400 + ms / 86400000;
+			}
+			var obliquity = function (JD) {
+				var T = (JD - 2451545) / 36525;
+				var DE = 46.815 * T + 0.0006 * T * T - 0.00181 * T * T * T;
+				var eps = 23.439292 - DE / 3600;
+				return eps;
+			}
+			var EcToEq = function (eclipticLong, eclipticLat, JD) {
+				var eps = obliquity(JD);
+				var RA = atan2(sin(eclipticLong) * cos(eps) - tan(eclipticLat) * sin(eps), cos(eclipticLong));
+				var dec = asin(sin(eclipticLat) * cos(eps) + cos(eclipticLat) * sin(eps) * sin(eclipticLong));
+				return {RA: mod(RA, 360), dec: dec};
+			}
+			var EOT = function (year, month, day, hour = 12, minute = 0, second = 0, millisecond = 0) {
+				var JD = JulianDate(year, month, day, hour, minute, second, millisecond);
+				//var JD = JulianDate(year, month, day, 12);
+				var JD0 = JulianDate(year, month, day);
+				//The Sun
+				var T = (JD - 2415020) / 36525;
+				var eps_g = mod(279.6966778 + 36000.76892 * T + 0.0003025 * T * T);
+				var po_g = mod(281.2208444 + 1.719175 * T + 0.000452778 * T * T);
+				var e = mod(0.01675104 - 0.0000418 * T - 0.000000126 * T * T);
+				var M_sun = mod(eps_g - po_g);
+				var E = rad(M_sun);
+				var del = E - e * Math.sin(E) - rad(M_sun);
+				while (Math.abs(del) > 0.000001) {
+					E -= del / (1 - e * Math.cos(E));
+					del = E - e * Math.sin(E) - rad(M_sun);
+				}
+				E = deg(E);
+				var v = mod(2 * atan(Math.sqrt((1 + e) / (1 - e)) * tan(E / 2)));
+				var lam_sun = mod(v + po_g);
+				var SUN = EcToEq(lam_sun, 0, JD);
+				//EOT
+				var hours = (JD - JD0) * 24
+				var S = (JD0 - 2451545) / 36525;
+				var T0 =  6.697374558 + 2400.051336 * S + 0.000025862 * S * S;
+				var G = SUN.RA * 24 / 360 + hours - 12;
+				var B = mod(G - T0, 24);
+				var U = B * 0.9972695663 - hours + 12;
+				var eot = U - 12;
+				if (Math.abs(eot) > 1) {
+					eot -= 24 * 0.9972695663 * Math.sign(eot);
+				}
+				return {E: eot * -60, dec: SUN.dec, date: day + "/" + month};
+			}
+			var run = function () {
+				var now = new Date();
+				var E = EOT(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+				var ylen = 365;
+				months[1].len = 28;
+				if (now.getUTCFullYear() % 400 === 0 || (now.getUTCFullYear() % 4 === 0 && now.getUTCFullYear() % 100 != 0)) {
+					ylen = 366;
+					months[1].len = 29;
+				}
+				var ydata = [];
+				for (i = 1; i <= ylen; i++) {
+					var j = 0;
+					var total = months[j].len;
+					while (i > total) {
+						j++;
+						total += months[j].len;
+					}
+					ydata.push(EOT(now.getUTCFullYear(), j + 1, i - total + months[j].len));
+				}
+				//Value module
+				var minutes = Math.floor(Math.abs(E.E));
+				var seconds = Math.round((Math.abs(E.E) - minutes) * 60);
+				if (seconds === 60) {
+					minutes++;
+					seconds = 0;
+				}
+				document.getElementById("val").innerHTML = minutes + "min " + seconds + "s";
+				var sign = "<b>behind</b>";
+				if (Math.sign(E.E) >= 0) {
+					sign = "<b>ahead</b> of";
+				}
+				document.getElementById("sign").innerHTML = sign;
+				//Dial module
+				var r = 0.42 * Math.min(dial.height, dial.width);
+				dtx.clearRect(dial.width / -2, dial.height / -2, dial.width, dial.height);
+				dtx.strokeStyle = "#000000";
+				dtx.fillStyle = "#000000";
+				dtx.lineWidth = r / 100;
+				dtx.beginPath();
+				dtx.arc(0, 0, r, 0, 2 * Math.PI);
+				dtx.stroke();
+				var a;
+				for (i = 0; i < 60; i++) {
+					a = i * 2 * Math.PI / 60;
+					var z = 100;
+					if (i % 5 === 0) {
+						z = 60;
+					}
+					dtx.beginPath();
+					dtx.arc(0.97 * r * Math.sin(a), -0.97 * r * Math.cos(a), r / z, 0, 2 * Math.PI);
+					dtx.fill();
+				}
+				dtx.font = r / 5 + "px Arial";
+				var b;
+				for (i = 0; i < 7; i++) {
+					b = i * 5 - 15;
+					dtx.fillText(Math.abs(b).toString(), 0.8 * r * sin(b * 6), -0.8 * r * cos(b * 6));
+				}				
+				var len = 0.93 * r;
+				var h = r / 6; 
+				var w = r / 6;
+				var ang = E.E * 6;
+				dtx.lineWidth = r / 20;
+				dtx.lineCap = "round";
+				dtx.beginPath();
+				dtx.moveTo(0, 0);
+				dtx.lineTo((len - h) * sin(ang), (h - len) * cos(ang));
+				dtx.stroke();
+				var len2 = Math.sqrt((w / 2) ** 2 + (len - h) ** 2);
+				var ang2 = atan((w / 2) / (len - h));
+				dtx.beginPath();
+				dtx.moveTo(len2 * sin(ang - ang2), -1 * len2 * cos(ang - ang2));
+				dtx.lineTo(len * sin(ang), -1 * len * cos(ang));
+				dtx.lineTo(len2 * sin(ang + ang2), -1 * len2 * cos(ang + ang2));
+				dtx.closePath();
+				dtx.fill();
+				dtx.font = r / 7.5 + "px Arial";
+				dtx.fillText("Behind", -1 * r / 2 / Math.sqrt(2), r / 2 / Math.sqrt(2));
+				dtx.fillText("Ahead", r / 2 / Math.sqrt(2), r / 2 / Math.sqrt(2));
+				//Graph module
+				gtx.clearRect(-0.15 * graph.width, graph.height / -2, graph.width, graph.height);
+				var yUnit = 0.42 * graph.height / 20;
+				var xUnit = 0.7 * graph.width / ylen;
+				gtx.lineWidth = r / 50;
+				gtx.lineCap = "round";
+				gtx.strokeStyle = "#666666";
+				gtx.beginPath();
+				gtx.moveTo(0, 0);
+				gtx.lineTo(ylen * xUnit, 0);
+				gtx.stroke();
+				gtx.strokeStyle = "#000000";
+				for (i = 1; i < ydata.length; i++) {
+					gtx.beginPath();
+					gtx.moveTo((i - 0.5) * xUnit, -1 * ydata[i - 1].E * yUnit);
+					gtx.lineTo((i + 0.5) * xUnit, -1 * ydata[i].E * yUnit);
+					gtx.stroke();
+				}
+				gtx.strokeStyle = "#000000";
+				gtx.beginPath();
+				gtx.moveTo(0, 20 * yUnit);
+				gtx.lineTo(0, -20 * yUnit);
+				gtx.stroke();
+				var days = (now.getTime() - Date.UTC(now.getUTCFullYear(), 0, 1)) / 86400000;
+				gtx.fillStyle = "#ff0000";
+				gtx.beginPath();
+				gtx.arc(days * xUnit, -1 * E.E * yUnit, r / 25, 0, 2 * Math.PI);
+				gtx.fill();
+				gtx.fillStyle = "#000000";
+				gtx.textBaseline = "middle";
+				gtx.textAlign = "right";
+				gtx.font = r / 8 + "px Arial";
+				gtx.lineWidth = r / 50;
+				for (i = 0; i < 9; i++) {
+					b = i * 5 - 20;
+					gtx.beginPath();
+					gtx.moveTo(0, b * yUnit);
+					gtx.lineTo(r / -30, b * yUnit);
+					gtx.stroke();
+					gtx.fillText((-1 * b).toString(), r / -15, b * yUnit);
+				}
+				gtx.font = 10 * xUnit + "px Arial";
+				gtx.textAlign = "center";
+				gtx.lineWidth = r / 75;
+				var total = 0;
+				var prev = 0;
+				for (i = 0; i < 12; i++) {
+					total += months[i].len;
+					gtx.beginPath();
+					gtx.moveTo(total * xUnit, 18 * yUnit);
+					gtx.lineTo(total * xUnit, 20 * yUnit);
+					gtx.stroke();
+					gtx.fillText(months[i].name, (total + prev) / 2 * xUnit, 19 * yUnit);
+					prev = total;
+				}
+				//Analemma module
+				atx.clearRect(dial.width / -2, dial.height / -2, dial.width, dial.height);
+				var yUnit = -0.35 * graph.height / 20;
+				var xUnit = 0.35 * graph.width / 30;
+				atx.lineWidth = r / 50;
+				atx.lineCap = "round";
+				atx.strokeStyle = "#000000";
+				for (i = 0; i < ydata.length; i++) {
+					atx.beginPath();
+					var j = i - 1;
+					if (i === 0) {
+						j = ydata.length - 1;
+					}
+					atx.moveTo(ydata[j].dec * xUnit, ydata[j].E * yUnit);
+					atx.lineTo(ydata[i].dec * xUnit, ydata[i].E * yUnit);
+					atx.stroke();
+				}
+				atx.fillStyle = "#ff0000";
+				atx.beginPath();
+				atx.arc(E.dec * xUnit, E.E * yUnit, r / 25, 0, 2 * Math.PI);
+				atx.fill();
+				atx.fillStyle = "#000000";
+				atx.beginPath();
+				atx.moveTo(-30 * xUnit, 20 * yUnit);
+				atx.lineTo(-30 * xUnit, -20 * yUnit);
+				atx.stroke();
+				atx.beginPath();
+				atx.moveTo(-30 * xUnit, -20 * yUnit);
+				atx.lineTo(30 * xUnit, -20 * yUnit);
+				atx.stroke();
+				atx.textBaseline = "middle";
+				atx.textAlign = "right";
+				atx.font = r / 8 + "px Arial";
+				atx.lineWidth = r / 50;
+				for (i = 0; i < 9; i++) {
+					b = i * 5 - 20;
+					atx.beginPath();
+					atx.moveTo(-30 * xUnit, b * yUnit);
+					atx.lineTo(-30 * xUnit - r / 30, b * yUnit);
+					atx.stroke();
+					atx.fillText(b.toString(), -30 * xUnit - r / 15, b * yUnit);
+				}
+				atx.textBaseline = "top";
+				atx.textAlign = "center";
+				for (i = 0; i < 7; i++) {
+					b = i * 10 - 30;
+					atx.beginPath();
+					atx.moveTo(b * xUnit, -20 * yUnit);
+					atx.lineTo(b * xUnit, -20 * yUnit + r / 30);
+					atx.stroke();
+					atx.fillText(b.toString(), b * xUnit, -20 * yUnit + r / 15);
+				}
+				atx.font = r / 10 + "px Arial";
+				atx.fillText("Solar declination (\u00B0)", 0, -20 * yUnit + r / 5);
+				// The end.
+				setTimeout(run, 60000);
+			}
+			var start = function () {
+				graph = document.getElementById("graph");
+				gtx = graph.getContext("2d");
+				dial = document.getElementById("dial");
+				dtx = dial.getContext("2d");
+				ana = document.getElementById("analemma");
+				atx = ana.getContext("2d");
+				var h, w;
+				if (window.innerWidth >= window.innerHeight - 80) {
+					w = Math.floor(window.innerWidth / 2) - 10;
+					h = Math.floor((window.innerHeight - 80) / 2);
+				} else {
+					w = Math.floor(window.innerWidth);
+					h = Math.floor((window.innerHeight - 80) / 4);
+				}
+				graph.width = w;
+				graph.height = h;
+				dial.width = w;
+				dial.height = h;
+				ana.width = w;
+				ana.height = h;
+				document.getElementById("one").style.fontSize = h / 10 + "px";
+				document.getElementById("two").style.fontSize = h / 10 + "px";
+				document.getElementById("val").style.fontSize = h * (4 / 10 / 3 + 1 / 20) + "px";
+				document.getElementById("val").style.margin = "0.75em";
+				document.getElementById("value").style.height = h + "px";
+				document.getElementById("value").style.width = w + "px";
+				dtx.translate(w / 2, h / 2);
+				dtx.textBaseline = "middle";
+				dtx.textAlign = "center";
+				gtx.translate(0.15 * w, h / 2);
+				atx.translate(w / 2, h / 2);
+				run();
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<div id="header">The Equation of Time</div>
+		<div class="box" id="value">
+			<p id="one">Sundials are currently</p>
+			<p id="val"></p>
+			<p id="two"><span id="sign"></span> mean time.</p>
+		</div>
+		<canvas class="box" id="graph"></canvas>
+		<canvas class="box" id="analemma"></canvas>
+		<canvas class="box" id="dial"></canvas>		
+	</body>
+</html>
