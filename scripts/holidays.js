@@ -231,6 +231,8 @@ var isHebrewDate = function (d, m) { //1 = Nisan, 12 = Adar I, 13 = Adar II
 var img = function (src, size = "1.6em") {
 	return '<img src="images/' + src + '" style="height: ' + size + '">';
 }
+//Misc.
+var ChristmasEve = ["&#127850;&#129371;", "&#127877;", "&#129420;"];
 //List of holidays
 var Holidays = [
 	new Hol(
@@ -254,14 +256,14 @@ var Holidays = [
 	new Hol(
 		"Christmas Eve",
 		isDate(24, 12),
-		"&#127850;&#129371;",//"&#129420;&#129420;&#129420;&#129420;&#128759;",
-		"#009900", "#ff0000"
+		"&#127876;<br>" + ChristmasEve[floor(Math.random() * 3)],
+		"#009900", "#ee0000"
 	),
 	new Hol(
 		"Christmas Day",
 		isDate(25, 12),
-		"&#127873;<br>Merry Christmas!",
-		"#ff0000", "#009900"
+		"&#127876;<br>Merry Christmas!<br>&#127873;",
+		"#ee0000", "#009900"
 	),
 	new Hol(
 		"Boxing Day",
@@ -467,7 +469,7 @@ var Holidays = [
 			}
 			return result;
 		},
-		"&#127876;"
+		"&#127876;<br>&#128367;&#128367;&#128367;&#128367;"
 	),
 	new Hol(
 		"St. Nicholas' Day",
@@ -567,6 +569,13 @@ var Holidays = [
 		"Mawlid",
 		isInSunsetJDList(Mawlid),
 		"&#9770;"
+	),
+	new Hol(
+		"Christmas season",
+		function (D) {
+			return D.m === 12 && D.d < 25;
+		},
+		"&#127876;<br>Hello."
 	)
 ];
 //The main event
