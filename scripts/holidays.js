@@ -575,7 +575,7 @@ var Holidays = [
 		function (D) {
 			return D.m === 12 && D.d < 25;
 		},
-		"&#127876;<br>Hello."
+		"&#127876;"
 	)
 ];
 //The main event
