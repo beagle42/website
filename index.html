@@ -28,9 +28,12 @@
 			}
 			#header {
 				width: 100%;
-				height: 400px;
 				background: var(--colour-one);
 				margin: 0;
+			}
+			#titleBox {
+				margin: auto;
+				padding: 9vmin 3vmin;
 			}
 			#subheader {
 				background-color: var(--colour-two);
@@ -39,7 +42,7 @@
 			}
 			#body {
 				width: 90%;
-				max-width: 1200px;
+				max-width: 1400px;
 				margin: auto;
 			}
 			#tiles {
@@ -59,7 +62,7 @@
 				}
 			}
 			.tilebox {
-				padding: 10px;
+				padding: 1.2vmin;
 				color: var(--colour-two);
 			}
 			.tile {
@@ -67,14 +70,14 @@
 				width: 100%;
 				height: 100%;
 				background-color: transparent;
-				border-radius: 20px;
+				border-radius: 2.4vmin;
 				cursor: pointer;
 				border: 5px solid var(--colour-two);
 				color: var(--colour-two);
 				transition: background-color 0.5s, color 0.5s;
 				text-align: center;
-				font-size: 30px;
-				padding: 30px 20px;
+				font-size: 3.6vmin;
+				padding: 3.6vmin 2.4vmin;
 				box-sizing: border-box;
 				font-family: Arial, Emoji, sans-serif;
 			}
@@ -92,29 +95,29 @@
 				justify-content: center;
 			}
 			#title {
-				font-size: 100px;
+				font-size: 12vmin;
 				color: var(--title-colour);
 				text-align: center;
 				font-family: Georgia, 'Domine', sans-serif;
-				margin: 10px;
+				margin: 1.2vmin;
 			}
 			#about {
-				font-size: 20px;
+				font-size: 2.4vmin;
 				font-family: Arial;
 			}
 			#greeting {
-				font-size: 30px;
+				font-size: 3.6vmin;
 				text-align: center;
 				font-family: Arial, ColourEmoji, sans-serif;
 				line-height: 1.6;
 			}
 			#headLogo {
-				height: 120px;
+				height: 14.4vmin;
 				margin: auto;
 				display: block;
 			}
 			#quotebox {
-				width: 500px;
+				width: 60vmin;
 				margin: auto;
 			}
 			#quote {
@@ -122,19 +125,19 @@
 				font-family: Georgia, Times, Times New Roman, serif;
 				color: #999999;
 				text-align: center;
-				font-size: 40px;
+				font-size: 4.8vmin;
 				margin-bottom: 0.5em;
 			}
 			#attr {
 				font-family: Georgia, serif;
 				color: #999999;
 				text-align: right;
-				font-size: 20px;
+				font-size: 2.4vmin;
 			}
 			#footer {
 				font-family: Arial, serif;
-				font-size: 15px;
-				margin: 30px 0;
+				font-size: 1.8vmin;
+				margin: 3.6vmin 0;
 			}
 		</style>
 		<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
@@ -146,7 +149,7 @@
 			var start = function () {
 				var now = new Date();
 				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
-				//var hol = holiday(1, 1, 2021, 15);
+				//var hol = holiday(10, 12, 2021, 15);
 				if (hol != Holidays.length) {
 					document.getElementById("greeting").innerHTML = Holidays[hol].message;
 					document.getElementById("greeting").title = Holidays[hol].name;
@@ -159,15 +162,15 @@
 				}
 			}
 		</script>
-		<div id="header" class="justify">
-			<div>
+		<div id="header">
+			<div id="titleBox">
 				<img id="headLogo" src="images/logo.png">
 				<p id="title">Joshua&#8217;s website</p>
 			</div>
 		</div>
 		<div id="body">
 			<p id="greeting">Hello.</p>
-			<p id="about"><!--Sometimes I make things.--></p>
+			<!--<p id="about">Sometimes I make things.</p>-->
 			<div id="tiles">
 				<div class="tilebox justify">
 					<a class="tile justify" href="beagle.html">&#128269;<br>Beagle<br>Search</a>
