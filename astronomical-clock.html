@@ -358,6 +358,9 @@
 			var run = function () {
 				var longitude = Number(document.getElementById("long").value);
 				var latitude = Number(document.getElementById("lat").value);
+				if (Math.abs(latitude) > 90) {
+					latitude = 0;
+				}
 				var now = new Date();
 				var decDay = now.getUTCHours() / 24 + now.getUTCMinutes() / 1440 + now.getUTCSeconds() / 86400 + now.getUTCMilliseconds() / 86400000;
 				var JD = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
