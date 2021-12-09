@@ -435,7 +435,7 @@
 					ctx.stroke();
 					ctx.font = r / 8 + "px Arial";
 					ctx.fillText((i + 1).toString(), 0.8 * r2 * sin(ang), -0.8 * r2 * cos(ang));
-					total += months[i]
+					total += months[i];
 				}
 				arrow(0.7, (dayNo(now.getDate(), now.getMonth() + 1, now.getFullYear()) - 1 + decDays) * 360 / 365);
 				ctx.translate(0, -1 * radial);
