@@ -722,7 +722,7 @@
 						}
 					}
 					//Date & time
-					var bigDial = checked("date") && !checked("italian") && (!checked("numbers") || checked("inside"));
+					var bigDial = checked("date") && !checked("italian") && ((!checked("numbers") && !checked("dots")) || checked("inside"));
 					if (checked("date")) {
 						var adjustedJD = JD + timeZone / 24;
 						var timeOfDay = mod(decDay * 24 + timeZone, 24);
