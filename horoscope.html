@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horoscope generator</title>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+		<style>
+			* {
+				font-family: Arial, serif;
+			}
+			#front {
+				text-align: center;
+			}
+			.p {
+				font-size: 30px;
+			}
+			#h1 {
+				font-size: 50px;
+				padding: 0 80px;
+				font-family: 'Pacifico', Arial, serif;
+			}
+			#h3 {
+				font-size: 30px;
+				padding: 0 80px;
+				font-family: 'Pacifico', Arial, serif;
+			}
+			.small {
+				font-size: 15px;
+			}
+			input {
+				font-size: inherit;
+				width: 85px;
+				text-align: center;
+				padding: 10px 20px;
+				border-radius: 10px;
+				border: 2px solid #666666;
+			}
+			input:focus {
+				outline: none;
+				border: 2px solid #333333;
+			}
+			.button {
+				background-color: #cccccc;
+				cursor: pointer;
+				border-radius: 10px;
+				padding: 10px 20px;
+			}
+			.button:hover {
+				background-color: #999999;
+			}
+			.button:active {
+				background-color: #bbbbbb;
+			}
+			canvas {
+				display: none;
+				margin: auto;
+			}
+			body {
+				margin: 0;
+			}
+			#header {
+				height: 30px;
+				font-size: 30px;
+				padding: 25px 80px;
+				text-align: left;
+				display: none;
+			}
+			#disclaim {
+				display: none;
+				padding: 0 15px;
+			}
+		</style>
+	</head>
+	<body onLoad="start()">
+		<script>
+			var canvas, ctx;
+			var pre = true;
+			var signs = ["\u2648", "\u2649", "\u264a", "\u264b", "\u264c", "\u264d", "\u264e", "\u264f", "\u2650", "\u2651", "\u2652", "\u2653"];
+			var planets = [];
+			var Planet = function (name, T, eps, po, e, a, i, leo, thet_0, v_0, symbol, colour, radius) {
+				this.name = name;
+				this.T = T;
+				this.eps = eps;
+				this.po = po;
+				this.e = e;
+				this.a = a;
+				this.i = i;
+				this.leo = leo;
+				this.thet_0 = thet_0;
+				this.v_0 = v_0;
+				this.colour = colour;
+				this.radius = radius;
+				this.symbol = symbol;
+			}
+			planets[0] = new Planet("Mercury", 0.24085, 75.5671, 77.612, 0.205627, 0.387098, 7.0051, 48.449, 6.74, -0.42, "\u263f", "#808080", 2.5);
+			planets[1] = new Planet("Venus", 0.615207, 272.30044, 131.54, 0.006812, 0.723329, 3.3947, 76.769, 16.92, -4.4, "\u2640", "#ffcc00", 3);
+			var earth = new Planet("Earth", 0.999996, 99.556772, 103.2055, 0.016671, 0.999985);
+			planets[2] = new Planet("Mars", 1.880765, 109.09646, 336.217, 0.093348, 1.523689, 1.8497, 49.632, 9.36, -1.52, "\u2642", "#ff0000", 2.75);
+			planets[3] = new Planet("Jupiter", 11.857911, 337.917132, 14.6633, 0.048907, 5.20278, 1.3035, 100.595, 196.74, -9.4, "\u2643", "#feac49", 6);
+			planets[4] = new Planet("Saturn", 29.310579, 172.398316, 89.567, 0.053853, 9.51134, 2.4873, 113.752, 165.6, -8.88, "\u2644", "#d6b977", 5);
+			planets[5] = new Planet("Uranus", 84.039492, 356.1354, 172.884833, 0.046321, 19.21814, 0.773059, 73.926961, 65.8, -7.19, "\u2645", "#a8eef0", 4);
+			planets[6] = new Planet("Neptune", 165.84539, 326.895127, 23.07, 0.010483, 30.1985, 1.7673, 131.879, 62.2, -6.87, "\u2646", "#0000ff", 4);
+			var JulianDate = function (y, m, d, h = 0, min = 0, s = 0, ms = 0) {
+				var y2 = y;
+				var m2 = m;
+				if (m <= 2) {
+					y2--;
+					m2 += 12;
+				}
+				var A, B, C, D;
+				if (y2 > 1582 || y2 === 1582 && m2 > 10 || y2 === 1582 && m2 === 10 && d > 15) {
+					A = Math.trunc(y2 / 100);
+					B = 2 - A + Math.trunc(A / 4);
+				} else {
+					B = 0;
+				}
+				if (y2 < 0) {
+					C = Math.trunc(365.25 * y2 - 0.75);
+				} else {
+					C = Math.trunc(365.25 * y2);
+				}
+				D = Math.trunc(30.6001 * (m2 + 1));
+				return B + C + D + d + 1720994.5 + h / 24 + min / 1440 + s / 86400 + ms / 86400000;
+			}
+			var zero = function (x) {
+				var y = x;
+				if (x < 10) {
+					y = "0" + x;
+				}
+				return y;
+			}
+			var mod = function (num, p = 360) {
+				var n = num;
+				if (n < 0) {
+					n = p - (-1 * n) % p;
+				}
+				return n % p;
+			}
+			var deg = function (radians) {
+				return radians * 180 / Math.PI;
+			}
+			var rad = function (degrees) {
+				return degrees * Math.PI / 180;
+			}
+			var sin = function (x) {
+				return Math.sin(rad(x));
+			}
+			var cos = function (x) {
+				return Math.cos(rad(x));
+			}
+			var tan = function (x) {
+				return Math.tan(rad(x));
+			}
+			var obliquity = function (JD) {
+				var T = (JD - 2451545) / 36525;
+				var DE = 46.815 * T + 0.0006 * T * T - 0.00181 * T * T * T;
+				var eps = 23.439292 - DE / 3600;
+				return eps;
+			}
+			var GST = function (decHours, JD) {
+				var S = JD - 2451545;
+				var T = S / 36525;
+				var T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * T * T);
+				var GMST = T0 + decHours * 1.002737909;
+				return mod(GMST, 24) * 360 / 24;
+			}
+			var PlanetPos = function (i, D) {
+				var N_p = mod(360 / 365.242191 * D / planets[i].T, 360);
+				var M_p = N_p + planets[i].eps - planets[i].po;
+				var v_p = mod(M_p + 360 / Math.PI * planets[i].e * sin(M_p), 360);
+				var l_p = mod(v_p + planets[i].po, 360);
+				var lr = planets[i].a * (1 - planets[i].e * planets[i].e) / (1 + planets[i].e * cos(v_p));
+				var N_E = mod(360 / 365.242191 * D / earth.T, 360);
+				var M_E = N_E + earth.eps - earth.po;
+				var v_E = mod(M_E + 360 / Math.PI * earth.e * sin(M_E), 360);
+				var L = mod(v_E + earth.po, 360);
+				var bR = earth.a * (1 - earth.e * earth.e) / (1 + earth.e * cos(v_E));
+				var psi = deg(Math.asin(sin(l_p - planets[i].leo) * sin(planets[i].i)));
+				var l2 = deg(Math.atan2(sin(l_p - planets[i].leo) * cos(planets[i].i), cos(l_p - planets[i].leo))) + planets[i].leo;
+				var lr2 = lr * cos(psi);
+				var lam;
+				if (i > 1) {
+					lam = deg(Math.atan(bR * sin(l2 - L) / (lr2 - bR * cos(l2 - L)))) + l2;
+				} else {
+					lam = 180 + L + deg(Math.atan(lr2 * sin(L - l2) / (bR - lr2 * cos(L - l2))));
+				}
+				return mod(lam, 360);
+			}
+			var Object = function (symbol, sym, lambda, retro = false) {
+				this.symbol = symbol;
+				this.sym = sym;
+				this.lambda = lambda;
+				this.retro = retro;
+			}
+			var Aspect = function (symbol, angle, orb, bold = false, adjust = 1) {
+				this.symbol = symbol;
+				this.angle = angle;
+				this.orb = orb;
+				this.bold = bold;
+				this.adjust = adjust;
+			}
+			var aspects = [];
+			aspects[0] = new Aspect("\u260c", 0, 10, false, 1.08);
+			aspects[1] = new Aspect("\u260d", 180, 10);
+			aspects.push(new Aspect("\u25b3", 120, 7.5, true));
+			aspects.push(new Aspect("\u25a1", 90, 7.5, true));
+			aspects.push(new Aspect("\u26b9", 60, 5));
+			aspects.push(new Aspect("\u26bb", 150, 2.5));
+			aspects.push(new Aspect("\u26ba", 30, 1.25, false, 0.98));
+			var generate = function () {
+				var r = canvas.width * 0.42;
+				ctx.fillStyle = "#ffffff";
+				ctx.fillRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
+				var latitude = Number(document.getElementById("lat").value);
+				if (Math.abs(latitude) > 90) {
+					latitude = 0;
+				}
+				var longitude = Number(document.getElementById("long").value);
+				var hour = Number(document.getElementById("hour").value);
+				var minute = Number(document.getElementById("min").value);
+				var day = Number(document.getElementById("day").value);
+				var month = Number(document.getElementById("mon").value);
+				var year = Number(document.getElementById("year").value);
+				var offset = Number(document.getElementById("timezone").value);
+				var time = new Date(Date.UTC(year, month - 1, day, hour, minute) - offset * 3600000);
+				var JD = JulianDate(time.getUTCFullYear(), time.getUTCMonth() + 1, time.getUTCDate(), time.getUTCHours(), time.getUTCMinutes(), time.getUTCSeconds(), time.getUTCMilliseconds());
+				var JD0 = JulianDate(time.getUTCFullYear(), time.getUTCMonth() + 1, time.getUTCDate());
+				var GMST = GST((JD - JD0) * 24, JD0);
+				var LMST = mod(GMST + longitude, 360);
+				var tilt = obliquity(JD);
+				var objects = [];
+				var Asc = deg(Math.atan2(cos(LMST), -1 * (sin(LMST) * cos(tilt) + tan(latitude) * sin(tilt))));
+				/*if (Asc < 180) {
+					Asc += 180;
+				} else {
+					Asc -=180;
+				}*/
+				objects[objects.length] = new Object("Asc", false, mod(Asc, 360));
+				var Mc = mod(deg(Math.atan2(sin(LMST), cos(LMST) * cos(tilt))), 360);
+				objects[objects.length] = new Object("Mc", false, Mc);
+				//Sun
+				var T = (JD - 2415020) / 36525;
+				var eps_g = mod(279.6966778 + 36000.76892 * T + 0.0003025 * T * T, 360);
+				var po_g = mod(281.2208444 + 1.719175 * T + 0.000452778 * T * T, 360);
+				var e = mod(0.01675104 - 0.0000418 * T - 0.000000126 * T * T, 360);
+				var M_sun = mod(eps_g - po_g, 360);
+				var E = rad(M_sun);
+				var del = E - e * Math.sin(E) - rad(M_sun);
+				while (Math.abs(del) > 0.000001) {
+					E -= del / (1 - e * Math.cos(E));
+					del = E - e * Math.sin(E) - rad(M_sun);
+				}
+				E = deg(E);
+				var v = mod(2 * deg(Math.atan(Math.sqrt((1 + e) / (1 - e)) * tan(E / 2))), 360);
+				var lam_sun = mod(v + po_g, 360);
+				objects[objects.length] = new Object("\u2609", true, lam_sun);
+				//Moon
+				var D = JD - 2455196.5;
+				var l = mod(13.1763966 * D + 91.929336, 360);
+				var M_m = mod(l - 0.1114041 * D - 130.143076, 360);
+				var N = mod(291.682547 - 0.0529539 * D, 360);
+				var C = l - lam_sun;
+				var E_v = 1.2739 * sin(2 * C - M_m);
+				var A_e = 0.1858 * sin(M_sun);
+				var A_3 = 0.37 * sin(M_sun);
+				var M_m2 = M_m + E_v - A_e - A_3;
+				var E_c = 6.2886 * sin(M_m2);
+				var A_4 = 0.214 * sin(2 * M_m2);
+				var l2 = l + E_v + E_c - A_e - A_4;
+				var V = 0.6583 * sin(2 * (l2 - lam_sun));
+				var l3 = l2 + V;
+				var N2 = N - 0.16 * sin(M_sun);
+				var lam_m = mod(deg(Math.atan2(sin(l3 - N2) * cos(5.145396), cos(l3 - N2))) + N2, 360);
+				objects[objects.length] = new Object("\u263d", true, lam_m);
+				//Planets
+				for (var i = 0; i < planets.length; i++) {
+					var lam = PlanetPos(i, D);
+					var retro = false;
+					if (lam - PlanetPos(i, D + 0.00001) > 0) {
+						retro = true;
+					}
+					objects[objects.length] = new Object(planets[i].symbol, true, lam, retro);
+				}
+				objects.sort(function(a, b){return a.lambda - b.lambda});
+				objects[0].gap = objects[0].lambda + 360 - objects[objects.length];
+				for (var i = 1; i < objects.length; i++) {
+					objects[i].gap = objects[i].lambda - objects[i - 1].lambda;
+				}
+				var max = 0;
+				var maxPos = 0;
+				for (var i = 0; i < objects.length; i++) {
+					if (objects[i].gap > max) {
+						maxPos = i;
+						max = objects[i].gap;
+					}
+				}
+				var maxValue = objects[maxPos].lambda;
+				var objects2 = [];
+				for (var i = 0; i < objects.length; i++) {
+					objects2[i] = objects[mod(i + maxPos, objects.length)];
+				}
+				objects = objects2;
+				ctx.fillStyle = "#000000";
+				ctx.lineWidth = r / 100;
+				for (var i = 0; i < 12; i++) {
+					var ang = i * 30 - Asc;
+					ctx.font = r / 14 + "px Emoji";
+					ctx.fillText(signs[i], -1 * r * 13 / 14 * cos(ang + 15), r * 13 / 14 * sin(ang + 15));
+					ctx.strokeStyle = "#000000";
+					ctx.beginPath();
+					ctx.moveTo(-1 * r * 6 / 7 * cos(ang), r * 6 / 7 * sin(ang));
+					ctx.lineTo(-1 * r * cos(ang), r * sin(ang));
+					ctx.stroke();
+					ctx.strokeStyle = "#cccccc";
+					ctx.beginPath();
+					ctx.moveTo(-1 * r * 6 / 7 * cos(i * 30), r * 6 / 7 * sin(i * 30));
+					ctx.lineTo(-1 * r * 3 / 7 * cos(i * 30), r * 3 / 7 * sin(i * 30));
+					ctx.stroke();
+					ctx.font = r / 14 + "px Arial";
+					ctx.fillText((i + 1).toString(), -0.52 * r * cos(i * 30 + 15), 0.52 * r * sin(i * 30 + 15));
+				}
+				ctx.lineWidth = r / 200;
+				for (var i = 0; i < objects.length; i++) {
+					objects[i].display = objects[i].lambda;
+					if (i != 0) {
+						if (mod(objects[i].lambda - maxValue) - mod(objects[i - 1].display - maxValue) < 6) {
+							objects[i].display = objects[i - 1].display + 6;
+						}
+					}
+					ctx.strokeStyle = "#000000";
+					ctx.fillStyle = "#000000";
+					ctx.beginPath();
+					ctx.moveTo(-1 * r * 6 / 7 * cos(objects[i].lambda - Asc), r * 6 / 7 * sin(objects[i].lambda - Asc));
+					ctx.lineTo(-1 * r * 11 / 14 * cos(objects[i].display - Asc), r * 11 / 14 * sin(objects[i].display - Asc));
+					ctx.stroke();
+					if (objects[i].sym) {
+						ctx.font = r / 12 + "px Symbols, Symbols2";
+					} else {
+						ctx.font = r / 16 + "px Times";
+					}
+					ctx.fillText(objects[i].symbol, -1 * r * 5 / 7 * cos(objects[i].display - Asc), r * 5 / 7 * sin(objects[i].display - Asc));
+					if (objects[i].retro) {
+						ctx.font = r / 20 + "px Times";
+						ctx.fillText("\u211e", -1 * r * 9 / 14 * cos(objects[i].display - Asc), r * 9 / 14 * sin(objects[i].display - Asc));
+					}
+					ctx.fillStyle = "#000000";
+					ctx.strokeStyle = "#999999";
+					for (var j = 0; j < i; j++) {
+						for (var k = 0; k < aspects.length; k++) {
+							var asp = Math.min(mod(objects[i].lambda - objects[j].lambda), mod(objects[j].lambda - objects[i].lambda));
+							if (asp <= aspects[k].angle + aspects[k].orb && asp >= aspects[k].angle - aspects[k].orb) {
+								var x1 = r * -3 / 7 * cos(objects[i].lambda - Asc);
+								var y1 = r * 3 / 7 * sin(objects[i].lambda - Asc);
+								var x2 = r * -3 / 7 * cos(objects[j].lambda - Asc);
+								var y2 = r * 3 / 7 * sin(objects[j].lambda - Asc);
+								ctx.beginPath();
+								ctx.moveTo(x1, y1);
+								ctx.lineTo(x2, y2);
+								ctx.stroke();
+								ctx.font = r / 20 + "px Symbols, Symbols2";
+								if (aspects[k].bold) {
+									ctx.font = "bold " + r / 30 + "px Symbols, Symbols2";
+								}
+								ctx.fillText(aspects[k].symbol, (x1 + x2) * aspects[k].adjust / 2, (y1 + y2) * aspects[k].adjust / 2);
+								break;
+							}
+						}
+					}
+				}
+				ctx.strokeStyle = "#000000";
+				ctx.lineWidth = r / 100;
+				ctx.beginPath();
+				ctx.arc(0, 0, r, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 3 / 7, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 6 / 7, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.fillStyle = "#777777";
+				ctx.font = r / 30 + "px Arial";
+				ctx.textBaseline = "top";
+				ctx.textAlign = "left";
+				var pos;
+				if (longitude === 0 || longitude === 180 || longitude === -180) {
+					pos = Math.abs(longitude) + "\u00B0";
+				} else if (longitude > 0) {
+					pos = longitude + "\u00B0E";
+				} else if (longitude < 0) {
+					pos = -1 * longitude + "\u00B0W";
+				}
+				var pos2;
+				if (latitude === 0) {
+					pos2 = latitude + "\u00B0";
+				} else if (latitude > 0) {
+					pos2 = latitude + "\u00B0N";
+				} else if (latitude < 0) {
+					pos2 = -1 * latitude + "\u00B0S";
+				}
+				var pos3 = offset;
+				if (offset === 0) {
+					pos3 = "";
+				} else if (offset > 0) {
+					pos3 = "+" + offset;
+				}
+				ctx.fillText(hour + ":" + zero(minute) + " " + day + "/" + month + "/" + year + ", UTC" + pos3 + " · " + pos2 + ", " + pos, canvas.width / -2, canvas.height / -2);
+				ctx.textBaseline = "bottom";
+				ctx.fillText("\u00a9 Joshua the Divine of Joshua the Divine's Divinations.", canvas.width / -2, canvas.height / 2);
+			}
+			var load = function (x) {
+				ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
+				ctx.fillStyle = "#000000";
+				ctx.font = canvas.width / 10 + "px Arial";
+				ctx.fillText("Loading...", 0, 0);
+				ctx.font = canvas.width / 20 + "px Emoji";
+				ctx.fillText(signs[x], 0, canvas.height / 4);
+				ctx.font = canvas.width / 20 + "px Symbols, Symbols2";
+				ctx.fillText(planets[x % planets.length].symbol, 0, canvas.height / -4);
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText(aspects[x % aspects.length].symbol, 0, canvas.height / 2);
+				if (x < 12) {
+					setTimeout(load, 50, x + 1);
+				} else {
+					generate();
+				}
+			}
+			var begin = function () {
+				canvas = document.getElementById("horoscope");
+				ctx = canvas.getContext("2d");
+				canvas.width = Math.min(window.innerWidth, window.innerHeight - 160);
+				canvas.height = canvas.width;
+				ctx.translate(canvas.width / 2, canvas.height / 2);
+				ctx.textBaseline = "middle";
+				ctx.textAlign = "center";
+				document.getElementById("front").style.display = "none";
+				document.getElementById("horoscope").style.display = "block";
+				document.getElementById("header").style.display = "block";
+				document.getElementById("disclaim").style.display = "block";
+				load(0);
+			}
+			var start = function () {
+				var now = new Date();
+				var l = -1 * now.getTimezoneOffset() / 4;
+				document.getElementById("timezone").value = now.getTimezoneOffset() / -60;
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<div id="header">Horoscope Generator</div>
+		<div id="front">
+			<p id="h3">Joshua the Divine of Joshua the Divine's Divinations presents a</p>
+			<p id="h1">Horoscope generator</p>
+			<p class="small">'Horoscope' as in the chart representing the heavens at the time and place of an event (usually a birth), not the reading of the supposed meanings of said chart.</p>
+			<p class="p">Time: <input type="number" min="0" max="23" id="hour" placeholder="hh">&#8201;:&#8201;<input type="number" min="0" max="59" id="min" placeholder="mm"> &nbsp; <input type="number" min="1" max="31" id="day" placeholder="dd">&#8201;/&#8201;<input type="number" min="1" max="12" id="mon" placeholder="mm">&#8201;/&#8201;<input type="number" id="year" placeholder="yyyy"> &nbsp;(UTC+<input type="number" min="-12" max="14" id="timezone" placeholder="hh">)</p>
+			<p class="p">Place: <input type="number" min="-90" max="90" id="lat" placeholder="lat">, <input type="number" min="-180" max="180" id="long" placeholder="long">
+			<p class="small">(Please do not enter sensitive information into this or any other shady website.)</p>
+			<p class="p"><span class="button" onClick="begin()">Generate</span></p>
+		</div>
+		<canvas id="horoscope"></canvas>
+		<div id="disclaim">
+			<p class="small"><b>What does this mean for your life?</b> - Nothing.</p>
+		</div>
+	</body>
+</html>

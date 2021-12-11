@@ -12,5 +12,6 @@ var index = [
 	new Page("Calendrical Conversions", "Convert between different calendars", "calendrical-conversions.html"),
 	new Page("Dials", "An astronomical clock", "dials.html"),
 	new Page("Astronomical Clock", "That's what it is", "astronomical-clock.html"),
-	new Page("Equation of Time", "Several ways of representing its current value", "equation-of-time.html")
+	new Page("Equation of Time", "Several ways of representing its current value", "equation-of-time.html"),
+	new Page("Horoscope Generator", "Generates a horoscope chart for any time, date and location", "horoscope.html")
 ];
