@@ -418,13 +418,13 @@
 				ctx.font = canvas.width / 10 + "px Arial";
 				ctx.fillText("Loading...", 0, 0);
 				ctx.font = canvas.width / 20 + "px Emoji";
-				ctx.fillText(signs[x], 0, canvas.height / 4);
+				ctx.fillText(signs[x % signs.length], 0, canvas.height / 4);
 				ctx.font = canvas.width / 20 + "px Symbols, Symbols2";
 				ctx.fillText(planets[x % planets.length].symbol, 0, canvas.height / -4);
 				ctx.fillStyle = "#ffffff";
 				ctx.font = canvas.width / 20 + "px Symbols2, Symbols";
 				ctx.fillText(aspects[x % aspects.length].symbol, 0, canvas.height / 2);
-				if (x < 12) {
+				if (x < 20) {
 					setTimeout(load, 50, x + 1);
 				} else {
 					generate();
