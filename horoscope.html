@@ -422,6 +422,7 @@
 				ctx.font = canvas.width / 20 + "px Symbols, Symbols2";
 				ctx.fillText(planets[x % planets.length].symbol, 0, canvas.height / -4);
 				ctx.fillStyle = "#ffffff";
+				ctx.font = canvas.width / 20 + "px Symbols2, Symbols";
 				ctx.fillText(aspects[x % aspects.length].symbol, 0, canvas.height / 2);
 				if (x < 12) {
 					setTimeout(load, 50, x + 1);
