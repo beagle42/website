@@ -878,7 +878,7 @@
 					ctx.lineCap = "round";
 					if (checked("sidereal")) {
 						distance = 1.1 * r;
-						if (checked("inside")) {
+						if (checked("inside") || bigDial) {
 							distance = 0.9 * r;
 						}
 						ctx.lineWidth = r / 100;
