@@ -722,7 +722,7 @@
 						}
 					}
 					//Date & time
-					var bigDial = checked("date") && !checked("italian") && ((!checked("numbers") && !checked("dots")) || checked("inside"));
+					var bigDial = checked("date") && !checked("italian") && (!checked("numbers") || checked("inside"));
 					if (checked("date")) {
 						var adjustedJD = JD + timeZone / 24;
 						var timeOfDay = mod(decDay * 24 + timeZone, 24);
@@ -741,7 +741,9 @@
 						var dayOfTheWeek = mod(JDN + 1, 7) + timeOfDay / 24;
 						var buffer = 0.01;
 						var mult = 0.49;
-						if (bigDial) {
+						if (checked("dots") && bigDial && !checked("inside")) {
+							mult = 0.42 * (1 + 0.02);
+						} else if (bigDial) {
 							mult = 0.42;
 						}
 						var root2 = Math.SQRT2;
