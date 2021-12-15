@@ -1143,6 +1143,11 @@
 						ctx.lineTo(distance * sin(hourAngle), -1 * distance * cos(hourAngle));
 						ctx.stroke();
 					}
+					//The Earth
+					ctx.fillStyle = "#006699";
+					ctx.beginPath();
+					ctx.arc(0, 0, r2, 0, 2 * Math.PI);
+					ctx.fill();
 					//The Sun
 					var sunPoints = 9;
 					if (document.getElementById("pointer").value === "1") {
@@ -1214,11 +1219,6 @@
 							}
 						}
 					}
-					//The Earth
-					ctx.fillStyle = "#006699";
-					ctx.beginPath();
-					ctx.arc(0, 0, r2, 0, 2 * Math.PI);
-					ctx.fill();
 				}
 				var waitTime = 1000;
 				if (checked("lowPower")) {
