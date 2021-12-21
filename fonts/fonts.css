@@ -12,10 +12,6 @@
 	src: url(NotoSansSymbols-Regular.ttf);
 }
 @font-face {
-	font-family: Symbols;
-	src: url(NotoSansSymbols-Regular.ttf);
-}
-@font-face {
 	font-family: Symbols2;
 	src: url(NotoSansSymbols2-Regular.ttf);
 }
