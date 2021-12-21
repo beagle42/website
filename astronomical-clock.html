@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 5.0-->
+	<!--Version 5.1-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -1515,7 +1515,7 @@
 				<b>Location</b>
 				<br>Latitude: <input type="number" max="90" min="-90" id="lat" value="0">&#176;
 				<br>Longitude: <input type="number" max="180" min="-180" id="long">&#176;
-				<br>
+				<br><span id="auto" onclick="auto()">Auto</span><br>
 				<b>Time zone</b> 
 				<br>UTC+<input type="number" max="14" min="-12" id="zone" disabled> &nbsp;(<input id="autoZone" type="checkbox" checked onChange="autoZone()"><label for="autoZone"> Auto</label>)
 				<br><b>Presets</b><br>
