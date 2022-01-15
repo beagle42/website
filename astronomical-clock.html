@@ -728,7 +728,7 @@
 						var timeOfDay = mod(decDay * 24 + timeZone, 24);
 						var JDN = Math.floor(adjustedJD + 0.5);
 						var date = JDNtoDate(JDN);
-						var daysSinceNY = date.d + timeOfDay / 24;
+						var daysSinceNY = date.d + timeOfDay / 24 - 1;
 						for (var i = 0; i < date.m; i++) {
 							daysSinceNY += months[i];
 						}
