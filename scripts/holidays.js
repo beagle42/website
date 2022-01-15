@@ -238,13 +238,13 @@ var Holidays = [
 	new Hol(
 		"New Year's Day",
 		isDate(1, 1),
-		"&#127878;<br>Happy New Year!",
+		"&#127878;<br>Happy New Year!<br>&#127881;",
 		"#000066", "#000066", "#FFD700"
 	),
 	new Hol(
 		"New Year's Eve",
 		isDate(31, 12),
-		"&#127756;",
+		"&#127879; &#127881;",
 		"#000066", "#000066", "#C0C0C0"
 	),
 	new Hol(
