@@ -13,5 +13,6 @@ var index = [
 	new Page("Dials", "An astronomical clock", "dials.html"),
 	new Page("Astronomical Clock", "That's what it is", "astronomical-clock.html"),
 	new Page("Equation of Time", "Several ways of representing its current value", "equation-of-time.html"),
-	new Page("Horoscope Generator", "Generates a horoscope chart for any time, date and location", "horoscope.html")
+	new Page("Horoscope Generator", "Generates a horoscope chart for any time, date and location", "horoscope.html"),
+	new Page("English Numbers", "eg. It converts '42' to 'forty-two'. You get the idea.", "english-numbers.html")
 ];
