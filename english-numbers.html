@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+	<!--I don't know; I was bored one morning.-->
+	<head>
+		<!-- Version 2.0 -->
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<title>English Numbers</title>
+		<style>
+			* {
+				font-family: Arial;
+			}
+			#head {
+				font-size: 3.5em;
+				padding: 0 80px;
+				font-family: Century Gothic;
+			}
+			#in {
+				font-size: 2em;
+			}
+			#num {
+				font-size: inherit;
+				padding: 10px 20px;
+				border: 1px solid #000000;
+				border-radius: 10px;
+				width: 50%;
+			}
+			#num:focus {
+				outline: 1px solid #000000;
+			}
+			#result {
+				font-size: 2em;
+				padding: 20px 100px;
+			}
+			#btn {
+				background-color: #cccccc;
+				padding: 12px 20px;
+				border-radius: 10px;
+				color: #333333;
+				cursor: pointer;
+			}
+			#btn:hover {
+				background-color: #999999;
+				color: #000000;
+			}
+			#numresult {
+				font-size: 1em;
+				padding: 5px 100px;
+				color: #555555;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			var single = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+			var ty = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+			var teen = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+			var triple = function (n) {
+				var hundreds = Math.floor(n / 100);
+				var tens2 = n % 100;
+				var tens = Math.floor(tens2 / 10);
+				var ones = n % 10;
+				var d = "";
+				if (tens2 < 10) {
+					d = single[ones];
+				} else if (tens2 < 20) {
+					d = teen[ones];
+				} else if (ones === 0) {
+					d = ty[tens];
+				} else if (tens2 != 0) {
+					d = ty[tens] + "-" + single[ones];
+				}
+				var result = "";
+				if (hundreds === 0) {
+					result = d;
+				} else if (tens2 === 0) {
+					result = single[hundreds] + " hundred";
+				} else {
+					result = single[hundreds] + " hundred and " + d;
+				}
+				return result;
+			}
+			var irregulars = ["n", "m", "b", "tr", "quadr", "quint", "sext", "sept", "oct", "non", "dec", "undec", "duodec", "tredec", "quattuordec", "quindec", "sexdec", "septendec", "octodec", "novemdec"];
+			var I = function (p, special = 0, SM = "", XN = "") {
+				this.pre = p;
+				this.special = special;
+				this.SM = SM;
+				this.XN = XN;
+			}
+			var onesIllions = [42, new I("un"), new I("du", "O"), new I("tre", "SX", "s", "s"), new I("quattuor"), new I("quin"), new I("se", "SX", "s", "x"), new I("septe", "MN", "m", "n"), new I("oct", "O"), new I("nove", "MN", "m", "n")];
+			var T = function (p, S = false, X = false, M = false, N = false, O = true, end = "a") {
+				this.pre = p;
+				this.S = S;
+				this.X = X;
+				this.M = M;
+				this.N = N;
+				this.O = O;
+				this.end = end;
+			}
+			var tensIllions = [111, new T("dec", false, false, false, true, true, "i"), new T("vigint", true, false, true, false, true, "i"), new T("trigint", true, false, false, true), new T("quadragint", true, false, false, true), new T("quinquagint", true, false, false, true), new T("sexagint", false, false, false, true), new T("septuagint", false, false, false, true), new T("octogint", false, true, true, false, false), new T("nonagint")];
+			var H = function (p, S = false, X = false, M = false, N = false, O = true) {
+				this.pre = p;
+				this.S = S;
+				this.X = X;
+				this.M = M;
+				this.N = N;
+				this.O = O;
+			}
+			var hundredsIllions = [0, new H("cent", false, true, false, true), new H("ducent", false, false, false, true), new H("trecent", true, false, false, true), new H("quadringent", true, false, false, true), new H("quingent", true, false, false, true), new H("sescent", false, false, false, true), new H("septingent", false, false, false, true), new H("octingent", false, true, true, false, false), new H("nongent")];
+			var illi = function (n) {
+				var hundreds = Math.floor(n / 100);
+				var tens = Math.floor((n % 100) / 10);
+				var ones = n % 10;
+				var prefix = "";
+				if (n < 20) {
+					prefix = irregulars[n];
+				} else if (hundreds === 0 && ones === 0) {
+					prefix = tensIllions[tens].pre;
+				} else if (tens === 0 && ones === 0) {
+					prefix = hundredsIllions[hundreds].pre;
+				} else if (ones === 0) {
+					prefix = tensIllions[tens].pre;
+					if (hundredsIllions[hundreds].O) {
+						prefix += tensIllions[tens].end
+					}
+					prefix += hundredsIllions[hundreds].pre;
+				} else if (tens === 0) {
+					prefix = onesIllions[ones].pre;
+					if (onesIllions[ones].special === "SX" && hundredsIllions[hundreds].S) {
+						prefix += onesIllions[ones].SM;
+					} else if (onesIllions[ones].special === "SX" && hundredsIllions[hundreds].X) {
+						prefix += onesIllions[ones].XN;
+					} else if (onesIllions[ones].special === "MN" && hundredsIllions[hundreds].M) {
+						prefix += onesIllions[ones].SM;
+					} else if (onesIllions[ones].special === "MN" && hundredsIllions[hundreds].N) {
+						prefix += onesIllions[ones].XN;
+					} else if (onesIllions[ones].special === "O" && hundredsIllions[hundreds].O) {
+						prefix += "o";
+					}
+					prefix += hundredsIllions[hundreds].pre;
+				} else {
+					prefix = onesIllions[ones].pre;
+					if (onesIllions[ones].special === "SX" && tensIllions[tens].S) {
+						prefix += onesIllions[ones].SM;
+					} else if (onesIllions[ones].special === "SX" && tensIllions[tens].X) {
+						prefix += onesIllions[ones].XN;
+					} else if (onesIllions[ones].special === "MN" && tensIllions[tens].M) {
+						prefix += onesIllions[ones].SM;
+					} else if (onesIllions[ones].special === "MN" && tensIllions[tens].N) {
+						prefix += onesIllions[ones].XN;
+					} else if (onesIllions[ones].special === "O" && tensIllions[tens].O) {
+						prefix += "o";
+					}
+					prefix += tensIllions[tens].pre;
+					if (hundreds != 0) {
+						if (hundredsIllions[hundreds].O) {
+							prefix += tensIllions[tens].end
+						}
+						prefix += hundredsIllions[hundreds].pre;
+					}
+				}
+				return prefix + "illi";
+			}
+			var illion = function (n) {
+				var name = "on";
+				var i = 0;
+				while (n >= 1000 ** i) {
+					var m = Math.floor(n / (1000 ** i)) % 1000;
+					name = illi(m) + name;
+					i++;
+				}
+				return name;
+			}
+			var englishNumber = function (number, start = 0) {
+				var name = "";
+				var num = Math.abs(number);
+				var n = Math.floor(num);
+				if (n === 0) {
+					name = "zero";
+				} else {
+					var i = start;
+					while (n >= 1000 ** (i - start)) {
+						var m = Math.floor(n / (1000 ** (i - start))) % 1000;
+						if (m != 0) {
+							if (name != "") {
+								name = " " + name;
+								if (name.substring(1, 4) != "and") {
+									name = "," + name;
+								}
+							}
+							if (i === 1) {
+								name = " thousand" + name;
+							} else if (i > 1) {
+								name = " " + illion(i - 1) + name;
+							}
+							name = triple(m) + name;
+							if (i === 0 && m < 100 && n >= 1000) {
+								name = "and " + name;
+							}
+						}
+						i++;
+					}
+				}
+				if (n != num) {
+					name += " point";
+					var i = 0;
+					while (num != Math.floor(num * (10 ** i)) / (10 ** i)) {
+						name += " " + single[Math.floor(num * (10 ** (i + 1))) % 10];
+						i++;
+					}
+				}
+				if (number < 0) {
+					name = "negative " + name;
+				}
+				return name;
+			}
+			var ENG = function (numString) {
+				var num = Number(numString);
+				if (num < 10e+15) {
+					return englishNumber(num);
+				} else {
+					var name = "";
+					for (var i = 0; i < Math.ceil(numString.length / 15); i++) {
+						var no = Number(numString.substring(Math.max(numString.length - (i + 1) * 15, 0), numString.length - i * 15));
+						var part = englishNumber(no, 5 * i);
+						if (part != "zero") {
+							if (name != "") {
+								name = " " + name;
+								if (name.substring(1, 4) != "and") {
+									name = "," + name;
+								}
+							}
+							name = part + name;
+							if (i === 0 && no < 100) {
+								name = "and " + name;
+							}
+						}
+					}
+					return name;
+				}
+			}
+			var go = function () {
+				var input = document.getElementById("num").value;
+				var neg = false;
+				if (input[0] === "-") {
+					input = input.substring(1);
+					if (input[0] != "0") {
+						neg = true;
+					}
+				}
+				var good = true;
+				if (input === "") {
+					good = false;
+				}
+				var input2 = input.split(".");
+				var decimal = "";
+				if (input2.length === 2) {
+					input = input2[0];
+					decimal = input2[1];
+					if (decimal === "") {
+						good = false;
+					}
+				} else if (input2.length > 2) {
+					good = false;
+				}
+				for (var i = 0; i < input.length; i++) {
+					var check = true;
+					if (input[i] === "0" && (i != 0 || input.length === 1) || input[i] === "1" || input[i] === "2" || input[i] === "3" || input[i] === "4" || input[i] === "5" || input[i] === "6" || input[i] === "7" || input[i] === "8" || input[i] === "9") {
+						check = false;
+					}
+					if (check) {
+						good = false;
+						break;
+					}
+				}
+				if (decimal != "") {
+					for (var i = 0; i < decimal.length; i++) {
+						if (!(decimal[i] === "0" || decimal[i] === "1" || decimal[i] === "2" || decimal[i] === "3" || decimal[i] === "4" || decimal[i] === "5" || decimal[i] === "6" || decimal[i] === "7" || decimal[i] === "8" || decimal[i] === "9")) {
+							good = false;
+							break;
+						}
+					}
+				}
+				if (good) {
+					var output = ENG(input);
+					if (neg) {
+						output = "Negative " + output;
+					}
+					if (decimal != "") {
+						output += " point"
+						for (var i = 0; i < decimal.length; i++) {
+							output += " " + single[Number(decimal[i])];
+						}
+					}
+					document.getElementById("result").innerHTML = output.substring(0, 1).toUpperCase() + output.substring(1);
+					var original = "";
+					if (neg) {
+						original = "-";
+					}
+					for (var i = 0; i < input.length; i++) {
+						original += input[i];
+						if ((input.length - i) % 3 === 1 && i != input.length - 1) {
+							original += ",<wbr>";
+						}
+					}
+					if (decimal != "") {
+						original += ".<wbr>" + decimal;
+					}
+					document.getElementById("numresult").innerHTML = original;
+				} else {
+					document.getElementById("result").innerHTML = "{Invalid number}";
+					document.getElementById("numresult").innerHTML = "&nbsp;";
+				}
+			}
+			console.log("For the nth '-illion' word, use illion(n).");
+			//More
+			var getLast = function (str, n) {
+				return str.substring(str.length - n);
+			}
+			var removeLast = function(str, n) {
+				return str.substring(0, str.length - n);
+			}
+			var ORD = function (numString) {
+				var str = ENG(numString);
+				if (getLast(str, 3) === "one") {
+					return removeLast(str, 3) + "first";
+				} else if (getLast(str, 2) === "wo") {
+					return removeLast(str, 3) + "second";
+				} else if (getLast(str, 2) === "ee") {
+					return removeLast(str, 5) + "third";
+				} else if (getLast(str, 2) === "ve") {
+					return removeLast(str, 2) + "fth";
+				} else if (getLast(str, 1) === "t") {
+					return str + "h";
+				} else if (getLast(str, 3) === "ine") {
+					return removeLast(str, 1) + "th";
+				} else if (getLast(str, 1) === "y") {
+					return removeLast(str, 1) + "ieth";
+				} else {
+					return str + "th";
+				}
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<center>
+			<p id="head">English Numbers</p>
+			<p id="in"><input id="num" type="text" placeholder="Enter numerals here"> &nbsp; <span id="btn" onClick="go()">Go</span></p>
+			<p id="result">The name of the number will appear here.</p>
+			<p id="numresult">It's that simple.</p>
+		</center>
+	</body>
+</html>
