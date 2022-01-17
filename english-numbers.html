@@ -300,7 +300,7 @@
 					}
 					for (var i = 0; i < input.length; i++) {
 						original += input[i];
-						if ((input.length - i) % 3 === 1 && i != input.length - 1) {
+						if ((input.length - i) % 3 === 1 && i != input.length - 1 && input.length != 4) {
 							original += ",<wbr>";
 						}
 					}
@@ -310,7 +310,7 @@
 					document.getElementById("numresult").innerHTML = original;
 				} else {
 					document.getElementById("result").innerHTML = "{Invalid number}";
-					document.getElementById("numresult").innerHTML = "&nbsp;";
+					document.getElementById("numresult").innerHTML = "Try again.";
 				}
 			}
 			console.log("For the nth '-illion' word, use illion(n).");
