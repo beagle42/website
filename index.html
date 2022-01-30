@@ -82,7 +82,7 @@
 				font-size: 3.6vmin;
 				padding: 3.6vmin 2.4vmin;
 				box-sizing: border-box;
-				font-family: Arial, Emoji, sans-serif;
+				font-family: Arial, Emoji, Symbols, Symbols2, sans-serif;
 			}
 			.tile:hover {
 				background-color: var(--colour-two);
@@ -153,7 +153,7 @@
 			var start = function () {
 				var now = new Date();
 				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
-				//var hol = holiday(10, 12, 2021, 15);
+				//var hol = holiday(26, 12, 2022, 15);
 				if (hol != Holidays.length) {
 					document.getElementById("greeting").innerHTML = Holidays[hol].message;
 					document.getElementById("greeting").title = Holidays[hol].name;
@@ -188,12 +188,18 @@
 				<div class="tilebox justify">
 					<a class="tile justify" href="dials.html">&#128339;<br>Dials<br>(a clock)</a>
 				</div>
-				<!--<div class="tilebox justify">
-					<a class="tile justify" href="equation-of-time.html">&#128200;<br>Equation<br>of Time</a>
-				</div>
 				<div class="tilebox justify">
 					<a class="tile justify" href="horoscope.html">&#9811;<br>Horoscope<br>Generator</a>
-				</div>-->
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="english-numbers.html">&#128290;&#10140;&#128288;<br>English<br>Numbers</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="zodiacal-clock.html">&#127774;<br>Zodiacal<br>Clock</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="equation-of-time.html">&#128200;<br>Equation<br>of Time</a>
+				</div>
 			</div>
 			<div id="quotebox">
 				<p id="quote">&#8220;Painfully boring.&#8221;</p>
