@@ -8,6 +8,8 @@ var mod = function (num, p = 360) {
 var floor = Math.floor;
 var ceil = Math.ceil;
 var SqRt = Math.sqrt;
+var abs = Math.abs;
+var log = Math.log;
 var Pi = Math.PI;
 var TwoPi = 2 * Math.PI;
 var deg = function (radians) {
