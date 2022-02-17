@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<title>U.S. Stars</title>
+		<style>
+			* {
+				font-family: Arial, sans-serif;
+			}
+			body {
+				background-color: #dddddd;
+				margin: 0;
+			}
+			#head {
+				font-size: 40px;
+				padding: 0 80px;
+			}
+			#descript {
+				font-size: 15px;
+				padding: 0 150px;
+			}
+			#options {
+				font-size: 25px;
+			}
+			input[type=number] {
+				border-radius: 10px;
+				padding: 5px 10px;
+				border: none;
+			}
+			input[type=number] {
+				background-color: white;
+				font-size: inherit;
+			}
+			input[type=number] {
+				width: 100px;
+			}
+			input[type=number]:focus {
+				outline: 1px solid black;
+			}
+			input[type=checkbox], label {
+				cursor: pointer;
+			}
+			#patterns {
+				font-size: 20px;
+				margin: 0.5em 0;
+			}
+			#patHead {
+				text-align: center;
+				font-size: 20px;
+				margin: 0.5em 0;
+			}
+			.justify {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#notes {
+				text-align: center;
+				font-size: 15px;
+			}
+			#patBox {
+				background-color: #cccccc;
+				border-radius: 10px;
+				padding: 10px;
+			}
+		</style>
+	</head>
+	<body onload="start()">
+		<script src="scripts/maths.js"></script>
+		<script>
+			var ctx, canvas, Height;
+			//Basics
+			var flagWToH = 19 / 10;
+			var jackWToH = (2 / 5) * flagWToH / (7 / 13);
+			var white = "#ffffff";
+			var red = "#B31942";
+			var blue = "#0A3161";
+			//Shorthand
+			var gramAng = 36;
+			var gonAng = 108;
+			var drawStar = function (x, y, outerRad) {
+				var innerRad = outerRad * sin(gramAng / 2) / sin(gonAng / 2);
+				var a = 360 / 5;
+				ctx.beginPath();
+				ctx.moveTo(x, y - outerRad);
+				ctx.lineTo(x + innerRad * sin(a / 2), y - innerRad * cos(a / 2));
+				for (var i = 1; i < 5; i++) {
+					ctx.lineTo(x + outerRad * sin(i * a), y - outerRad * cos(i * a));
+					ctx.lineTo(x + innerRad * sin((i + 0.5) * a), y - innerRad * cos((i + 0.5) * a));
+				}
+				ctx.closePath();
+				ctx.fill();
+			}
+			//Patterns
+			var patterns = [];
+			var Pattern = function (name, seedMax, makePattern, drawPattern, onStart = true) {
+				this.name = name;
+				this.seedMax = seedMax;
+				this.makePattern = makePattern;
+				this.drawPattern = drawPattern;
+				this.onStart = onStart;
+			}
+			var ProvArrange = function (works, w, h, sq) {
+				this.works = works;
+				this.w = w;
+				this.h = h;
+				this.sq = sq;
+			}
+			var Arrange = function (patIndex, w, h, sq) {
+				this.patIndex = patIndex;
+				this.w = w;
+				this.h = h;
+				this.sq = sq;
+			}
+			var getSq = function (widthDivs, heightDivs) {
+				return abs(log((jackWToH / widthDivs) / (1 / heightDivs)));
+			}
+			patterns[0] = new Pattern( // Square
+				"Square",
+				function (stars) {
+					return stars;
+				},
+				function (stars, seed) {
+					var works = stars % seed === 0;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = stars / seed;
+						sq = getSq(w, h);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < stars; i++) {
+						var xUnit = (1 / w);
+						var yUnit = (1 / h);
+						var x = (i % w + 1/2) * xUnit;
+						var y = (floor(i / w) + 1/2) * yUnit;
+						list.push([x, y]);
+					}
+					return list;
+				}
+			);
+			patterns[1] = new Pattern( // Big rhombic
+				"Big rhombic",
+				function (stars) {
+					return ceil(stars / 2);
+				},
+				function (stars, seed) {
+					var works = (stars - seed) % (2 * seed - 1) === 0 && seed != 1 && stars >= 5;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = ((stars - seed) / (2 * seed - 1)) * 2 + 1;
+						sq = getSq(2 * w, h + 1);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < stars; i++) {
+						var xUnit = (1 / w);
+						var yUnit = (1 / (h + 1));
+						var posInDblRow = (i % (2 * w - 1));
+						var evenRow = floor(posInDblRow / w);
+						var row = floor(i / (2 * w - 1)) * 2 + evenRow;
+						var posInRow = posInDblRow % w;
+						var x = (posInRow + evenRow / 2 + 1 / 2) * xUnit;
+						var y = (row + 1) * yUnit;
+						list.push([x, y]);
+					}
+					return list;
+				}
+			);
+			patterns[2] = new Pattern( // Small rhombic
+				"Small rhombic",
+				function (stars) {
+					return ceil(stars / 2);
+				},
+				function (stars, seed) {
+					var works = (stars - seed) % (2 * seed + 1) === 0 && stars >= 4;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = ((stars - seed) / (2 * seed + 1)) * 2 + 1;
+						sq = getSq((w + 1) * 2, h + 1);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < stars; i++) {
+						var xUnit = (1 / (w + 1));
+						var yUnit = (1 / (h + 1));
+						var posInDblRow = i % (2 * w + 1);
+						var evenRow = 0;
+						if (posInDblRow >= w) {
+							evenRow = 1;
+						}
+						var row = floor(i / (2 * w + 1)) * 2 + evenRow;
+						var posInRow = posInDblRow - evenRow * w;
+						var x = (posInRow + (1 - evenRow) / 2 + 1 / 2) * xUnit;
+						var y = (row + 1) * yUnit;
+						list.push([x, y]);
+					}
+					return list;
+				}
+			);
+			patterns[3] = new Pattern( // Staggered columns
+				"Staggered columns",
+				function (stars) {
+					return ceil(stars / 2);
+				},
+				function (stars, seed) {
+					var works = stars % (2 * seed - 1) === 0 && seed != 1 && stars >= 3;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = stars / (2 * seed - 1) * 2;
+						sq = getSq(w * 2, h + 1);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				patterns[1].drawPattern
+			);
+			patterns[4] = new Pattern( // Staggered rows
+				"Staggered rows",
+				function (stars) {
+					return ceil(stars / 2);
+				},
+				function (stars, seed) {
+					var works = (stars - seed) % (2 * seed) === 0 && seed != 1;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = stars / seed;
+						sq = getSq(w * 2 + 1, h + 1);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < stars; i++) {
+						var xUnit = 1 / (2 * w + 1) * 2;
+						var yUnit = 1 / (h + 1);
+						var evenRow = floor((i % (2 * w)) / w);
+						var row = floor(i / w);
+						var posInRow = i % w;
+						var x = (posInRow + evenRow / 2 + 1 / 2) * xUnit;
+						var y = (row + 1) * yUnit;
+						list.push([x, y]);
+					}
+					return list;
+				}
+			);
+			patterns[5] = new Pattern( // Staggered both
+				"Staggered both",
+				function (stars) {
+					return ceil(stars / 2);
+				},
+				function (stars, seed) {
+					var works = stars % (2 * seed) === 0 && seed != 1 && stars / seed > 2;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = stars / seed;
+						sq = getSq(w * 2 + 1, h + 1);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				patterns[4].drawPattern
+			);
+			patterns[6] = new Pattern(
+				"One short row",
+				function (stars) {
+					return ceil((stars + 1) / 4);
+				},
+				function (stars, seed) {
+					var works = (stars + 1) % seed === 0 && seed != 1;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = (stars + 1) / seed;
+						sq = getSq(w, h);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < stars + 1; i++) {
+						var xUnit = (1 / w);
+						var yUnit = (1 / h);
+						var row = floor(i / w);
+						var posInRow = i % w;
+						var shortRowNo = ceil(h / 2) - 1;
+						var shortRow = 0;
+						if (row === shortRowNo) {
+							shortRow = 1;
+						}
+						var x = (posInRow + + shortRow / 2 + 1/2) * xUnit;
+						var y = (row + 1/2) * yUnit;
+						if (shortRow === 0 || posInRow != w - 1) {
+							list.push([x, y]);
+						}
+					}
+					return list;
+				},
+				false
+			);
+			patterns[7] = new Pattern(
+				"Big capped",
+				function (stars) {
+					return ceil((stars - 2) / 4) + 1;
+				},
+				function (stars, seed) {
+					var works = (stars - 2) % (seed - 1) === 0 && seed != 1 && stars > 2;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = (stars - 2) / (seed - 1);
+						sq = getSq(w, h);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < h * w; i++) {
+						var xUnit = (1 / w);
+						var yUnit = (1 / h);
+						var row = floor(i / w);
+						var posInRow = i % w;
+						var shortRow = 1;
+						if (row === 0 || row === h - 1) {
+							shortRow = 0;
+						}
+						var x = (posInRow + shortRow / 2 + 1/2) * xUnit;
+						var y = (row + 1/2) * yUnit;
+						if (shortRow === 0 || posInRow != w - 1) {
+							list.push([x, y]);
+						}
+					}
+					return list;
+				},
+				false
+			);
+			patterns[8] = new Pattern(
+				"Small capped",
+				function (stars) {
+					return ceil((stars + 2) / 4) - 1;
+				},
+				function (stars, seed) {
+					var works = (stars + 2) % (seed + 1) === 0 && stars > 2;
+					var w = 0;
+					var h = 0;
+					var sq = 0;
+					if (works) {
+						w = seed;
+						h = (stars + 2) / (seed + 1);
+						sq = getSq(w + 1, h);
+					}
+					return new ProvArrange(works, w, h, sq);
+				},
+				function (stars, w, h) {
+					var list = [];
+					for (var i = 0; i < stars + 2; i++) {
+						var xUnit = (1 / (w + 1));
+						var yUnit = (1 / h);
+						var row = floor(i / (w + 1));
+						var posInRow = i % (w + 1);
+						var shortRow = 0;
+						if (row === 0 || row === h - 1) {
+							shortRow = 1;
+						}
+						var x = (posInRow + shortRow / 2 + 1/2) * xUnit;
+						var y = (row + 1/2) * yUnit;
+						if (shortRow === 0 || posInRow != w) {
+							list.push([x, y]);
+						}
+					}
+					return list;
+				},
+				false
+			);
+			var getBestArrange = function (stars, patsToUse) {
+				var arrangements = [];
+				for (var i = 0; i < patsToUse.length; i++) {
+					for (var seed = 1; seed <= patterns[patsToUse[i]].seedMax(stars); seed++) {
+						var prov = patterns[patsToUse[i]].makePattern(stars, seed);
+						if (prov.works) {
+							arrangements.push(new Arrange(patsToUse[i], prov.w, prov.h, prov.sq));
+						}
+					}
+				}
+				//console.log(arrangements);
+				var bestArrange = 0;
+				for (var j = 0; j < arrangements.length; j++) {
+					if (arrangements[j].sq < arrangements[bestArrange].sq) {
+						bestArrange = j;
+					}
+				}
+				if (arrangements.length != 0) {
+					return patterns[arrangements[bestArrange].patIndex].drawPattern(stars, arrangements[bestArrange].w, arrangements[bestArrange].h);
+				} else {
+					return 0;
+				}
+			}
+			var drawFlag = function (stars, patsToUse) {
+				var list = getBestArrange(stars, patsToUse);
+				var h = Height;
+				var w = h * flagWToH;
+				var jackH = 7 / 13 * h;
+				var jackW = 2 / 5 * w;
+				canvas.height = h;
+				canvas.width = w;
+				ctx.fillStyle = red;
+				ctx.fillRect(0, 0, w, h);
+				//stripes
+				ctx.fillStyle = white;
+				for (var i = 0; i < 6; i++) {
+					ctx.fillRect(0, 2 / 13 * h * (i + 1 / 2), w, h / 13);
+				}
+				//canton
+				ctx.fillStyle = blue;
+				ctx.fillRect(0, 0, jackW, jackH);
+				//Stars
+				ctx.fillStyle = white;
+				var starOuterRad = 2/5 * 1/13 * h;
+				if (list != 0) {
+					for (var i = 0; i < list.length; i++) {
+						drawStar(list[i][0] * jackW, list[i][1] * jackH, starOuterRad);
+					}
+				}
+			}
+			var go = function () {
+				var stars = Number(document.getElementById("stars").value);
+				if (!Number.isInteger(stars) || !(stars >= 1) || !(stars <= 1000)) {
+					stars = 0;
+				}
+				var patsToUse = [];
+				for (var i = 0; i < patterns.length; i++) {
+					if (document.getElementById("pattern" + i).checked) {
+						patsToUse.push(i);
+					}
+				}
+				drawFlag(stars, patsToUse);
+				setTimeout(go, 500);
+			}
+			var start = function () {
+				var result = "";
+				for (var i = 0; i < patterns.length; i++) {
+					if (i != 0) {
+						result += "<br>";
+					}
+					result += '<input type="checkbox" id="pattern' + i + '"';
+					if (patterns[i].onStart) {
+						result += ' checked';
+					}
+					result += '><label for="pattern' + i + '"> ' + "'" + patterns[i].name + "'</label>";
+				}
+				document.getElementById("patterns").innerHTML = result;
+				canvas = document.getElementById("flag");
+				ctx = canvas.getContext("2d");
+				Height = window.innerWidth / 4;
+				go();
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<center>
+			<p id="head">Stars on the U.S. Flag</p>
+			<p id="descript"></p>
+			<canvas id="flag"></canvas>
+			<p id="options">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
+		</center>
+		<div class="justify">
+			<div id="patBox">
+				<p id="patHead">Allowed patterns:</p>
+				<p id="patterns"></p>
+			</div>
+		</div>
+		<p id="notes"><b>Notes:</b>
+			<br>This is not supposed to be an accurate representaion of any actual historical (or future) flags.
+			<br>The designs are not preselected; all the maths to find possible configurations and then determine the best one is done here and now on your device.
+			<br>I couldn't think of very descriptive names for the different patterns so just experiment if you're interested.
+			<br>Yes, the stars are always the same size.
+		</p>
+	</body>
+</html>

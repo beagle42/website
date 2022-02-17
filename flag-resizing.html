@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<title>Flag Resizing</title>
+		<style>
+			* {
+				font-family: Arial, sans-serif;
+			}
+			body {
+				background-color: #dddddd;
+				margin: 0;
+			}
+			#head {
+				font-size: 40px;
+				padding: 0 80px;
+			}
+			#descript, #note {
+				font-size: 15px;
+				padding: 0 150px;
+			}
+			#options {
+				font-size: 20px;
+			}
+			input, select, .btn {
+				border-radius: 10px;
+				padding: 5px 10px;
+				border: none;
+			}
+			input, select {
+				background-color: white;
+				font-size: inherit;
+			}
+			input {
+				width: 60px;
+			}
+			input:focus, select:focus {
+				outline: 1px solid black;
+			}
+			select, .btn {
+				cursor: pointer;
+			}
+			.btn {
+				background-color: #aaaaaa;
+			}
+			.btn:hover {
+				background-color: #888888;
+			}
+			.btn:active {
+				background-color: #aaaaaa;
+			}
+		</style>
+	</head>
+	<body onLoad="start()">
+		<script src="scripts/maths.js"></script>
+		<script>
+			var ctx, canvas, white, red, blue, Height;
+			var phi = (1 + SqRt(5)) / 2;
+			//Shorthand
+			var White = function () {
+				ctx.fillStyle = white;
+			}
+			var Red = function () {
+				ctx.fillStyle = red;
+			}
+			var Blue = function () {
+				ctx.fillStyle = blue;
+			}
+			var drawStar = function (x, y, points, outerRad, innerRad) {
+				var a = 360 / points;
+				ctx.beginPath();
+				ctx.moveTo(x, y - outerRad);
+				ctx.lineTo(x + innerRad * sin(a / 2), y - innerRad * cos(a / 2));
+				for (var i = 1; i < points; i++) {
+					ctx.lineTo(x + outerRad * sin(i * a), y - outerRad * cos(i * a));
+					ctx.lineTo(x + innerRad * sin((i + 0.5) * a), y - innerRad * cos((i + 0.5) * a));
+				}
+				ctx.closePath();
+				ctx.fill();
+			}
+			var ausStar = function (x, y, radius, points = 7) {
+				drawStar(x, y, points, radius, 4 / 9 * radius);
+			}
+			var gramAng = 36;
+			var gonAng = 108;
+			var pentagram = function (x, y, width) {
+				var outerRad = width / (2 * cos(gramAng / 2));
+				var innerRad = width * tan(gramAng / 2) / (2 * sin(gonAng / 2));
+				drawStar(x, y, 5, outerRad, innerRad);
+			}
+			var nzStar = function (x, y, width, border) {
+				White();
+				pentagram(x, y, width + 2 * border / tan(gramAng / 2));
+				Red();
+				pentagram(x, y, width);
+			}
+			var go = function () {
+				var country = document.getElementById("flag").value;
+				var inputH = Number(document.getElementById("h").value);
+				var inputW = Number(document.getElementById("w").value);
+				var ratio = inputW / inputH;
+				var valid = true;
+				if (!(ratio >= 1 && ratio <= 4)) {
+					ratio = 2;
+					valid = false;
+				}
+				var h = Height;
+				var w = h * ratio;
+				canvas.height = h;
+				canvas.width = w;
+				//colours
+				white = "#ffffff";
+				blue = "#012169";
+				red = "#c8102e";
+				if (country === "au") {
+					red = "#e4002b";
+				}
+				//background
+				Blue();
+				ctx.fillRect(0, 0, w, h);
+				//Union Jack
+				var jackH = h;
+				var jackW = w;
+				if (country != "uk") {
+					jackH /= 2;
+					jackW /= 2;
+				}
+				var jackU = jackH / 30;
+				var ang = atan(ratio);
+				var andW = jackU * 3;
+				var patW = jackU * 2;
+				//St. Andrew's
+				var crossXwise = andW / cos(ang);
+				var crossYwise = andW / sin(ang);
+				White();
+				ctx.beginPath();
+				ctx.moveTo(0, 0);
+				ctx.lineTo(crossXwise, 0);
+				ctx.lineTo(jackW, jackH - crossYwise);
+				ctx.lineTo(jackW, jackH);
+				ctx.lineTo(jackW - crossXwise, jackH);
+				ctx.lineTo(0, crossYwise);
+				ctx.closePath();
+				ctx.fill();
+				ctx.beginPath();
+				ctx.moveTo(jackW, 0);
+				ctx.lineTo(jackW, crossYwise);
+				ctx.lineTo(crossXwise, jackH);
+				ctx.lineTo(0, jackH);
+				ctx.lineTo(0, jackH - crossYwise);
+				ctx.lineTo(jackW - crossXwise, 0);
+				ctx.closePath();
+				ctx.fill();
+				//St. Patrick's
+				Red();
+				crossXwise = patW / cos(ang);
+				crossYwise = patW / sin(ang);
+				ctx.beginPath();
+				ctx.moveTo(0, 0);
+				ctx.lineTo(jackW / 2, jackH / 2);
+				ctx.lineTo(jackW / 2 - crossXwise, jackH / 2);
+				ctx.lineTo(0, crossYwise);
+				ctx.closePath();
+				ctx.fill();
+				ctx.beginPath();
+				ctx.moveTo(jackW, 0);
+				ctx.lineTo(jackW / 2, jackH / 2);
+				ctx.lineTo(jackW / 2, jackH / 2 - crossYwise);
+				ctx.lineTo(jackW - crossXwise, 0);
+				ctx.closePath();
+				ctx.fill();
+				ctx.beginPath();
+				ctx.moveTo(jackW, jackH);
+				ctx.lineTo(jackW / 2, jackH / 2);
+				ctx.lineTo(jackW / 2 + crossXwise, jackH / 2);
+				ctx.lineTo(jackW, jackH - crossYwise);
+				ctx.closePath();
+				ctx.fill();
+				ctx.beginPath();
+				ctx.moveTo(0, jackH);
+				ctx.lineTo(jackW / 2, jackH / 2);
+				ctx.lineTo(jackW / 2, jackH / 2 + crossYwise);
+				ctx.lineTo(crossXwise, jackH);
+				ctx.closePath();
+				ctx.fill();
+				//St. Georges's
+				White();
+				ctx.fillRect(0, jackH / 2 - 5 * jackU, jackW, 10 * jackU);
+				ctx.fillRect(jackW / 2 - 5 * jackU, 0, 10 * jackU, jackH);
+				Red();
+				ctx.fillRect(0, jackH / 2 - 3 * jackU, jackW, 6 * jackU);
+				ctx.fillRect(jackW / 2 - 3 * jackU, 0, 6 * jackU, jackH);
+				//Australian stars
+				if (country === "au") {
+					var mult = 1;
+					var SCwidth = 3 / 2;
+					if (ratio < SCwidth) {
+						mult = ratio / SCwidth;
+					}
+					var properH = h * mult;
+					var properW = properH * 2;
+					var baselineX = w * 3 / 4;
+					var baselineY = h / 2;
+					Red();
+					//ctx.fillRect(baselineX - properH * 2 / 3 / 2, baselineY - properH / 2, properH * 2 / 3, properH);
+					White();
+					ausStar(w / 4, h * 3 / 4, h * 3 / 20);
+					ausStar(baselineX, baselineY + 2 / 6 * properH, h / 14);
+					ausStar(baselineX - 1 / 8 * properW, baselineY - 1 / 16 * properH, h / 14);
+					ausStar(baselineX, baselineY - 2 / 6 * properH, h / 14);
+					ausStar(baselineX + 1 / 9 * properW, baselineY - 31 / 240 * properH, h / 14);
+					ausStar(baselineX + 1 / 20 * properW, baselineY + 1 / 24 * properH, h / 24, 5);
+				}
+				//NZ stars
+				if (country === "nz") {
+					var mult = 1;
+					var SCwidth = 3 / 2;
+					if (ratio < SCwidth) {
+						mult = ratio / SCwidth;
+					}
+					var nzU = h / 120;
+					var adjnzU = nzU * mult;
+					var baselineX = w * 3 / 4;
+					var baselineY = h / 2;
+					var intsctY = baselineY - 12 * adjnzU;
+					nzStar(baselineX, baselineY + 36 * adjnzU, 14 * nzU, nzU);
+					nzStar(baselineX - 28 * adjnzU * sin(82), intsctY + 28 * adjnzU * cos(82), 12 * nzU, nzU);
+					nzStar(baselineX, baselineY - 36 * adjnzU, 12 * nzU, nzU);
+					nzStar(baselineX + 24 * adjnzU * sin(82), intsctY - 24 * adjnzU * cos(82), 10 * nzU, nzU);
+				}
+				//Invalid
+				if (!valid) {
+					ctx.fillStyle = "rgba(128, 128, 128, 0.7)";
+					ctx.fillRect(0, 0, w, h);
+				}
+				//repeat
+				setTimeout(go, 100);
+			}
+			var start = function () {
+				canvas = document.getElementById("jack");
+				ctx = canvas.getContext("2d");
+				Height = window.innerWidth / 4 - 10;
+				go();
+			}
+			var set = function (h, w) {
+				document.getElementById("h").value = h;
+				document.getElementById("w").value = w;
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<center>
+			<p id="head">Flag Resizing</p>
+			<p id="descript">So I was watching the Tokyo 2020 Olympics one day, and obviously the first thing I noticed was the flags. All the national flags used in the Olympics have a 2:3 height to length ratio, so the Australian Flag, which properly has a 1:2 aspect ratio, must have been compressed. But it can't just be squashed; that would make everything look wrong. Instead it must be adapted to the new size. So I made this thing to do that for a whole range of aspect ratios. I included the NZ and UK flags too because they're of similar designs</p>
+			<canvas id="jack"></canvas>
+			<p id="options">
+				Flag:
+				<select id="flag">
+					<option value="au">Australia</option>
+					<option value="nz">New Zealand</option>
+					<option value="uk">United Kingdom</option>
+				</select>
+				&nbsp; &nbsp; Aspect ratio:
+				<input type="number" min="1" id="h" value="100"> : <input type="number" min="1" id="w" value="200">
+				&nbsp; &nbsp;
+				<span class="btn" onclick="set(1,2)">1:2</span>
+				<span class="btn" onclick="set(3,5)">3:5</span>
+				<span class="btn" onclick="set(1,phi)">1:&#966;</span>
+				<span class="btn" onclick="set(2,3)">2:3</span>
+				<span class="btn" onclick="set(1,1)">1:1</span>
+			</p>
+			<p id="note">N.B. This is not supposed to be an accurate representaion of any actual flags.</p>
+		</center>
+	</body>
+</html>
