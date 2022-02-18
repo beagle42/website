@@ -47,6 +47,7 @@
 			#patterns {
 				font-size: 20px;
 				margin: 0.5em 0;
+				line-height: 1.5;
 			}
 			#patHead {
 				font-size: 20px;
@@ -425,14 +426,18 @@
 						bestArrange = j;
 					}
 				}
+				var list = 0;
+				var patUsed = -1;
 				if (arrangements.length != 0) {
-					return patterns[arrangements[bestArrange].patIndex].drawPattern(stars, arrangements[bestArrange].w, arrangements[bestArrange].h);
-				} else {
-					return 0;
+					patUsed = arrangements[bestArrange].patIndex;
+					list = patterns[patUsed].drawPattern(stars, arrangements[bestArrange].w, arrangements[bestArrange].h);
 				}
+				return {list: list, patUsed: patUsed};
 			}
 			var drawFlag = function (stars, patsToUse) {
-				var list = getBestArrange(stars, patsToUse);
+				var configuration = getBestArrange(stars, patsToUse);
+				console.log(configuration.patUsed);
+				var list = configuration.list;
 				var h = Height;
 				var w = h * flagWToH;
 				var jackH = 7 / 13 * h;
@@ -456,6 +461,17 @@
 					for (var i = 0; i < list.length; i++) {
 						drawStar(list[i][0] * jackW, list[i][1] * jackH, starOuterRad);
 					}
+				}
+				// Showing pattern used
+				for (var i = 0; i < patterns.length; i++) {
+					var fontColour = "#000000";
+					var underline = "none";
+					if (i === configuration.patUsed) {
+						fontColour = red;
+						underline = "underline";
+					}
+					//document.getElementById("patternLabel" + i).style.color = fontColour;
+					document.getElementById("patternLabel" + i).style.textDecoration = underline;
 				}
 			}
 			var go = function () {
@@ -482,7 +498,7 @@
 					if (patterns[i].onStart) {
 						result += ' checked';
 					}
-					result += '><label for="pattern' + i + '"> ' + "'" + patterns[i].name + "'</label>";
+					result += '><label for="pattern' + i + '"> <span id="patternLabel' + i + '">' + "'" + patterns[i].name + "'</span></label>";
 				}
 				document.getElementById("patterns").innerHTML = result;
 				canvas = document.getElementById("flag");
