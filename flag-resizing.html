@@ -20,11 +20,12 @@
 			}
 			#descript, #note {
 				font-size: 15px;
-				padding: 0 150px;
+				padding: 0 10vw;
 			}
 			#options {
 				font-size: 20px;
 				padding: 0 30px;
+				line-height: 2.5;
 			}
 			input, select, .btn {
 				border-radius: 10px;
@@ -52,6 +53,9 @@
 			}
 			.btn:active {
 				background-color: #aaaaaa;
+			}
+			.nobr {
+				white-space: nowrap;
 			}
 		</style>
 	</head>
@@ -261,20 +265,26 @@
 			<p id="descript">So I was watching the Tokyo 2020 Olympics one day, and obviously the first thing I noticed was the flags. All the national flags used in the Olympics have a 2:3 height to length ratio, so the Australian Flag, which properly has a 1:2 aspect ratio, must have been compressed. But it can't just be squashed; that would make everything look wrong. Instead it must be adapted to the new size. So I made this thing to do that for a whole range of aspect ratios. I included the NZ and UK flags too because they're of similar designs</p>
 			<canvas id="jack"></canvas>
 			<p id="options">
-				Flag:
-				<select id="flag">
-					<option value="au">Australia</option>
-					<option value="nz">New Zealand</option>
-					<option value="uk">United Kingdom</option>
-				</select>
-				&nbsp; &nbsp; Aspect ratio:
-				<input type="number" min="1" id="h" value="100"> : <input type="number" min="1" id="w" value="200">
+				<span class="nobr">
+					Flag:
+					<select id="flag">
+						<option value="au">Australia</option>
+						<option value="nz">New Zealand</option>
+						<option value="uk">United Kingdom</option>
+					</select>
+				</span>
 				&nbsp; &nbsp;
-				<span class="btn" onclick="set(1,2)">1:2</span>
-				<span class="btn" onclick="set(3,5)">3:5</span>
-				<span class="btn" onclick="set(1,phi)">1:&#966;</span>
-				<span class="btn" onclick="set(2,3)">2:3</span>
-				<span class="btn" onclick="set(1,1)">1:1</span>
+				<span class="nobr">Aspect ratio:
+					<input type="number" min="1" id="h" value="100"> : <input type="number" min="1" id="w" value="200">
+				</span>
+				&nbsp; &nbsp;
+				<span class="nobr">
+					<span class="btn" onclick="set(1,2)">1:2</span>
+					<span class="btn" onclick="set(3,5)">3:5</span>
+					<span class="btn" onclick="set(1,phi)">1:&#966;</span>
+					<span class="btn" onclick="set(2,3)">2:3</span>
+					<span class="btn" onclick="set(1,1)">1:1</span>
+				</span>
 			</p>
 			<p id="note">N.B. This is not supposed to be an accurate representaion of any actual flags.</p>
 		</center>
