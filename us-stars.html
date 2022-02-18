@@ -23,7 +23,8 @@
 				padding: 0 150px;
 			}
 			#options {
-				font-size: 25px;
+				font-size: 30px;
+				margin: 1.5em 0;
 			}
 			input[type=number] {
 				border-radius: 10px;
@@ -48,7 +49,6 @@
 				margin: 0.5em 0;
 			}
 			#patHead {
-				text-align: center;
 				font-size: 20px;
 				margin: 0.5em 0;
 			}
@@ -58,7 +58,6 @@
 				justify-content: center;
 			}
 			#notes {
-				text-align: center;
 				font-size: 15px;
 				padding: 0 30px;
 			}
@@ -66,6 +65,13 @@
 				background-color: #cccccc;
 				border-radius: 10px;
 				padding: 10px;
+			}
+			canvas {
+				display: block;
+				margin: auto;
+			}
+			.centred {
+				text-align: center;
 			}
 		</style>
 	</head>
@@ -481,7 +487,7 @@
 				document.getElementById("patterns").innerHTML = result;
 				canvas = document.getElementById("flag");
 				ctx = canvas.getContext("2d");
-				Height = window.innerWidth / 4;
+				Height = min(window.innerHeight / 2, 0.9 * window.innerWidth / flagWToH);
 				go();
 			}
 		</script>
@@ -490,19 +496,17 @@
 				<img src="images/logo.png" id="homeLogo">
 			</a>
 		</div>
-		<center>
-			<p id="head">Stars on the U.S. Flag</p>
-			<p id="descript"></p>
-			<canvas id="flag"></canvas>
-			<p id="options">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
-		</center>
+		<p id="head" class="centred">Stars on the U.S. Flag</p>
+		<p id="descript"></p>
+		<canvas id="flag"></canvas>
+		<p id="options" class="centred">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
 		<div class="justify">
 			<div id="patBox">
-				<p id="patHead">Allowed patterns:</p>
+				<p id="patHead" class="centred">Allowed patterns:</p>
 				<p id="patterns"></p>
 			</div>
 		</div>
-		<p id="notes"><b>Notes:</b>
+		<p id="notes" class="centred"><b>Notes:</b>
 			<br>This is not supposed to be an accurate representaion of any actual historical (or future) flags.
 			<br>The designs are not preselected; all the maths to find possible configurations and then determine the best one is done here and now on your device.
 			<br>I couldn't think of very descriptive names for the different patterns so just experiment if you're interested.
