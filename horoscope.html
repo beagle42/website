@@ -18,6 +18,7 @@
 			}
 			.p {
 				font-size: 30px;
+				line-height: 2.5;
 			}
 			#h1 {
 				font-size: 50px;
@@ -73,6 +74,9 @@
 			#disclaim {
 				display: none;
 				padding: 0 15px;
+			}
+			.nobr {
+				white-space: nowrap;
 			}
 		</style>
 	</head>
@@ -461,8 +465,12 @@
 			<p id="h3">Joshua the Divine of Joshua the Divine's Divinations presents a</p>
 			<p id="h1">Horoscope generator</p>
 			<p class="small">'Horoscope' as in the chart representing the heavens at the time and place of an event (usually a birth), not the reading of the supposed meanings of said chart.</p>
-			<p class="p">Time: <input type="number" min="0" max="23" id="hour" placeholder="hh">&#8201;:&#8201;<input type="number" min="0" max="59" id="min" placeholder="mm"> &nbsp; <input type="number" min="1" max="31" id="day" placeholder="dd">&#8201;/&#8201;<input type="number" min="1" max="12" id="mon" placeholder="mm">&#8201;/&#8201;<input type="number" id="year" placeholder="yyyy"> &nbsp;(UTC+<input type="number" min="-12" max="14" id="timezone" placeholder="hh">)</p>
-			<p class="p">Place: <input type="number" min="-90" max="90" id="lat" placeholder="lat">, <input type="number" min="-180" max="180" id="long" placeholder="long">
+			<p class="p">Time:
+				<span class="nobr"><input type="number" min="0" max="23" id="hour" placeholder="hh">&#8201;:&#8201;<input type="number" min="0" max="59" id="min" placeholder="mm"></span> &nbsp; 
+				<span class="nobr"><input type="number" min="1" max="31" id="day" placeholder="dd">&#8201;/&#8201;<input type="number" min="1" max="12" id="mon" placeholder="mm">&#8201;/&#8201;<input type="number" id="year" placeholder="yyyy"></span> &nbsp;
+				<span class="nobr">(UTC+<input type="number" min="-12" max="14" id="timezone" placeholder="hh">)</span>
+			</p>
+			<p class="p nobr">Place: <input type="number" min="-90" max="90" id="lat" placeholder="lat">, <input type="number" min="-180" max="180" id="long" placeholder="long"></p>
 			<p class="small">(Please do not enter sensitive information into this or any other shady website.)</p>
 			<p class="p"><span class="button" onClick="begin()">Generate</span></p>
 		</div>
