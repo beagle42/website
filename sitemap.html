@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Literata&display=swap" rel="stylesheet">
+		<title>Joshua's website - site map</title>
+		<style>
+			* {
+				font-family: Arial, sans-serif;
+				text-size-adjust: none;
+			}
+			body {
+				margin: 0;
+			}
+			#header {
+				background-color: #ffd700;
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				font-size: 20px;
+				box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+				height: 80px;
+			}
+			#title {
+				line-height: 1;
+			}
+			#name {
+				font-family: 'Literata', Georgia, sans-serif;
+			}
+			#resultsbox {
+				margin-top: 140px;
+				margin-left: 150px;
+				width: 40vw;
+			}
+			.result {
+				margin: 40px 0;
+			}
+			.resulttitle {
+				font-size: 25px;
+				margin: 10px 0;
+			}
+			.resulttitlea:link, .resulttitlea:visited {
+				color: #0000cc;
+				text-decoration: none;
+				cursor: pointer;
+			}
+			.resulttitlea:link:active, .resulttitlea:visited:active {
+				color: #cc0000;
+			}
+			.resulttitlea:hover {
+				text-decoration: underline;
+			}
+			.blurb {
+				font-size: 15px;
+				color: #555555;
+				margin: 0;
+			}
+			@media only screen and (max-aspect-ratio: 1/1) {
+				#resultsbox {
+					margin-left: 20px;
+					width: 80vw;
+				}
+			}
+		</style>
+	</head>
+	<body onLoad="load()">
+		<script src="scripts/search-index.js"></script>
+		<script>
+			index.sort(function (a, b) {
+				let x = a.name.toLowerCase();
+				let y = b.name.toLowerCase();
+				if (x < y) {return -1;}
+				if (x > y) {return 1;}
+				return 0;
+			});
+			var load = function () {
+				var result = "";
+				for (var i = 0; i < index.length; i++) {
+					result += '<div class="result"><p class="resulttitle"><a class="resulttitlea" href="' + index[i].url + '">' + index[i].name + '</a></p><p class="blurb">' + index[i].blurb + '</p></div>';
+				}
+				document.getElementById("resultsbox").innerHTML = result;
+			}
+		</script>
+		<div id="header">
+			<div id="home">
+				<a href="index.html">
+					<img src="images/logo.png" id="homeLogo">
+				</a>
+			</div>
+			<div id="title">
+				<p id="titlep"><span id="name">Joshua&#8217;s website</span> &#8212; site map</p>
+			</div>
+		</div>
+		<div id="resultsbox"></div>
+	</body>
+</html>
