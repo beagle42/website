@@ -16,6 +16,7 @@ var index = [
 	new Page("Horoscope Generator", "Generates a horoscope chart for any time, date and location", "horoscope.html"),
 	new Page("English Numbers", "eg. It converts '42' to 'forty-two'. You get the idea.", "english-numbers.html"),
 	new Page("Zodiacal Clock", "An astronomical clock", "zodiacal-clock.html"),
-	new Page("Flag Resizing", "Resize the Autralian Flag to different aspect ratios", "flag-resizing.html"),
-	new Page("Stars on the U.S. Flag", "Change the number of stars on the U.S. Flag", "us-stars.html")
+	new Page("Flag Resizing", "Resize the Australian Flag to different aspect ratios", "flag-resizing.html"),
+	new Page("Stars on the U.S. Flag", "Change the number of stars on the U.S. Flag", "us-stars.html"),
+	new Page("Site map", "A list of every page on this site", "sitemap.html")
 ];
