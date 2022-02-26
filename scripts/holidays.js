@@ -561,7 +561,7 @@ var Holidays = [
 		"&#9770;"
 	),
 	new Hol(
-		"Eid al-Fitr",
+		"Eid al-Adha",
 		isInSunsetJDList(EidalAdha),
 		"&#9770;"
 	),
