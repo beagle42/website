@@ -307,6 +307,9 @@
 					if (works) {
 						w = seed;
 						h = (stars + 1) / seed;
+						if (h < 4) {
+							works = false;
+						}
 						sq = getSq(w, h);
 					}
 					return new ProvArrange(works, w, h, sq);
@@ -347,6 +350,9 @@
 						w = seed;
 						h = (stars - 2) / (seed - 1);
 						sq = getSq(w, h);
+						if (h < 4) {
+							works = false;
+						}
 					}
 					return new ProvArrange(works, w, h, sq);
 				},
@@ -385,6 +391,9 @@
 						w = seed;
 						h = (stars + 2) / (seed + 1);
 						sq = getSq(w + 1, h);
+						if (h < 4) {
+							works = false;
+						}
 					}
 					return new ProvArrange(works, w, h, sq);
 				},
