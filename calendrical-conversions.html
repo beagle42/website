@@ -275,7 +275,8 @@
 				}
 				return result;
 			}
-			var IslamicMonths = [0, "Mu&#7717;arram", "&#7778;afar", "Rab&#299;&#8216; al-Awwal", "Rab&#299;&#8216; ath-Th&#257;n&#299;", "Jum&#257;d&#225; al-&#362;l&#225;", "Jum&#257;d&#225; al-&#256;khirah", "Rajab", "Sha&#8216;b&#257;n", "Rama&#7693;&#257;n", "Shaww&#257;l", "Dh&#363; al-Qa&#8216;dah", "Dh&#363; al-&#7716;ijjah"];
+			//var IslamicMonths = [0, "Mu&#7717;arram", "&#7778;afar", "Rab&#299;&#8216; al-Awwal", "Rab&#299;&#8216; ath-Th&#257;n&#299;", "Jum&#257;d&#225; al-&#362;l&#225;", "Jum&#257;d&#225; al-&#256;khirah", "Rajab", "Sha&#8216;b&#257;n", "Rama&#7693;&#257;n", "Shaww&#257;l", "Dh&#363; al-Qa&#8216;dah", "Dh&#363; al-&#7716;ijjah"];
+			var IslamicMonths = [0, "Mu&#7717;arram", "&#7778;afar", "Rab&#299;&#8216; al-Awwal", "Rab&#299;&#8216; al-Th&#257;n&#299;", "Jum&#257;d&#225; al-Awwal", "Jum&#257;d&#225; al-Th&#257;n&#299;", "Rajab", "Sha&#8216;b&#257;n", "Rama&#7693;&#257;n", "Shaww&#257;l", "Dh&#363; al-Qa&#8216;dah", "Dh&#363; al-&#7716;ijjah"];
 			var IslamicDays = ["al-Ithnayn", "ath-Thul&#257;th&#257;"];
 			var JulianEmbols = [0, 12, 0, 0, 9, 0, 0, 3, 0, 12, 0, 0, 11, 0, 0, 8, 0, 0, 3];
 			var JLunarMonthsList = function (baseYear) {
@@ -1065,7 +1066,7 @@
 					}
 					return result;
 				},
-				dayInput(14, 30) + "/" + dayInput(14, 13, 1, "month") + "/" + yearInput(14)
+				dayInput(14, 30) + "&thinsp;/&thinsp;" + dayInput(14, 13, 1, "month") + "&thinsp;/&thinsp;" + yearInput(14)
 			);
 			cal[15] = new Cal(
 				"Simplified Julian Lunar",
@@ -1214,7 +1215,7 @@
 				DMYInput(17, IslamicMonths, 30)
 			);
 			cal[18] = new Cal(
-				"Bohra / Tabular Islamic (type IIIa)",
+				"Tabular Islamic (type IIIa) / Fatimid",
 				function (JD) {
 					var diff = 1948439;
 					var T = mod(JD - diff, 30 * 354 + 11);
