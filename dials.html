@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 1.0-->
+	<!--Version 1.1-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -34,7 +34,7 @@
 		<script>
 			var canvas, ctx, r, r2, i, radial;
 			var signs = ["\u2648", "\u2649", "\u264a", "\u264b", "\u264c", "\u264d", "\u264e", "\u264f", "\u2650", "\u2651", "\u2652", "\u2653"];
-			var week = ["\u2600", "\uD83C\uDF19", "\u2642", "\u263f", "\u2643", "\u2640", "\u2644"];
+			var week = ["\u2609", "\uD83C\uDF19", "\u2642", "\u263f", "\u2643", "\u2640", "\u2644"];
 			var seasons = ["\u2600", "\uD83C\uDF42", "\u2744", "\uD83C\uDF37"];
 			var phases = ["\uD83C\uDF11", "\uD83C\uDF12", "\uD83C\uDF13", "\uD83C\uDF14", "\uD83C\uDF15", "\uD83C\uDF16", "\uD83C\uDF17", "\uD83C\uDF18",];
 			var months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -251,7 +251,6 @@
 				var MOON = EcToEq(lam_m, beta_m, JD, LMST);
 				//Moon Phase:
 				var PHASE = mod(l3 - lam_sun, 360);
-				var phase = PHASE;
 				//Display
 				ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
 				ctx.strokeStyle = "#000000";
@@ -299,39 +298,39 @@
 				ctx.lineTo(0.9 * r * sin(6 * SECOND), -0.9 * r * cos(6 * SECOND));
 				ctx.stroke();
 				//Moon
-				rm = Math.ceil(r2);
-				var side = true;
-				if (phase > 180) {
-					side = false;
-					phase -= 180;
+				var moonRad = r2;
+				var moonPosY = -1 * radial;
+				ctx.fillStyle = "#000000";
+				if (PHASE === 180) {
+					ctx.fillStyle = "#ffffff";
 				}
-				var img = ctx.createImageData(2 * rm, 2 * rm);
-				for (var i = 0; i < img.data.length; i += 4) {
-					var pixel = Math.floor(i / 4);
-					var row = Math.floor(pixel / (2 * rm)) - rm;
-					pixel %= 2 * rm;
-					pixel -= rm;
-					var slice = Math.sqrt(rm * rm - row * row);
-					if (pixel > -1 * slice && pixel < slice) {
-						var divide = pixel > slice * cos(phase);
-						img.data[i + 3] = 255;
-						if (divide && side || !divide && !side) {
-							img.data[i] = 255;
-							img.data[i + 1] = 255;
-							img.data[i + 2] = 255;
-						}
+				ctx.beginPath();
+				ctx.arc(0, moonPosY, moonRad, 0, 2 * Math.PI);
+				ctx.fill();
+				ctx.fillStyle = "#ffffff";
+				if (mod(PHASE, 180) != 0) {
+					var side = PHASE < 180;
+					var side2 = -1;
+					if (side) {
+						side2 = 1;
 					}
+					var n = 1000;
+					ctx.beginPath();
+					ctx.moveTo(0, moonPosY - moonRad);
+					for (var i = 0; i <= n; i++) {
+						var moonY = i * 2 / n - 1;
+						var moonX = Math.sqrt(1 - moonY * moonY) * cos(PHASE) * side2;
+						ctx.lineTo(moonX * moonRad, moonPosY + moonY * moonRad);
+					}
+					ctx.arc(0, moonPosY, moonRad, 0.5 * Math.PI, 1.5 * Math.PI, side);
+					ctx.closePath();
+					ctx.fill();
 				}
-				var memory = document.createElement('canvas');
-				var mctx = memory.getContext("2d");
-				memory.width = rm * 2;
-				memory.height = rm * 2;
-				mctx.putImageData(img, 0, 0);
-				ctx.drawImage(memory, -1 * rm, -1 * radial - rm);
-				memory.remove();
+				ctx.fillStyle = "#000000";
+				ctx.strokeStyle = "#000000";
 				ctx.lineWidth = r / 50;
 				ctx.beginPath();
-				ctx.arc(0, -1 * radial, r2, 0, 2 * Math.PI);
+				ctx.arc(0, moonPosY, r2, 0, 2 * Math.PI);
 				ctx.stroke();
 				//Zodiac
 				ctx.translate(radial, 0);
@@ -385,9 +384,9 @@
 					ctx.lineTo(r2 * sin(i * 360 / 7), -1 * r2 * cos(i * 360 / 7));
 					ctx.stroke();
 					if (i === 2 || i === 3 || i === 5) {
-						ctx.font = r / 4 + "px Symbols, Emoji";
+						ctx.font = r / 4 + "px Symbols, Symbols2, Emoji";
 					} else {
-						ctx.font = r / 5 + "px Symbols, Emoji";
+						ctx.font = r / 5 + "px Symbols, Symbols2, Emoji";
 					}
 					ctx.fillText(week[i], 0.7 * r2 * sin((i + 0.5) * 360 / 7), -0.7 * r2 * cos((i + 0.5) * 360 / 7));
 				}
