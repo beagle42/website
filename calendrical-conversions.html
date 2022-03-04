@@ -740,11 +740,12 @@
 						Y--;
 						M += 12;
 					}
-					var A = 2 * floor(Y / 900);
-					var B = floor(mod(Y + 200, 900) / 400);
+					var E = floor(Y / 100);
+					var A = 2 * floor((E + 3) / 9);
+					var B = floor(mod(E + 3, 9) / 5);
 					var C = floor(30.6001 * (M + 1)) - 122;
-					var T = (Y - 1) * 365 + floor(Y / 4) - floor(Y / 100) + A + B;
-					return T + C + D + 1721484;
+					var T = Y * 365 + floor(Y / 4) - E + A + B;
+					return T + C + D + 1721119;
 				},
 				cal[1].display,
 				function (RJ) {
@@ -1325,7 +1326,7 @@
 				DMYInput(19, JLunarMonths, 30)
 			);
 			cal[20] = new Cal(
-				"Gregorian Lunar",
+				"fake Gregorian Lunar",
 				function (JD) {
 					var y = cal[0].fromJD(JD)[2];
 					var NYs = [];
