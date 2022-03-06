@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua Hunold, 25/6/2021-->
-	<!--Version 1.1.0, 30/9/2021-->
+	<!--Version 1.1.1, 6/3/2022-->
 	<!--How much more boring can I get?-->
 	<head>
 		<title>Calendrical Conversions</title>
@@ -401,9 +401,26 @@
 				return result;
 			}
 			var ByzantineMonths = [0, "September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August"];
+			var Ordinal = function (x) {
+				var y = x.toString();
+				var result = "th";
+				if (mod(x, 100) === 11 || mod(x, 100) === 12 || mod(x, 100) === 13) {
+					// Pass
+				} else if (mod(x, 10) === 1) {
+					result = "st"
+				} else if (mod(x, 10) === 2) {
+					result = "nd"
+				} else if (mod(x, 10) === 3) {
+					result = "rd"
+				}
+				return y + "<sup>" + result + "</sup>";
+			}
 			//General shorthand
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
+			}
+			var abbr = function (string, name) {
+				return '<span title="' + name + '">' + string + '</span>';
 			}
 			var show = function (a, id) {
 				var result = "";
@@ -490,7 +507,7 @@
 					return C + D + E + F - 1524.5 + 0.5;
 				},
 				function (G, JD) {
-					return [week[mod(JD, 7)] + "day,", G[0] + " " + months[G[1]] + " " + G[2] + " A.D.", "(" + date(G) + ")"];
+					return [week[mod(JD, 7)] + "day,", G[0] + " " + months[G[1]] + " " + G[2] + " " + abbr("A.D.", "anno Domini"), "(" + date(G) + ")"];
 				},
 				function (G) {
 					var result = false;
@@ -585,7 +602,7 @@
 					return floor(365.25 * Y) + 1824664 + (M - 1) * 30 + D;
 				},
 				function (C, JD) {
-					return [week[mod(JD, 7)] + "day,", C[0] + " " + copticMonths[C[1]] + " " + C[2] + " A.M.", "(" + date(C) + ")"];
+					return [week[mod(JD, 7)] + "day,", C[0] + " " + copticMonths[C[1]] + " " + C[2] + " " + abbr("A.M.", "anno martyrum"), "(" + date(C) + ")"];
 				},
 				function (C) {
 					var result = false;
@@ -803,7 +820,7 @@
 					return cal[0].toJD([GBC[0], GBC[1], 1 - GBC[2]]);
 				},
 				function (G, JD) {
-					return [week[mod(JD, 7)] + "day,", G[0] + " " + months[G[1]] + " " + G[2] + " B.C.", "(" + date(G) + "BC)"];
+					return [week[mod(JD, 7)] + "day,", G[0] + " " + months[G[1]] + " " + G[2] + " " + abbr("B.C.", "before Christ"), "(" + date(G) + "BC)"];
 				},
 				function (GBC) {
 					return cal[0].valid([GBC[0], GBC[1], 1 - GBC[2]]);
@@ -820,9 +837,7 @@
 				function (JBC) {
 					return cal[1].toJD([JBC[0], JBC[1], 1 - JBC[2]]);
 				},
-				function (J, JD) {
-					return [week[mod(JD, 7)] + "day,", J[0] + " " + months[J[1]] + " " + J[2] + " B.C.", "(" + date(J) + "BC)"];
-				},
+				cal[8].display,
 				function (JBC) {
 					return cal[1].valid([JBC[0], JBC[1], 1 - JBC[2]]);
 				},
@@ -1163,7 +1178,7 @@
 					return T + D + 1948439 - 1;
 				},
 				function (TI, JD) {
-					return [week[mod(JD, 7)] + "day,", TI[0] + " " + IslamicMonths[TI[1]] + " " + TI[2] + " A.H.", "(" + date(TI) + ")"];
+					return [week[mod(JD, 7)] + "day,", TI[0] + " " + IslamicMonths[TI[1]] + " " + TI[2] + " " + abbr("A.H.", "anno Hegirae"), "(" + date(TI) + ")"];
 				},
 				function (TI) {
 					var result = false;
@@ -1405,7 +1420,7 @@
 					return cal[2].toJD([Et[0], Et[1], Et[2] - 276]);
 				},
 				function (Et, JD) {
-					return [week[mod(JD, 7)] + "day,", Et[0] + " " + EthiopianMonths[Et[1]] + " " + Et[2], "(" + date(Et) + ")"];
+					return [week[mod(JD, 7)] + "day,", Et[0] + " " + EthiopianMonths[Et[1]] + " " + Et[2] + " " + abbr("A.D.", "anno Domini"), "(" + date(Et) + ")"];
 				},
 				function (Et) {
 					return cal[2].valid([Et[0], Et[1], Et[2] - 276]);
@@ -1462,7 +1477,7 @@
 							M = "Adar";
 						}
 					}
-					return [week[mod(JD, 7)] + "day,", H[0] + " " + M + " " + H[2] + " A.M."];
+					return [week[mod(JD, 7)] + "day,", H[0] + " " + M + " " + H[2] + " " + abbr("A.M.", "anno mundi")];
 				},
 				function (H) {
 					var D = H[0];
@@ -1500,7 +1515,7 @@
 					return cal[1].toJD([D, M, Y]);
 				},
 				function (B, JD) {
-					return [week[mod(JD, 7)] + "day,", B[0] + " " + ByzantineMonths[B[1]] + " " + B[2] + " A.M.", "(" + date(B) + ")"];
+					return [week[mod(JD, 7)] + "day,", B[0] + " " + ByzantineMonths[B[1]] + " " + B[2] + " " + abbr("A.M.", "anno mundi"), "(" + date(B) + ")"];
 				},
 				function (B) {
 					var D = B[0];
@@ -1556,6 +1571,38 @@
 				DMYInput(25, frenchMonths, 30),
 				false
 			);
+			cal[26] = new Cal(
+				"Ordinal Date",
+				function (JD) {
+					var Y = cal[0].fromJD(JD)[2];
+					var D = JD - cal[0].toJD([1, 1, Y]) + 1;
+					return [D, Y];
+				},
+				function (O) {
+					var D = O[0];
+					var Y = O[1];
+					var JD = cal[0].toJD([1, 1, Y]) + D - 1;
+					return JD;
+				},
+				function (O, JD) {
+					var D = O[0];
+					var Y = O[1];
+					var d = D.toString();
+					if (D < 100) {
+						d = "0" + d;
+					}
+					if (D < 10) {
+						d = "0" + d;
+					}
+					return ["The " + Ordinal(D) + " day of " + Y, "(" + Y + "-" + d + ")"];
+				},
+				function (O) {
+					var D = O[0];
+					var Y = O[1];
+					return (D >= 1 && D <= 365) || (D === 366 && (mod(Y, 400) === 0 || (mod(Y, 4) === 0 && mod(Y, 100) != 0)));
+				},
+				valueInput(26, 1, 366, "day") + "&thinsp;/&thinsp;" + yearInput(26)
+			);
 			//Today
 			var run = function () {
 				var now = new Date();
@@ -1592,7 +1639,7 @@
 			}
 			//Setup
 			var order = [0, 1, 22, 2, 3, 4, 5, 6, 7, 10, 8, 9, 11, 12, 13, 14, 19, 16, 17, 18, 21, 23];
-			var order = [0, 1, 22, 2, 11, 12, 5, 13, 3, 4, 25, 6, 7, 24, 10, 8, 9, 16, 17, 18, 14, 19, 21, 23];
+			var order = [0, 1, 22, 2, 11, 12, 5, 13, 3, 4, 25, 6, 7, 24, 10, 26, 8, 9, 16, 17, 18, 14, 19, 21, 23];
 			var setup = function () {
 				var todaySelect = "";
 				var fromSelect = "";
