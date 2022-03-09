@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+	<!--Version 2.0 - 9/3/2022-->
 	<head>
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
@@ -29,17 +30,22 @@
 			input[type=number] {
 				border-radius: 10px;
 				padding: 5px 10px;
-				border: none;
 			}
 			input[type=number] {
 				background-color: white;
 				font-size: inherit;
+				border: none;
 			}
-			input[type=number] {
+			#stars {
 				width: 100px;
 			}
 			input[type=number]:focus {
 				outline: 1px solid black;
+			}
+			input[type=number]:disabled {
+				background-color: #dddddd;
+				color: #000000;
+				cursor: text;
 			}
 			input[type=checkbox], label {
 				cursor: pointer;
@@ -73,6 +79,14 @@
 			}
 			.centred {
 				text-align: center;
+			}
+			#firstRowOption {
+				font-size: 15px;
+			}
+			#firstRow {
+				width: 50px;
+				padding: 4px 8px;
+				border-radius: 8px
 			}
 		</style>
 	</head>
@@ -418,12 +432,12 @@
 				},
 				false
 			);
-			var getBestArrange = function (stars, patsToUse) {
+			var getBestArrange = function (stars, patsToUse, manual, firstRow) {
 				var arrangements = [];
 				for (var i = 0; i < patsToUse.length; i++) {
 					for (var seed = 1; seed <= patterns[patsToUse[i]].seedMax(stars); seed++) {
 						var prov = patterns[patsToUse[i]].makePattern(stars, seed);
-						if (prov.works) {
+						if (prov.works && (!manual || seed === firstRow)) {
 							arrangements.push(new Arrange(patsToUse[i], prov.w, prov.h, prov.sq));
 						}
 					}
@@ -437,15 +451,35 @@
 				}
 				var list = 0;
 				var patUsed = -1;
+				var w = 0;
 				if (arrangements.length != 0) {
 					patUsed = arrangements[bestArrange].patIndex;
 					list = patterns[patUsed].drawPattern(stars, arrangements[bestArrange].w, arrangements[bestArrange].h);
+					w = arrangements[bestArrange].w;
 				}
-				return {list: list, patUsed: patUsed};
+				return {list: list, patUsed: patUsed, w: w};
 			}
-			var drawFlag = function (stars, patsToUse) {
-				var configuration = getBestArrange(stars, patsToUse);
+			var drawFlag = function () {
+				//Data
+				var stars = Number(document.getElementById("stars").value);
+				if (!(Number.isInteger(stars) && stars >= 1 && stars <= 1000)) {
+					stars = 0;
+				}
+				var patsToUse = [];
+				for (var i = 0; i < patterns.length; i++) {
+					if (document.getElementById("pattern" + i).checked) {
+						patsToUse.push(i);
+					}
+				}
+				var manual = document.getElementById("manual").checked;
+				var firstRow = Number(document.getElementById("firstRow").value);
+				if (!(Number.isInteger(firstRow) && firstRow >= 1 && firstRow <= 1000)) {
+					firstRow = 0;
+				}
+				//Getting configuration
+				var configuration = getBestArrange(stars, patsToUse, manual, firstRow);
 				var list = configuration.list;
+				//Setting up drawing;
 				var h = Height;
 				var w = h * flagWToH;
 				var jackH = 7 / 13 * h;
@@ -481,20 +515,19 @@
 					//document.getElementById("patternLabel" + i).style.color = fontColour;
 					document.getElementById("patternLabel" + i).style.textDecoration = underline;
 				}
-			}
-			var go = function () {
-				var stars = Number(document.getElementById("stars").value);
-				if (!Number.isInteger(stars) || !(stars >= 1) || !(stars <= 1000)) {
-					stars = 0;
-				}
-				var patsToUse = [];
-				for (var i = 0; i < patterns.length; i++) {
-					if (document.getElementById("pattern" + i).checked) {
-						patsToUse.push(i);
+				//Manual first row option
+				if (!manual) {
+					document.getElementById("firstRow").disabled = true;
+					if (list != 0) {
+						document.getElementById("firstRow").value = configuration.w;
+					} else {
+						document.getElementById("firstRow").value = "";
 					}
+				} else {
+					document.getElementById("firstRow").disabled = false;
 				}
-				drawFlag(stars, patsToUse);
-				setTimeout(go, 500);
+				//Repeating
+				setTimeout(drawFlag, 500);
 			}
 			var start = function () {
 				var result = "";
@@ -512,7 +545,7 @@
 				canvas = document.getElementById("flag");
 				ctx = canvas.getContext("2d");
 				Height = min(window.innerHeight / 2, 0.9 * window.innerWidth / flagWToH);
-				go();
+				drawFlag();
 			}
 		</script>
 		<div id="home">
@@ -526,12 +559,14 @@
 		<p id="options" class="centred">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
 		<div class="justify">
 			<div id="patBox">
-				<p id="patHead" class="centred">Allowed patterns:</p>
+				<p id="patHead" class="centred"><b>Allowed patterns:</b></p>
 				<p id="patterns"></p>
 			</div>
 		</div>
-		<p id="notes" class="centred"><b>Notes:</b>
+		<p id="firstRowOption" class="centred">No. of stars in first row: <input type="number" min="1" max="1000" step="1" id="firstRow"> (<input type="checkbox" id="manual"><label for="manual"> Manual</label>)</p>
+		<p id="notes" class="centred"><br><b>Notes:</b>
 			<br>This is not supposed to be an accurate representaion of any actual historical (or future) flags.
+			<br>It always tries to show the 'best looking' configuration it can find (within the given parameters).
 			<br>The designs are not preselected; all the maths to find possible configurations and then determine the best one is done here and now on your device.
 			<br>I couldn't think of very descriptive names for the different patterns so just experiment if you're interested.
 			<br>Yes, the stars are always the same size.
