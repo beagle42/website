@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-	<!--'Calendrical Coversions' by Joshua Hunold, 25/6/2021-->
-	<!--Version 1.1.1, 6/3/2022-->
+	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
+	<!--Version 1.1.2, 19/5/2022-->
 	<!--How much more boring can I get?-->
 	<head>
 		<title>Calendrical Conversions</title>
@@ -137,6 +137,9 @@
 			}
 			#homeLogo {
 				height: 50px;
+			}
+			.smallCaps {
+				font-variant: small-caps;
 			}
 		</style>
 	</head>
@@ -419,8 +422,14 @@
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
 			}
-			var abbr = function (string, name) {
-				return '<span title="' + name + '">' + string + '</span>';
+			var abbr = function (string, name, smallCaps = true) {
+				var cl = "";
+				var string2 = string;
+				if (smallCaps) {
+					cl = 'class="smallCaps" ';
+					string2 = string.toLowerCase();
+				}
+				return '<span ' + cl + 'title="' + name + '">' + string2 + '</span>';
 			}
 			var show = function (a, id) {
 				var result = "";
@@ -787,7 +796,7 @@
 					return J[0];
 				},
 				function (J, JD) {
-					return ["Julian date", JD, "at midday"];
+					return [abbr("J.D.", "Julian date") + " " + JD, "at midday"];
 				},
 				function (J) {
 					return true;
@@ -920,7 +929,7 @@
 				},
 				function (I, JD) {
 					var IndianWeek = ["Soma", "Mangala", "Budha", "Guru", "Shukra", "Shani", "Ravi"];
-					return [IndianWeek[mod(JD, 7)] + "v&#257;r,", I[0] + " " + IndianMonths[I[1]] + " " + I[2] + " Saka era", "(" + date(I) + ")"];
+					return [IndianWeek[mod(JD, 7)] + "v&#257;r,", I[0] + " " + IndianMonths[I[1]] + " " + I[2] + " " + abbr("S.E.", "Saka era"), "(" + date(I) + ")"];
 				},
 				function (I) {
 					var result = false;
@@ -1231,7 +1240,7 @@
 				DMYInput(17, IslamicMonths, 30)
 			);
 			cal[18] = new Cal(
-				"Tabular Islamic (type IIIa) / Fatimid",
+				"Fatimid",
 				function (JD) {
 					var diff = 1948439;
 					var T = mod(JD - diff, 30 * 354 + 11);
@@ -1537,7 +1546,7 @@
 					return R[0] + 1721425;
 				},
 				function (R, JD) {
-					return ["Rata Die", R[0]];
+					return [abbr("R.D.", "rata die") + " " + R[0]];
 				},
 				function (R) {
 					return true;
@@ -1613,10 +1622,25 @@
 				document.getElementById("todayResult").innerHTML = show(display);
 				//setTimeout(run, 100);
 			}
+			//Things
+			var nameCalendar = function(name) {
+				var b = name.indexOf("(");
+				var result = name + " calendar";
+				if (b >= 0) {
+					result = name.substring(0, b) + "calendar " + name.substring(b);
+				}
+				return result;
+			}
+			var getFirstCal = function () {
+				return Number(document.getElementById("fromSelect").value);
+			}
+			var getSecondCal = function () {
+				return Number(document.getElementById("toSelect").value);
+			}
 			//Convert
 			var convert = function () {
-				var firstCal = Number(document.getElementById("fromSelect").value);
-				var secondCal = Number(document.getElementById("toSelect").value);
+				var firstCal = getFirstCal();
+				var secondCal = getSecondCal();
 				var dateIn = [];
 				var integerInput = true;
 				for (var i = 0; i < document.getElementsByClassName("dateIn" + firstCal).length; i++) {
@@ -1625,20 +1649,26 @@
 						integerInput = false;
 					}
 				}
+				var firstCalDisplayBox = "";
+				var secondCalDisplayBox = "";
 				if (integerInput && cal[firstCal].valid(dateIn)) {
 					var JD = cal[firstCal].toJD(dateIn);
 					var dateOut = cal[secondCal].fromJD(JD);
 					var firstCalDisplay = cal[firstCal].display(dateIn, JD);
 					var secondCalDisplay = cal[secondCal].display(dateOut, JD);
-					document.getElementById("firstCalDisplay").innerHTML = "<b>" + cal[firstCal].name + " Calendar</b><br>" + show(firstCalDisplay);
-					document.getElementById("secondCalDisplay").innerHTML = "<b>" + cal[secondCal].name + " Calendar</b><br>" + show(secondCalDisplay);
+					firstCalDisplayBox = "<b>" + nameCalendar(cal[firstCal].name) + "</b><br>" + show(firstCalDisplay);
+					secondCalDisplayBox = "<b>" + nameCalendar(cal[secondCal].name) + "</b><br>" + show(secondCalDisplay);
+				} else if (integerInput) {
+					firstCalDisplayBox = "ERROR<br>Invalid date";
+					secondCalDisplayBox = "Try again.";
 				} else {
-					document.getElementById("firstCalDisplay").innerHTML = "ERROR<br>Invalid date input";
-					document.getElementById("secondCalDisplay").innerHTML = "";
+					firstCalDisplayBox = "ERROR<br>Invalid input";
+					secondCalDisplayBox = "Try again.";
 				}
+				document.getElementById("firstCalDisplay").innerHTML = firstCalDisplayBox;
+				document.getElementById("secondCalDisplay").innerHTML = secondCalDisplayBox;
 			}
 			//Setup
-			var order = [0, 1, 22, 2, 3, 4, 5, 6, 7, 10, 8, 9, 11, 12, 13, 14, 19, 16, 17, 18, 21, 23];
 			var order = [0, 1, 22, 2, 11, 12, 5, 13, 3, 4, 25, 6, 7, 24, 10, 26, 8, 9, 16, 17, 18, 14, 19, 21, 23];
 			var setup = function () {
 				var todaySelect = "";
@@ -1665,9 +1695,9 @@
 				document.getElementById("inputBox").innerHTML = result;
 				run();
 			}
-			//Change
+			//Change input
 			var change = function () {
-				var newCal = Number(document.getElementById("fromSelect").value);
+				var newCal = getFirstCal();
 				for (var i = 0; i < document.getElementsByClassName("inputPanel").length; i++) {
 					var dis = "none";
 					if (i === newCal) {
@@ -1686,7 +1716,7 @@
 				}
 			}
 			var increment = function (n) {
-				var firstCal = Number(document.getElementById("fromSelect").value);
+				var firstCal = getFirstCal();
 				var dateIn = [];
 				var integerInput = true;
 				for (var i = 0; i < document.getElementsByClassName("dateIn" + firstCal).length; i++) {
@@ -1703,8 +1733,8 @@
 				}
 			}
 			var swap = function () {
-				var firstCal = Number(document.getElementById("fromSelect").value);
-				var secondCal = Number(document.getElementById("toSelect").value);
+				var firstCal = getFirstCal();
+				var secondCal = getSecondCal();
 				var dateIn = [];
 				var integerInput = true;
 				for (var i = 0; i < document.getElementsByClassName("dateIn" + firstCal).length; i++) {
@@ -1760,7 +1790,7 @@
 			</p>
 			<p>in the
 				<select id="todaySelect" class="calSelect" onChange="run()"></select>
-			Calendar.</p>
+			calendar.</p>
 		</div>
 		<hr>
 		<div id="body">
