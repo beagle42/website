@@ -571,6 +571,13 @@ var Holidays = [
 		"&#9770;"
 	),
 	new Hol(
+		"Friday the 13th",
+		function (D) {
+			return D.d === 13 && D.weekDay === 5;
+		},
+		'<span style="font-family: Emoji">&#128008;</span>'
+	),
+	new Hol(
 		"Christmas season",
 		function (D) {
 			return D.m === 12 && D.d < 25;
@@ -582,6 +589,7 @@ var Holidays = [
 var holiday = function (d, m, y, h = 12) {
 	var D = {d: d, m: m, y: y, h: h};
 	D.JD = GregToJD(D.d, D.m, D.y);
+	D.weekDay = mod(D.JD + 1, 7);
 	D.Easter = EasterJD(D.y);
 	D.DL = DomLetter(D.y);
 	D.sunsetJD = D.JD;
