@@ -1,15 +1,14 @@
-var mod = function (num, p = 360) {
-	var n = num;
-	if (n < 0) {
-		n = p - (-1 * n) % p;
-	}
-	return n % p;
+var mod = function (n, p = 360) {
+	return ((n % p) + p) % p;
 }
 var floor = Math.floor;
 var ceil = Math.ceil;
+var round = Math.round;
 var SqRt = Math.sqrt;
 var abs = Math.abs;
+var exp = Math.exp;
 var log = Math.log;
+var log10 = Math.log10;
 var min = Math.min;
 var max = Math.max;
 var Pi = Math.PI;
