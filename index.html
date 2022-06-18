@@ -153,10 +153,9 @@
 			var start = function () {
 				var now = new Date();
 				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
-				//var hol = holiday(26, 12, 2022, 15);
+				//var hol = holiday(13, 5, 2022, 15);
 				if (hol != Holidays.length) {
-					document.getElementById("greeting").innerHTML = Holidays[hol].message;
-					document.getElementById("greeting").title = Holidays[hol].name;
+					document.getElementById("greeting").innerHTML = '<span title="' + Holidays[hol].name + '">' + Holidays[hol].message + '</span>';
 					if (Holidays[hol].colour1 != "NA") {
 						var root = document.querySelector(':root');
 						root.style.setProperty('--colour-one', Holidays[hol].colour1);

@@ -211,8 +211,7 @@
 				var now = new Date();
 				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
 				if (hol != Holidays.length) {
-					document.getElementById("greeting").innerHTML = Holidays[hol].message;
-					document.getElementById("greeting").title = Holidays[hol].name;
+					document.getElementById("greeting").innerHTML = '<span title="' + Holidays[hol].name + '">' + Holidays[hol].message + '</span>';
 				}
 			}
 			var order = function (q) {
