@@ -1,8 +1,20 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
-	<!--Version 1.1.2, 19/5/2022-->
+	<!--Version 2.0.0, 22/7/2022-->
 	<!--How much more boring can I get?-->
+	
+	<!-- Bibilography:
+		Principle sources:
+			Reingold, E. & Dershowitz, N. (2018). 'Calendrical Calculations: The Ultimate Edition'. Cambridge University Press. DOI: https://doi.org/10.1017/9781107415058
+			Basically, all of Wikipedia.
+		Other sources (not an exhaustive list \_(-_-)_/):
+			Karjanto, N. & Beauducel, F. (2020). 'An ethnoarithmetic excursion into the Javanese calendar'. URL: https://arxiv.org/pdf/2012.10064.pdf
+			Haberl, C. (2021). 'Of Calendars—and Kings—and Why the Winter is Boiling Hot'. Journal of the Royal Asiatic Society, 31, 3. DOI: https://doi.org/10.1017/S1356186320000759
+			Janson, S. (2011). 'The Icelandic Calendar', Scripta Islandica, 62. URL: https://uu.diva-portal.org/smash/get/diva2:436604/FULLTEXT01.pdf
+			Van Gent, R.. URL: https://webspace.science.uu.nl/~gent0113/islam/islam_tabcal.htm
+	-->
+	<!-- By the way, I named in 'Calendrical' before I discovered the book, so... -->
 	<head>
 		<title>Calendrical Conversions</title>
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
@@ -166,13 +178,32 @@
 				this.today = today;
 			}
 			//Data
+			//Gregorian/Julian
 			var week = ["Mon", "Tues", "Wednes", "Thurs", "Fri", "Satur", "Sun"];
 			var months = [0, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+			var monthsAbbr = [0, "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+			var week2 = [0];
+			for (var i = 1; i <= 7; i++) {
+				week2[i] = week[i - 1] + "day";
+			}
+			var weekSun = [0, "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 			var monthLengths = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+			var isGregorianLeap = function (Y) {
+				return mod(Y, 400) === 0 || (mod(Y, 4) === 0 && mod(Y, 100) != 0);
+			}
+			var dominicalLetter = function (Y) { // A = 0
+				var a = floor(Y / 4);
+				var b = floor(a / 25);
+				var c = floor(b / 4);
+				return mod(6 * (Y + a - b + c), 7);
+			}
+			//Coptic
 			var copticMonths = [0, "Thout", "Paopi", "Hathor", "Koiak", "Tobi", "Meshir", "Paremhat", "Parmouti", "Pashons", "Paoni", "Epip", "Mesori", "Pi Kogi Enavot"];
+			//French
 			var frenchWeek = ["D&#233;ca", "Primi", "Duo", "Tri", "Quarti", "Quinti", "Sexti", "Septi", "Octi", "Noni"];
 			var frenchMonths = [0, "Vend&#233;miaire", "Brumaire", "Frimaire", "Niv&#244;se", "Pluvi&#244;se", "Vent&#244;se", "Germinal", "Flor&#233;al", "Prairial", "Messidor", "Thermidor", "Fructidor", "Complementary day"];
 			var compDays = [0, "de la Vertu", "du G&#233;nie", "du Travail", "de l'Opinion", "des R&#233;compenses", "de la R&#233;volution"];
+			//Roman numerals
 			var Roman = function (n) {  
 				var result = "";
 				var decimal = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
@@ -189,11 +220,9 @@
 				}
 				return result;
 			}
+			//Indian
 			var IndianMonths = [0, "Chaitra", "Vais&#257;kha", "Jy&#275;shtha", "&#256;sh&#257;dha", "Shr&#257;vana", "Bh&#257;dra", "&#256;shwin", "K&#257;rtika", "Agrah&#257;yana", "Pausha", "M&#257;gha", "Ph&#257;lguna"];
-			var week2 = [0];
-			for (var i = 1; i <= 7; i++) {
-				week2[i] = week[i - 1] + "day";
-			}
+			//Week
 			var weekYearLength = function (x) {
 				var p = function (y) {
 					var a = floor(y / 4);
@@ -207,6 +236,7 @@
 				}
 				return result;
 			}
+			//Gregorian Lunar
 			var GregEpact = function (Y) {
 				var a = mod(Y, 19);
 				var b = Math.floor(Y / 100);
@@ -247,23 +277,7 @@
 				}
 				return result;
 			}
-			var JLunarNewYear = function (Y) {
-				var E0 = mod(11 * mod(Y, 19) + 8, 30);
-				return cal[1].toJD([9, 12, Y - 1]) + mod(23 - E0, 30);
-			}
-			var JLunarMonthLengths = function (x, Y) {
-				var result = 30;
-				if (x % 2 === 0) {
-					result--;
-				}
-				if (x === 2 && mod(Y, 4) === 0) {
-					result++;
-				}
-				if (x === 11 && mod(Y, 19) === 18) {
-					result--;
-				}
-				return result;
-			}
+			//Islamic
 			var IslamicYearLength = function (y, x) {
 				var result = 354;
 				if (y === 2 || y === 5 || (y === 7 && x === 2) || (y === 8 && x === 3) || y === 10 || y === 13 || y === 16 || (y === 18 && x === 2) || (y === 19 && x === 3) || y === 21 || y === 24 || (y === 26 && x === 2) || (y === 27 && x === 3) || y === 29) {
@@ -281,6 +295,7 @@
 			//var IslamicMonths = [0, "Mu&#7717;arram", "&#7778;afar", "Rab&#299;&#8216; al-Awwal", "Rab&#299;&#8216; ath-Th&#257;n&#299;", "Jum&#257;d&#225; al-&#362;l&#225;", "Jum&#257;d&#225; al-&#256;khirah", "Rajab", "Sha&#8216;b&#257;n", "Rama&#7693;&#257;n", "Shaww&#257;l", "Dh&#363; al-Qa&#8216;dah", "Dh&#363; al-&#7716;ijjah"];
 			var IslamicMonths = [0, "Mu&#7717;arram", "&#7778;afar", "Rab&#299;&#8216; al-Awwal", "Rab&#299;&#8216; al-Th&#257;n&#299;", "Jum&#257;d&#225; al-Awwal", "Jum&#257;d&#225; al-Th&#257;n&#299;", "Rajab", "Sha&#8216;b&#257;n", "Rama&#7693;&#257;n", "Shaww&#257;l", "Dh&#363; al-Qa&#8216;dah", "Dh&#363; al-&#7716;ijjah"];
 			var IslamicDays = ["al-Ithnayn", "ath-Thul&#257;th&#257;"];
+			//Julian Lunar
 			var JulianEmbols = [0, 12, 0, 0, 9, 0, 0, 3, 0, 12, 0, 0, 11, 0, 0, 8, 0, 0, 3];
 			var JLunarMonthsList = function (baseYear) {
 				var result = [];
@@ -306,51 +321,9 @@
 				return result;
 			}
 			var JLunarMonths = [0, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Embolism"];
-			var GregDepact = function (Y) {
-				var D = mod(GregEpact(Y) + 5, 30);
-				if (D === 0 && mod(Y, 19) > 10) {
-					D = 30;
-				}
-				return D;
-			}
-			var isGEmbol = function (Y) {
-				var result = false;
-				if (GregDepact(Y) > GregDepact(Y + 1)) {
-					result = true;
-				}
-				return result;
-			}
-			var GLunarNewYear2 = function (Y) {
-				var E1 = GregEpact(Y);
-				var NY = cal[0].toJD([9, 12, Y - 1]) + mod(23 - E1, 30);
-				if (E1 === 24 || (E1 === 25 && mod(Y, 19) > 10)) {
-					NY -= 30;
-				}
-				if (mod(Y, 100) === 0 && mod(Y, 400) != 0) {
-					NY--;
-				}
-				var x = mod(Y, 2500);
-				if (x === 200 || x === 500 || x === 800 || x === 1100 || x === 1400 || x === 1800 || x === 2100 || x === 2400) {
-					NY++;
-				}
-				if (mod(Y, 19) === 0 && !isGEmbol(Y - 1)) {
-					NY++;
-				}
-				return NY;
-			}
-			var GLunarMonthLengths2 = function (M, Y) {
-				var result = 30;
-				if (M % 2 === 0) {
-					result--;
-				}
-				if (M === 2 && (mod(Y, 4) === 0 && !(mod(Y, 2500) === 200 || mod(Y, 2500) === 500 || mod(Y, 2500) === 800 || mod(Y, 2500) === 1100 || mod(Y, 2500) === 1400 || mod(Y, 2500) === 1800 || mod(Y, 2500) === 2100 || mod(Y, 2500) === 2400))) {
-					result++;
-				} else if ((M === 1 && !isGEmbol(Y - 1) && mod(Y, 19) === 0) || (M === 13 && mod(Y, 19) === 18)) {
-					result--;
-				}
-				return result;
-			}
+			//Ethiopian
 			var EthiopianMonths = [0, "M&#228;sk&#228;r&#228;m", "&#7788;&#601;q&#601;mt", "&#7722;&#601;dar", "Ta&#7723;&#347;a&#347;", "T&#601;rr", "Y&#228;katit", "M&#228;gabit", "Miyazya", "G&#601;nbo", "S&#228;ne", "&#7722;amle", "N&#228;hase", "&#7766;agume"];
+			//Hebrew
 			var isHebrewLeap = function (Y) {
 				var nt = mod(Y, 19);
 				var result = false;
@@ -403,7 +376,9 @@
 				}
 				return result;
 			}
+			//Byzantine
 			var ByzantineMonths = [0, "September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August"];
+			//Ordinal
 			var Ordinal = function (x) {
 				var y = x.toString();
 				var result = "th";
@@ -418,9 +393,214 @@
 				}
 				return y + "<sup>" + result + "</sup>";
 			}
-			//General shorthand
+			//Armenian
+			var ArmenianJDepoch = 1922868; // Armenian date 1/1/1
+			var ArmenianWeek = ["Erkoushabathi", "Erekhshabathi", "Chorekhshabathi", "Hingshabathi", "Urbath", "Shabath", "Kiraki"];
+			var ArmenianMonths = [0, "Nawasardi", "Hor&#772;i", "Sahmi", "Tre&#772;", "K&#8216;aloch", "Arach", "Mehekani", "Areg", "Ahekani", "Mareri", "Margach", "Hrotich", "Aweleach"];
+			//Nanakshahi
+			var SikhYearZero = 1468;
+			var SikhMonthLengths = function (M) {
+				var result = 30;
+				if (M <= 5 || M === 12) {
+					result++;
+				}
+				return result;
+			}
+			var SikhMonths = [0, "Chet", "Vaisakh", "Jeth", "Harh", "Sawan", "Bhadon", "Assu", "Kattak", "Maghar", "Poh", "Magh", "Phaggan"];
+			//Roman-form
+			var RomanEvents = [0, "Kalends", "Nones", "Ides"];
+			var RomanEventsAbbr = [0, "Kal", "Non", "Id"];
+			var toRomanForm = function (A, isLeap) {
+				var D = A[0];
+				var M = A[1];
+				var Y = A[2];
+				var bis = 1;
+				var RC;
+				var RP;
+				var RM = M;
+				var RY = Y;
+				var ides = 13;
+				if (M === 3 || M === 5 || M === 7 || M === 10) {
+					ides = 15;
+				}
+				var nones = ides - 8;
+				if (isLeap && M === 2) {
+					if (D === 24) {
+						bis = 2;
+					} else if (D > 24) {
+						D--;
+					}
+				}
+				if (D === 1) {
+					RP = 1;
+					RC = 1;
+				} else if (D <= nones) {
+					RP = 2;
+					RC = nones - D + 1;
+				} else if (D <= ides) {
+					RP = 3;
+					RC = ides - D + 1;
+				} else {
+					if (M === 12) {
+						RM = 1;
+						RY++;
+					} else {
+						RM++;
+					}
+					RP = 1;
+					RC = monthLengths[M] - D + 2;
+				}
+				return [bis, RC, RP, RM, RY];
+			}
+			var fromRomanForm = function (A, isLeap) {
+				var bis = A[0];
+				var RC = A[1];
+				var RP = A[2];
+				var RM = A[3];
+				var RY = A[4];
+				var D;
+				var M = RM;
+				var Y = RY;
+				var ides = 13;
+				if (M === 3 || M === 5 || M === 7 || M === 10) {
+					ides = 15;
+				}
+				var nones = ides - 8;
+				if (RP === 1 && RC === 1) {
+					D = 1;
+				} else if (RP === 2) {
+					D = nones - RC + 1;
+				} else if (RP === 3) {
+					D = ides - RC + 1;
+				} else {
+					if (RM === 1) {
+						M = 12;
+						Y--;
+					} else {
+						M--;
+					}
+					D = monthLengths[M] - RC + 2;
+				}
+				if (isLeap && M === 2 && bis === 1 && D >= 24) {
+					D++;
+				}
+				return [D, M, Y];
+			}
+			var isValidRomanForm = function (A, isLeap) {
+				var bis = A[0];
+				var RC = A[1];
+				var RP = A[2];
+				var RM = A[3];
+				var RY = A[4];
+				var M = RM;
+				var result = false;
+				if (RC >= 1 && RM >= 1 && RM <= 12) {
+					if (bis === 2) {
+						if (isLeap && RM === 3 && RP === 1 && RC === 6) {
+							result = true;
+						}
+					} else if (bis === 1) {
+						if (RP === 1 && RC === 1) {
+							result = true;
+						} else {
+							if (RP === 1) {
+								M = mod(RM - 2, 12) + 1;
+							}
+							var ides = 13;
+							if (M === 3 || M === 5 || M === 7 || M === 10) {
+								ides = 15;
+							}
+							var nones = ides - 8;
+							if ((RP === 2 && RC <= nones - 1) || (RP === 3 && RC <= 8) || (RP === 1 && RC <= monthLengths[M] - ides + 1)) {
+								result = true;
+							}
+						}
+					}
+				}
+				return result;
+			}
+			//Icelandic
+			//(https://uu.diva-portal.org/smash/get/diva2:436604/FULLTEXT01.pdf)
+			var IcelandicNewYear = function (Y) {
+				var DL = dominicalLetter(Y);
+				var D = 19 + mod(DL + 1, 7);
+				return [D, 4, Y];
+			}
+			var IcelandicSeasons = [0, "Summer", "Winter"];
+			var IcelandicMonths = [0, "Harpa", "Skerpla", "S&#243;lm&#225;nu&#240;ur", "Heyannir", "Tv&#237;m&#225;nu&#240;ur", "Haustm&#225;nu&#240;ur", "Gorm&#225;nu&#240;ur", "&#221;lir", "M&#246;rsugur", "&#222;orri", "G&#243;a", "Einm&#225;nu&#240;ur", "aukan&#230;tur", "sumarauki"];
+			//Bangladeshi 
+			//(https://en.wikipedia.org/wiki/Bengali_calendars https://bn.wikipedia.org/wiki/%E0%A6%AC%E0%A6%99%E0%A7%8D%E0%A6%97%E0%A6%BE%E0%A6%AC%E0%A7%8D%E0%A6%A6 )
+			var BengaliMonths = [0, "Boishakh", "Joishtho", "Asharh", "Srabon", "Bhadro", "Ashvin", "Kartika", "Ogrohayon", "Poush", "Magh", "Falgun", "Choitro"];
+			var BengaliYearZero = 593;
+			var BangladeshiMonthLengths = function (M, isLeap, isNew) {
+				var result = 30;
+				if (M <= 5 || (isNew && M === 6)) {
+					result++;
+				} else if (isNew && M === 11) {
+					result--;
+				}
+				if (isLeap && M === 11) {
+					result++;
+				}
+				return result;
+			}
+			//Bahai
+			var BahaiMonths = [0, "Bah&#225;", "Jal&#225;l", "Jam&#225;l", "&#8216;A&#7827;amat", "N&#250;", "Ra&#7717;mat", "Kalim&#225;t", "Kam&#225;l", "Asm&#225;&#8217;", "&#8216;Izzat", "Mash&#237;yyat", "&#8216;Ilm", "Qudrat", "Qawl", "Mas&#225;&#8217;il", "Sharaf", "Sul&#7789;&#225;n", "Mulk", "Ayy&#225;m-i-H&#225;", "&#8216;Al&#225;&#8217;"];
+			var BahaiYearZero = 1843;
+			//Mandaean
+			var MandaeanMonths = [0, "&#352;ab&#257;&#7789;", "&#256;d&#257;r", "Nis&#257;n", "Ay&#257;r", "Siw&#257;n", "Tammuz", "&#256;b", "Aylul", "Parw&#257;n&#257;y&#257;", "Te&#353;rin", "Ma&#353;r&#601;w&#257;n", "K&#257;nun", "&#7788;&#257;bit"];
+			var MandaeanEpochJD = -173231148;
+			//Javanese
+			// (https://arxiv.org/pdf/2012.10064.pdf)
+			var JavaneseKurupStartJD = 2428252;
+			var JavaneseKurupStartYear = 1867; // AJ
+			var JavaneseFiveDays = ["Pon", "Wage", "Kliwon", "L&#234;gi", "Pahing"];
+			var JavaneseSevenDays = ["Ngahad", "S&#234;n&#232;n", "Selasa", "R&#234;bo", "K&#234;mis", "Jemuwah", "S&#234;tu"];
+			var JavaneseMonths = [0, "Sura", "Sapar", "Mulud", "Bakdamulud", "Jumadilawal", "Jumadilakir", "Rejeb", "Ruwah", "Pasa", "Sawal", "Dulkangidah", "Besar"];
+			var JavaneseYears = [0, "Alip", "Eh&#233;", "Jimawal", "J&#233;", "Dal", "B&#233;", "Wawu", "Jimakir"];
+			var JavaneseMonthLengths = function (M) {
+				var result = 30;
+				if (M % 2 === 0 && M != 12) {
+					result--;
+				}
+				return result;
+			}
+			var JavaneseYearLengths = function (Y) {
+				var result = 354;
+				if (Y === 2 || Y === 4 || Y === 8) {
+					result++;
+				}
+				return result;
+			}
+			var JavaneseWinduLength = 2835; // days
+			var JavaneseKurupLength = JavaneseWinduLength * 15 - 1; // days
+			//Persian
+			// (http://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm https://en.wikipedia.org/wiki/Solar_Hijri_calendar)
+			var PersianMonths = [0, "Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar", "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand"];
+			var PersianLeapYears = [1, 5, 9, 13, 13, 17, 22, 26, 30];
+			var PersianYearLengths = function (Y) {
+				var result = 365;
+				if (PersianLeapYears.includes(Y)) {
+					result++;
+				}
+				return result;
+			}
+			var PersianRefJD = 2454181; // Persian 1/1/1386
+			var PersianRefYear = 1386;
+			var PersianDaysPerCycle = 365 * 33 + 8;
+			var PersianMonthLengths = function (M) {
+				var result = 30;
+				if (M <= 6) {
+					result++;
+				}
+				return result;
+			}
+			// Shorthand
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
+			}
+			var longDate = function (x, M) {
+				return x[0] + " " + M[x[1]] + " " + x[2];
 			}
 			var abbr = function (string, name, smallCaps = true) {
 				var cl = "";
@@ -970,7 +1150,7 @@
 					var D = IW[0];
 					var W = IW[1];
 					var Y = IW[2];
-					return [week2[D] + ",", "Week " + W + " of " + Y, "(" + Y + "-W" + W + "-" + D + ")"];
+					return [week2[D] + ",", "week " + W + " of " + Y, "(" + Y + "-W" + W + "-" + D + ")"];
 				},
 				function (IW) {
 					var result = false;
@@ -1093,70 +1273,8 @@
 				},
 				dayInput(14, 30) + "&thinsp;/&thinsp;" + dayInput(14, 13, 1, "month") + "&thinsp;/&thinsp;" + yearInput(14)
 			);
-			cal[15] = new Cal(
-				"Simplified Julian Lunar",
-				function (JD) {
-					var y = cal[1].fromJD(JD)[2];
-					var NYs = [];
-					for (var i = 0; i <= 3; i++) {
-						NYs[i] = JLunarNewYear(y - 1 + i);
-					}
-					var j = 0;
-					while (JD >= NYs[j]) {
-						j++;
-					}
-					var ny = NYs[j - 1];
-					var year = y + j - 2;
-					var T = JD - ny;
-					var k = 1
-					while (T - JLunarMonthLengths(k, year) >= 0) {
-						T -= JLunarMonthLengths(k, year);
-						k++;
-					}
-					return [T + 1, k, year];
-				},
-				function (JL) {
-					var D = JL[0];
-					var M = JL[1];
-					var Y = JL[2];
-					var T = JLunarNewYear(Y);
-					var i = 1;
-					while (i < M) {
-						T += JLunarMonthLengths(i, Y);
-						i++;
-					}
-					return T + D - 1;
-				},
-				function (JL, JD) {
-					var P = "&nbsp;";
-					if (JL[0] === 14 && JL[1] === 4) {
-						P = "(Paschal full moon)";
-					}
-					return [week[mod(JD, 7)] + "day,", date(JL), P];
-				},
-				function (JL) {
-					var D = JL[0];
-					var M = JL[1];
-					var Y = JL[2];
-					var result = false;
-					var len = JLunarNewYear(Y + 1) - JLunarNewYear(Y);
-					if (D >= 1 && D <= 30 && M >= 1 && M <= 13) {
-						result = true;
-						if (D === 30 && M % 2 === 0) {
-							result = false;
-							if (M === 2 && mod(Y, 4) === 0) {
-								result = true;
-							}
-						} else if (M === 13 && len < 380) {
-							result = false;
-						}
-					}
-					return result;
-				},
-				dayInput(15, 30) + "/" + dayInput(15, 13, 1, "month") + "/" + yearInput(15)
-			);
 			cal[16] = new Cal(
-				"Tabular Islamic (type IIa)",
+				"Tabular Islamic (astro. epoch)",
 				function (JD) {
 					var diff = 1948439;
 					var T = mod(JD - diff, 30 * 354 + 11);
@@ -1205,7 +1323,7 @@
 				DMYInput(16, IslamicMonths, 30)
 			);
 			cal[17] = new Cal(
-				"Tabular Islamic (type IIc)",
+				"Tabular Islamic (civil epoch)",
 				function (JD) {
 					var diff = 1948440;
 					var T = mod(JD - diff, 30 * 354 + 11);
@@ -1348,76 +1466,6 @@
 					return result;
 				},
 				DMYInput(19, JLunarMonths, 30)
-			);
-			cal[20] = new Cal(
-				"fake Gregorian Lunar",
-				function (JD) {
-					var y = cal[0].fromJD(JD)[2];
-					var NYs = [];
-					for (var i = 0; i <= 3; i++) {
-						NYs[i] = GLunarNewYear2(y - 1 + i);
-					}
-					var j = 0;
-					while (JD >= NYs[j]) {
-						j++;
-					}
-					var ny = NYs[j - 1];
-					var year = y + j - 2;
-					var T = JD - ny;
-					var k = 1
-					while (T - GLunarMonthLengths2(k, year) >= 0) {
-						T -= GLunarMonthLengths2(k, year);
-						k++;
-					}
-					return [T + 1, k, year];
-				},
-				function (GL) {
-					var D = GL[0];
-					var M = GL[1];
-					var Y = GL[2];
-					var T = GLunarNewYear2(Y);
-					var i = 1;
-					while (i < M) {
-						T += GLunarMonthLengths2(i, Y);
-						i++;
-					}
-					return T + D - 1;
-				},
-				function (GL, JD) {
-					var P = "&nbsp;";
-					var E = GregEpact(GL[2]);
-					if (GL[0] === 14) {
-						if (E === 24 || (E === 25 && mod(GL[2], 19) > 10)) {
-							if (GL[1] === 5) {
-								P = "(Paschal full moon)";
-							}
-						} else if (GL[1] === 4) {
-							P = "(Paschal full moon)";
-						}
-					}
-					return [week[mod(JD, 7)] + "day,", date(GL), P];
-				},
-				function (GL) {
-					var D = GL[0];
-					var M = GL[1];
-					var Y = GL[2];
-					var result = false;
-					var len = GLunarNewYear(Y + 1) - GLunarNewYear(Y);
-					if (D >= 1 && D <= 30 && M >= 1 && M <= 13) {
-						result = true;
-						if (D === 30 && ((M === 1 && len % 10 === 3) || (M % 2 === 0))) {
-							result = false;
-							if (M === 2 && len % 10 === 5) {
-								result = true;
-							}
-						}
-						if (M === 13 && len < 380) {
-							result = false;
-						}
-					}
-					return true;
-				},
-				dayInput(20, 30) + "/" + dayInput(20, 13, 1, "month") + "/" + yearInput(20)
 			);
 			cal[21] = new Cal(
 				"Ethiopian",
@@ -1612,6 +1660,540 @@
 				},
 				valueInput(26, 1, 366, "day") + "&thinsp;/&thinsp;" + yearInput(26)
 			);
+			cal[15] = new Cal(
+				"Armenian",
+				function (JD) {
+					var T = JD - ArmenianJDepoch;
+					var Y = floor(T / 365) + 1;
+					var M = floor(mod(T, 365) / 30) + 1;
+					var D = T - 365 * (Y - 1) - 30 * (M - 1) + 1;
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return ArmenianJDepoch + 365 * (Y - 1) + 30 * (M - 1) + D - 1;
+				},
+				function (A, JD) {
+					return [week[mod(JD, 7)] + "day,", longDate(A, ArmenianMonths), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					return D >= 1 && M >= 1 && ((M <= 12 && D <= 30) || (M === 13 && D <= 5)); 
+				},
+				DMYInput(15, ArmenianMonths, 30)
+			);
+			cal[20] = new Cal(
+				"Nanakshahi",
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var GY = G[2];
+					var Y = GY - SikhYearZero;
+					var NY = cal[0].toJD([14, 3, GY]);
+					if (JD < NY) {
+						Y--;
+						NY = cal[0].toJD([14, 3, GY - 1]);
+					}
+					var D = JD - NY + 1;
+					var M = 1;
+					while (D - SikhMonthLengths(M) > 0) {
+						D -= SikhMonthLengths(M);
+						M++;
+					}
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GY = SikhYearZero + Y;
+					var NY = cal[0].toJD([14, 3, GY]);
+					var JD = NY + D - 1;
+					var i = 1;
+					while (i < M) {
+						JD += SikhMonthLengths(i);
+						i++;
+					}
+					return JD;
+				},
+				function (A, JD) {
+					return [week[mod(JD, 7)] + "day,", longDate(A, SikhMonths), "(" + date(A) + ")"];
+				},
+				function (A, JD) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GYatEnd = SikhYearZero + Y + 1;
+					return D >= 1 && M >= 1 && M <= 12 && D <= SikhMonthLengths(M) && (D != 31 || M != 12 || isGregorianLeap(GYatEnd));
+				},
+				DMYInput(20, SikhMonths, 31)
+			);
+			cal[27] = new Cal(
+				"Gregorian Roman-form",
+				function (JD) {
+					var A = cal[0].fromJD(JD);
+					var Y = A[2];
+					var isLeap = isGregorianLeap(Y);
+					return toRomanForm(A, isLeap);
+				},
+				function (A) {
+					var Y = A[4];
+					var isLeap = isGregorianLeap(Y);
+					return cal[0].toJD(fromRomanForm(A, isLeap));
+				},
+				function (A, JD) {
+					var bis = A[0];
+					var RC = A[1];
+					var RP = A[2];
+					var RM = A[3];
+					var RY = A[4];
+					var line1 = "The ";
+					var line2 = "(";
+					if (RC != 1) {
+						if (RC != 2) {
+							line2 += abbr("a.d.", "ante diem", false) + " ";
+							if (bis === 2) {
+								line1 += "doubled ";
+								line2 += "bis "
+							}
+							line1 += Ordinal(RC) + " ";
+							line2 += Roman(RC) + " ";
+						} else {
+							line2 += abbr("prid.", "pridie", false) + " ";
+						}
+						line1 += "day before the ";
+					}
+					line1 += RomanEvents[RP] + "&nbsp;of&nbsp;" + months[RM] + "&nbsp;" + RY;
+					line2 += abbr(RomanEventsAbbr[RP] + ".", RomanEvents[RP], false) + " " + abbr(monthsAbbr[RM] + ".", months[RM], false) + " " + RY + ")";
+					return [line1, line2];
+				},
+				function (A) {
+					var Y = A[4];
+					var isLeap = isGregorianLeap(Y);
+					return isValidRomanForm(A, isLeap);
+				},
+				monthInput(27, [0, " ", "bis"], "leap") + " " + dayInput(27, 19, 1, "count") + " " + monthInput(27, RomanEvents, "event") + " " + monthInput(27, months) + " " + yearInput(27)
+			);
+			cal[28] = new Cal(
+				"Julian Roman-form",
+				function (JD) {
+					var A = cal[1].fromJD(JD);
+					var Y = A[2];
+					var isLeap = mod(Y, 4) === 0;
+					return toRomanForm(A, isLeap);
+				},
+				function (A) {
+					var Y = A[4];
+					var isLeap = mod(Y, 4) === 0;
+					return cal[1].toJD(fromRomanForm(A, isLeap));
+				},
+				cal[27].display,
+				function (A) {
+					var Y = A[4];
+					var isLeap = mod(Y, 4) === 0;
+					return isValidRomanForm(A, isLeap);
+				},
+				monthInput(28, [0, " ", "bis"], "leap") + " " + dayInput(28, 19, 1, "count") + " " + monthInput(28, RomanEvents, "event") + " " + monthInput(28, months) + " " + yearInput(28)
+			);
+			cal[29] = new Cal(
+				"Icelandic week",
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var D = mod(JD + 1, 7) + 1; // Sunday = 1, Saturday = 7
+					var W;
+					var S;
+					var Y = G[2];
+					var lastNY = cal[0].toJD(IcelandicNewYear(Y));
+					var nextNY = cal[0].toJD(IcelandicNewYear(Y + 1));
+					if (JD < lastNY) {
+						Y--;
+						nextNY = lastNY;
+						lastNY = cal[0].toJD(IcelandicNewYear(Y));
+					}
+					var winter = nextNY - 180;
+					var seasonStart = lastNY;
+					if (JD < winter) {
+						S = 1;
+					} else {
+						S = 2;
+						seasonStart = winter;
+					}
+					W = floor((JD - seasonStart) / 7) + 1;
+					return [D, W, S, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var W = A[1];
+					var S = A[2];
+					var Y = A[3];
+					var NY = cal[0].toJD(IcelandicNewYear(Y));
+					var winter = cal[0].toJD(IcelandicNewYear(Y + 1)) - 180;
+					var JD;
+					var d = mod(D + 2, 7) + 1;
+					if (S === 1) {
+						JD = NY + mod(D + 2, 7);
+					} else {
+						JD = winter + mod(D, 7);
+					}
+					JD += (W - 1) * 7;
+					return JD;
+				},
+				function (A, JD) {
+					var D = A[0];
+					var W = A[1];
+					var S = A[2];
+					var Y = A[3];
+					return [weekSun[D] + ",", "week " + W + " of " + IcelandicSeasons[S] + " " + Y];
+				},
+				function (A) {
+					var D = A[0];
+					var W = A[1];
+					var S = A[2];
+					var Y = A[3];
+					var yearLength = cal[0].toJD(IcelandicNewYear(Y + 1)) - cal[0].toJD(IcelandicNewYear(Y));
+					var result = false;
+					if (D >= 1 && D <= 7 && W >= 1) {
+						if (S === 1) {
+							var lastWeek = 27;
+							if (yearLength > 364) {
+								lastWeek = 28;
+							}
+							if (W < lastWeek) {
+								result = true;
+							} else if (W === lastWeek && (D === 5 || D === 6)) {
+								result = true;
+							}
+						} else if (S === 2 && (W <= 25 || (W === 26 && D != 5 && D != 6))) {
+							result = true;
+						}
+					}
+					return result;
+				},
+				monthInput(29, weekSun, "day") + " " + valueInput(29, 1, 28, "week") + " " + monthInput(29, IcelandicSeasons, "season") + " " + yearInput(29)
+			);
+			cal[30] = new Cal(
+				"Icelandic month", // 30-day months numbered 1-12; extra days and leap week between 3rd and 4th month numbered 13 and 14 respectively.
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var Y = G[2];
+					var lastMidsum = cal[0].toJD(IcelandicNewYear(Y + 1)) - 270;
+					if (JD < lastMidsum) {
+						Y--;
+						lastMidsum = cal[0].toJD(IcelandicNewYear(Y + 1)) - 270;
+					}
+					var T = JD - lastMidsum;
+					var M = floor(T / 30) + 1;
+					var D = mod(T, 30) + 1;
+					if (M === 13 && D > 4) {
+						M = 14;
+						D -= 4;
+					}
+					if (M <= 9) {
+						M += 3;
+					} else {
+						Y++;
+						if (M <= 12) {
+							M -= 9;
+						}
+					}
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					if (M >= 4 && M <= 12) {
+						M -= 3;
+					} else {
+						Y--;
+						if (M <= 3) {
+							M += 9;
+						} else if (M === 14) {
+							M--;
+							D += 4;
+						}
+					}
+					var lastMidsum = cal[0].toJD(IcelandicNewYear(Y + 1)) - 270;
+					return lastMidsum + (M - 1) * 30 + D - 1;
+				},
+				function (A, JD) {
+					var M = A[1];
+					var Mno;
+					if (M <= 6) {
+						Mno = "S" + M;
+					} else if (M <= 12) {
+						Mno = "W" + (M - 6);
+					} else if (M === 13) {
+						Mno = "Sa";
+					} else {
+						Mno = "Ss";
+					}
+					return [week[mod(JD, 7)] + "day,", longDate(A, IcelandicMonths), "(" + date([A[0], Mno, A[2]]) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var yearLength = cal[0].toJD(IcelandicNewYear(Y + 1)) - cal[0].toJD(IcelandicNewYear(Y));
+					return D >= 1 && M >= 1 && ((M <= 12 && D <= 30) || (M === 13 && D <= 4) || (yearLength > 364 && M === 14 && D <= 7));
+				},
+				DMYInput(30, IcelandicMonths, 30)
+			);
+			cal[31] = new Cal(
+				"Bangladeshi (2019 version)",
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var GY = G[2];
+					var NY = cal[0].toJD([14, 4, GY]);
+					if (JD < NY) {
+						GY--;
+						NY = cal[0].toJD([14, 4, GY]);
+					}
+					var Y = GY - BengaliYearZero;
+					var isLeap = isGregorianLeap(GY + 1);
+					var D = JD - NY + 1;
+					var M = 1;
+					while (D - BangladeshiMonthLengths(M, isLeap, true) > 0) {
+						D -= BangladeshiMonthLengths(M, isLeap, true);
+						M++;
+					}
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GY = BengaliYearZero + Y;
+					var NY = cal[0].toJD([14, 4, GY]);
+					var isLeap = isGregorianLeap(GY + 1);
+					var JD = NY + D - 1;
+					var i = 1;
+					while (i < M) {
+						JD += BangladeshiMonthLengths(i, isLeap, true);
+						i++;
+					}
+					return JD;
+				},
+				function (A, JD) {
+					return [week[mod(JD, 7)] + "day,", longDate(A, BengaliMonths) + " " + abbr("B.S.", "Bengali Sambat"), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GY = BengaliYearZero + Y;
+					var isLeap = isGregorianLeap(GY + 1);
+					return D >= 1 && M >= 1 && M <= 12 && D <= BangladeshiMonthLengths(M, isLeap, true);
+				},
+				DMYInput(31, BengaliMonths, 31)
+			);
+			cal[32] = new Cal(
+				"Bangladeshi (pre-2019 version)",
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var GY = G[2];
+					var NY = cal[0].toJD([14, 4, GY]);
+					if (JD < NY) {
+						GY--;
+						NY = cal[0].toJD([14, 4, GY]);
+					}
+					var Y = GY - BengaliYearZero;
+					var isLeap = isGregorianLeap(GY + 1);
+					var D = JD - NY + 1;
+					var M = 1;
+					while (D - BangladeshiMonthLengths(M, isLeap, false) > 0) {
+						D -= BangladeshiMonthLengths(M, isLeap, false);
+						M++;
+					}
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GY = BengaliYearZero + Y;
+					var NY = cal[0].toJD([14, 4, GY]);
+					var isLeap = isGregorianLeap(GY + 1);
+					var JD = NY + D - 1;
+					var i = 1;
+					while (i < M) {
+						JD += BangladeshiMonthLengths(i, isLeap, false);
+						i++;
+					}
+					return JD;
+				},
+				function (A, JD) {
+					return [week[mod(JD, 7)] + "day,", longDate(A, BengaliMonths) + " " + abbr("B.S.", "Bengali Sambat"), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GY = BengaliYearZero + Y;
+					var isLeap = isGregorianLeap(GY + 1);
+					return D >= 1 && M >= 1 && M <= 12 && D <= BangladeshiMonthLengths(M, isLeap, false);
+				},
+				DMYInput(32, BengaliMonths, 31),
+				false
+			);
+			cal[33] = new Cal(
+				"Bah&#225;&#8217;&#237; (Greg.-fixed version)",
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var GY = G[2];
+					var ala = cal[0].toJD([2, 3, GY]);
+					if (JD < ala) {
+						GY--;
+						ala = cal[0].toJD([2, 3, GY]);
+					}
+					var Y = GY - BahaiYearZero;
+					var isLeap = isGregorianLeap(GY + 1);
+					var T = JD - ala;
+					var M = floor(T / 19);
+					var D = mod(T, 19) + 1;
+					if (M === 0) {
+						M = 20;
+						Y--;
+					}
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					if (M === 20) {
+						M = 0;
+						Y++;
+					}
+					var GY = BahaiYearZero + Y;
+					var ala = cal[0].toJD([2, 3, GY]);
+					return ala + M * 19 + D - 1;
+				},
+				function (A, JD) {
+					var M = A[1];
+					if (M === 19) {
+						M = "A";
+					} else if (M === 20) {
+						M = 19;
+					}
+					return [week[mod(JD, 7)] + "day,", longDate(A, BahaiMonths) + " " + abbr("B.E.", "Bah&#225;&#8217;&#237; Era"), "(" + date([A[0], M, A[2]]) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var GY = BahaiYearZero + Y;
+					var isLeap = isGregorianLeap(GY + 1);
+					return D >= 1 && M >= 1 && (((M <= 18 || M === 20) && D <= 19) || (M === 19 && (D <= 4 || (isLeap && D === 5))));
+				},
+				DMYInput(33, BahaiMonths, 19)
+			);
+			cal[34] = new Cal(
+				"Javanese (4th kurup version)",
+				function (JD) {
+					var daysSinceEpoch = JD - JavaneseKurupStartJD; // all 0-indexed
+					var kurupsSinceEpoch = floor(daysSinceEpoch / JavaneseKurupLength);
+					var dayInKurup = mod(daysSinceEpoch, JavaneseKurupLength);
+					var windu = floor(dayInKurup / JavaneseWinduLength);
+					var dayInWindu = mod(dayInKurup, JavaneseWinduLength);
+					var D = dayInWindu + 1; // all 1-indexed
+					var yearInWindu = 1;
+					while (D > JavaneseYearLengths(yearInWindu)) {
+						D -= JavaneseYearLengths(yearInWindu);
+						yearInWindu++;
+					}
+					var M = 1;
+					while (D > JavaneseMonthLengths(M)) {
+						D -= JavaneseMonthLengths(M);
+						M++;
+					}
+					Y = JavaneseKurupStartYear + kurupsSinceEpoch * 120 + windu * 8 + yearInWindu - 1;
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var kurup = floor((Y - JavaneseKurupStartYear) / 120);
+					var yearInKurup = mod(Y - JavaneseKurupStartYear, 120);
+					var winduInKurup = floor(yearInKurup / 8);
+					var yearInWindu = mod(yearInKurup, 8);
+					var JD = JavaneseKurupStartJD + (D - 1) + kurup * JavaneseKurupLength + winduInKurup * JavaneseWinduLength;
+					for (var i = 0; i < yearInWindu; i++) {
+						JD += JavaneseYearLengths(i + 1);
+					}
+					for (var i = 1; i < M; i++) {
+						JD += JavaneseMonthLengths(i);
+					}
+					return JD;
+				},
+				function (A, JD) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var fiveDays = mod(JD + 2, 5); // Pon = 0;
+					var sevenDays = mod(JD + 1, 7); // Sunday = 0
+					var yearInWindu = mod(Y - JavaneseKurupStartYear, 8) + 1;
+					return [JavaneseSevenDays[sevenDays] + " " + JavaneseFiveDays[fiveDays] + ",", D + " " + JavaneseMonths[M] + " " + JavaneseYears[yearInWindu] + " " + Y + " " + abbr("A.J.", "anno Javanico"), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var yearInKurup = mod(Y - JavaneseKurupStartYear, 120);
+					var yearInWindu = mod(yearInKurup, 8) + 1;
+					return D >= 1 && M >= 1 && M <= 12 && D <= JavaneseMonthLengths(M) && !(D === 30 && M === 12 && (JavaneseYearLengths(yearInWindu) === 354 || yearInKurup === 119));
+				},
+				DMYInput(34, JavaneseMonths, 30)
+			);
+			cal[35] = new Cal(
+				"Persian (33-year version)",
+				function (JD) {
+					var daysSinceRef = JD - PersianRefJD;
+					var cyclesSinceRef = floor(daysSinceRef / PersianDaysPerCycle);
+					var D = mod(daysSinceRef, PersianDaysPerCycle) + 1;
+					var yearInCycle = 0;
+					while (D > PersianYearLengths(yearInCycle)) {
+						D -= PersianYearLengths(yearInCycle);
+						yearInCycle++;
+					}
+					var M = 1;
+					while (D > PersianMonthLengths(M)) {
+						D -= PersianMonthLengths(M);
+						M++;
+					}
+					var Y = PersianRefYear + cyclesSinceRef * 33 + yearInCycle;
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var yearsSinceRef = Y - PersianRefYear;
+					var cyclesSinceRef = floor(yearsSinceRef / 33);
+					var yearInCycle = mod(yearsSinceRef, 33);
+					var JD = PersianRefJD + cyclesSinceRef * PersianDaysPerCycle + D - 1;
+					for (var i = 0; i < yearInCycle; i++) {
+						JD += PersianYearLengths(i);
+					}
+					for (var i = 1; i < M; i++) {
+						JD += PersianMonthLengths(i);
+					}
+					return JD;
+				},
+				function (A, JD) {
+					return [week[mod(JD, 7)] + "day,", longDate(A, PersianMonths) + " " + abbr("A.P.", "anno Persico"), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return M >= 1 && M <= 12 && D >= 1 && D <= PersianMonthLengths(M) && !(D === 30 && M === 12 && PersianYearLengths(mod(Y, 33)) === 365);
+				},
+				DMYInput(35, PersianMonths, 31)
+			);
 			//Today
 			var run = function () {
 				var now = new Date();
@@ -1620,7 +2202,6 @@
 				var result = cal[newCal].fromJD(JD);
 				var display = cal[newCal].display(result, JD);
 				document.getElementById("todayResult").innerHTML = show(display);
-				//setTimeout(run, 100);
 			}
 			//Things
 			var nameCalendar = function(name) {
@@ -1669,10 +2250,12 @@
 				document.getElementById("secondCalDisplay").innerHTML = secondCalDisplayBox;
 			}
 			//Setup
-			var order = [0, 1, 22, 2, 11, 12, 5, 13, 3, 4, 25, 6, 7, 24, 10, 26, 8, 9, 16, 17, 18, 14, 19, 21, 23];
+			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 23, 15, 27, 28, 29, 30];
 			var setup = function () {
 				var todaySelect = "";
 				var fromSelect = "";
+				var inputBox = "";
+				//var list = ""; 
 				for (var i = 0; i < order.length; i++) {
 					var j = order[i];
 					var option = '<option value="' + j + '">' + cal[j].name + '</option>';
@@ -1680,30 +2263,31 @@
 						todaySelect += option;
 					}
 					fromSelect += option;
+					inputBox += '<p id="inputPanel' + j + '" class="inputPanel"';
+					if (j != 0) {
+						inputBox += ' style="display: none"';
+					}
+					inputBox += '>' + cal[j].input + '</p>';
+					cal[j].input = "";
+					//list += j + ". " + cal[j].name + "<br>";
 				}
 				document.getElementById("todaySelect").innerHTML = todaySelect;
 				document.getElementById("fromSelect").innerHTML = fromSelect;
 				document.getElementById("toSelect").innerHTML = fromSelect;
-				var result = "";
-				for (var i = 0; i < cal.length; i++) {
-					result += '<p id="inputPanel' + i + '" class="inputPanel"';
-					if (i != 0) {
-						result += ' style="display: none"';
-					}
-					result += '>' + cal[i].input + '</p>';
-				}
-				document.getElementById("inputBox").innerHTML = result;
+				document.getElementById("inputBox").innerHTML = inputBox;
+				//document.getElementById("list").innerHTML = list;
 				run();
 			}
 			//Change input
 			var change = function () {
 				var newCal = getFirstCal();
-				for (var i = 0; i < document.getElementsByClassName("inputPanel").length; i++) {
+				for (var i = 0; i < order.length; i++) {
+					var j = order[i];
 					var dis = "none";
-					if (i === newCal) {
+					if (j === newCal) {
 						dis = "block";
 					}
-					document.getElementsByClassName("inputPanel")[i].style.display = dis;
+					document.getElementById("inputPanel" + j).style.display = dis;
 				}
 				for (var i = 0; i < document.getElementsByClassName("dateIn" + newCal).length; i++) {
 					document.getElementsByClassName("dateIn" + newCal)[i].value = "";
