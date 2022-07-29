@@ -2,7 +2,7 @@
 <html>
 	<!--I don't know; I was bored one morning.-->
 	<head>
-		<!-- Version 2.0 -->
+		<!-- Version 2.0.1 -->
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
@@ -42,9 +42,14 @@
 				border-radius: 10px;
 				color: #333333;
 				cursor: pointer;
+				transition: background-color 0.1s, color 0.1s;
 			}
 			#btn:hover {
 				background-color: #999999;
+				color: #000000;
+			}
+			#btn:active {
+				background-color: #bbbbbb;
 				color: #000000;
 			}
 			#numresult {
