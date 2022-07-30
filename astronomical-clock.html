@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 5.1-->
+	<!--Version 5.2-->
+	<!--30/7/2022-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -32,16 +33,12 @@
 				bottom: 0;
 				right: 0;
 				top: 0;
-				/*opacity: 0;*/
 				width: 320px;
 				background-color: #dddddd;
 				padding: 0 25px;
 				overflow: auto;
 				/*box-shadow: -4px 0 8px 0 rgba(0, 0, 0, 0.2), -6px 0 20px 0 rgba(0, 0, 0, 0.19);*/
 				transition: right 0.5s;
-			}
-			#footer:hover {
-				/*opacity: 1;*/
 			}
 			.options {
 				font-size: 20px;
@@ -71,8 +68,8 @@
 				border-radius: 5px;
 				text-align: center;
 			}
-			input[type=number], #auto {
-				width: 70px;
+			input[type=number] {
+				width: 90px;
 			}
 			select:focus, input[type=number]:focus {
 				outline: none;
@@ -80,9 +77,12 @@
 			select, input[type=number] {
 				padding: 0 5px;
 			}
+			#auto {
+				width: 70px;
+				padding: 5px 10px;
+			}
 			#auto, .preset {
 				background-color: #cccccc;
-				padding: 5px 10px;
 				cursor: pointer;
 				transition: background-color 0.1s;
 			}
@@ -105,7 +105,12 @@
 				flex-grow: 1;
 				flex-shrink: 0;
 				margin: 3px;
+				padding: 5px 15px;
 				font-size: 20px;
+			}
+			.flexbreak {
+				flex-basis: 100%;
+				height: 0;
 			}
 			label {
 				cursor: pointer;
@@ -121,7 +126,7 @@
 				padding: 5px 10px 5px 20px;
 				font-size: 40px;
 				font-family: Arial;
-				transition: right 0.5s;
+				transition: right 0.5s, background-color 0.1s;
 			}
 			@media only screen and (max-aspect-ratio: 1/1) {
 				#arrow {
@@ -512,7 +517,8 @@
 						ctx.putImageData(sky, 0, 0);
 					} else {
 						if (checked("lines") || checked("horizon") || checked("hours") || checked("inside")) {
-							ctx.fillStyle = "#87ceeb";
+							ctx.fillStyle = "#65c2e7";
+							ctx.fillStyle = "#66ccff";
 						} else {
 							ctx.fillStyle = "#00001a";
 						}
@@ -1184,7 +1190,7 @@
 					ctx.fill();
 					ctx.strokeStyle = "#333300";
 					ctx.lineWidth = r / 200;
-					if (document.getElementById("pointer").value === "1") {
+					if (document.getElementById("pointer").value === "1" && false) {
 						ctx.beginPath();
 						ctx.arc(distance * sin(SUN.H), -1 * distance * cos(SUN.H), r2 * factor, 0, 2 * Math.PI);
 						ctx.stroke();
@@ -1357,7 +1363,7 @@
 					uncheck("hours");
 					uncheck("sky");
 					value("proj", "-1");
-					uncheck("date");
+					check("date");
 				} else if (k === "b") {
 					uncheck("planets");
 					uncheck("smaller");
@@ -1520,17 +1526,19 @@
 				<br>UTC+<input type="number" max="14" min="-12" id="zone" disabled> &nbsp;(<input id="autoZone" type="checkbox" checked onChange="autoZone()"><label for="autoZone"> Auto</label>)
 				<br><b>Presets</b><br>
 			</p>
-				<div id="presetBox">
-					<div class="preset" onClick="preset('w')">The&nbsp;works</div>
-					<div class="preset" onClick="preset('p')">Prague</div>
-					<div class="preset" onClick="preset('g')">German</div>
-					<div class="preset" onClick="preset('i')">Italian</div>
-					<div class="preset" onClick="preset('e')">Elegant</div>
-					<div class="preset" onClick="preset('o')">Open&nbsp;skies</div>
-					<div class="preset" onClick="preset('z')">Zodiac</div>
-					<div class="preset" onClick="preset('s')">Sky</div>
-					<div class="preset" onClick="preset('n')">Switch&nbsp;poles</div>
-				</div>
+			<div id="presetBox">
+				<div class="preset" onClick="preset('w')">The&nbsp;works</div>
+				<div class="preset" onClick="preset('p')">Prague</div>
+				<div class="flexbreak"></div>
+				<div class="preset" onClick="preset('g')">Plain</div>
+				<div class="preset" onClick="preset('i')">Italian</div>
+				<div class="preset" onClick="preset('e')">Elegant</div>
+				<div class="preset" onClick="preset('o')">Open</div>
+				<div class="preset" onClick="preset('z')">Zodiac</div>
+				<div class="preset" onClick="preset('s')">Sky</div>
+				<div class="flexbreak"></div>
+				<div class="preset" onClick="preset('n')">Switch&nbsp;poles</div>
+			</div>
 			<p class="options">
 				<b>Options</b>
 				<br>
