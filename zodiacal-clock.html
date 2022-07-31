@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 1.0-->
+	<!--Version 1.1-->
+	<!--31/7/2022-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -88,7 +89,7 @@
 				padding: 5px 10px 5px 20px;
 				font-size: 40px;
 				font-family: Arial;
-				transition: right 0.5s;
+				transition: right 0.5s, background-color 0.1s;
 			}
 			#arrow:hover {
 				background-color: #999999;
@@ -176,6 +177,31 @@
 				ctx.lineTo(len2 * sin(ang + ang2), -1 * len2 * cos(ang + ang2));
 				ctx.closePath();
 				ctx.fill();
+			}
+			var drawHand = function (len, length, ang, h, w, lin, lin2) {
+				var len2 = len - h;
+				ctx.rotate(rad(ang + 180));
+				ctx.lineWidth = lin;
+				ctx.beginPath();
+				ctx.moveTo(0, 0);
+				ctx.lineTo(0, len - (3 / 4) * h);
+				ctx.stroke();
+				ctx.lineWidth = lin2;
+				ctx.beginPath();
+				ctx.moveTo(0, len - (3 / 4) * h);
+				ctx.lineTo(0, length);
+				ctx.stroke();
+				ctx.beginPath();
+				var cp1x = w * 2;
+				var cp1y = len2 + h / 20;
+				var cp2x = w / 10;
+				var cp2y = len2 + h * 5 / 8;
+				ctx.moveTo(0, len - h);
+				ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, lin2 / 2, len);
+				ctx.lineTo(lin2 / -2, len);
+				ctx.bezierCurveTo(-1 * cp2x, cp2y, -1 * cp1x, cp1y, 0, len - h);
+				ctx.fill();
+				ctx.rotate(-1 * rad(ang + 180));
 			}
 			var checked = function (id) {
 				return document.getElementById(id).checked;
@@ -277,6 +303,8 @@
 					var handColour = "#e6c300";
 					var handColour = "#808080";
 					var handColour = "#999999";
+					//var handColour = "#805e00";
+					var handColour2 = "#808080";
 					//Clock bg
 					if (checked("time")) {
 						ctx.fillStyle = blackColour;
@@ -529,16 +557,20 @@
 					ctx.fillStyle = handColour;
 					ctx.strokeStyle = handColour;
 					if (checked("time")) {
-						arrow(0.6 * r, HOUR * 30, 0.25 * r, 0.1 * r, 0.05 * r);
-						arrow(0.96 * r, MINUTE * 6, 0.25 * r, 0.1 * r, 0.05 * r);
+						//arrow(0.6 * r, HOUR * 30, 0.25 * r, 0.1 * r, 0.05 * r);
+						//arrow(0.96 * r, MINUTE * 6, 0.25 * r, 0.1 * r, 0.05 * r);
+						drawHand(0.55 * r, 0.6 * r, HOUR * 30, 0.2 * r, 0.06 * r, 0.035 * r, 0.02 * r);
+						drawHand(0.8 * r, 0.96 * r, MINUTE * 6, 0.25 * r, 0.05 * r, 0.035 * r, 0.02 * r);
 					}
 					//Week hand
+					ctx.fillStyle = handColour2;
+					ctx.strokeStyle = handColour2;
 					if (checked("week")) {
 						arrow(0.2 * r, WEEK * 360 / 7, 0.1 * r, 0.05 * r, r / 50);
 					}
 					//Centre
 					if (checked("hands") || checked("time") || checked("week") || checked("dragon")) {
-						ctx.fillStyle = handColour;
+						ctx.fillStyle = handColour2;
 						ctx.beginPath();
 						ctx.arc(0, 0, r * 0.05, 0, TwoPi);
 						ctx.fill();
