@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<!--Version 5.2-->
-	<!--30/7/2022-->
+	<!--31/7/2022-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -360,6 +360,10 @@
 			var lastLat = "N/A";
 			var lastPole = "N/A";
 			var lastProj = "N/A";
+			var colourNavy = "#000033";
+			var colourGold = "#ccad00";
+			var colourSilver = "#999999";
+			var colourBG = "#66ccff"; // "#66c1e5";
 			var run = function () {
 				var longitude = Number(document.getElementById("long").value);
 				var latitude = Number(document.getElementById("lat").value);
@@ -518,17 +522,16 @@
 					} else {
 						if (checked("lines") || checked("horizon") || checked("hours") || checked("inside")) {
 							ctx.fillStyle = "#65c2e7";
-							ctx.fillStyle = "#66ccff";
+							ctx.fillStyle = colourBG;
 						} else {
-							ctx.fillStyle = "#00001a";
+							ctx.fillStyle = colourNavy;
 						}
 						ctx.beginPath();
 						ctx.arc(0, 0, r, 0, 2 * Math.PI);
 						ctx.fill();
 					}
 					//Equator and Tropics
-					ctx.fillStyle = "#c0c0c0";
-					ctx.strokeStyle = "#999999";
+					ctx.strokeStyle = colourSilver;
 					ctx.lineWidth = r / 100;
 					if (checked("lines")) {
 						ctx.beginPath();
@@ -545,7 +548,7 @@
 					ctx.fillStyle = "#ffffff";
 					ctx.strokeStyle = "#ffffff";
 					if (checked("horizon") || checked("hours")) {
-						ctx.strokeStyle = "#999999";
+						ctx.strokeStyle = colourSilver;
 						ctx.lineWidth = r / 150;
 						var circle = dist(Math.sign(latitude) * 90 - latitude);
 						if (checked("hours") && latitude != 0 && circle < r) {
@@ -581,7 +584,7 @@
 						}
 						if (true) {
 							ctx.lineWidth = r / 200;
-							ctx.strokeStyle = "#999999";
+							ctx.strokeStyle = colourSilver;
 							ctx.fillStyle = "#ffffff";
 							for (i = 0; i < points.length; i++) {
 								var H = points[i].H;
@@ -881,8 +884,8 @@
 						}
 					}
 					//Stars
-					ctx.fillStyle = "#ccad00";
-					ctx.strokeStyle = "#ccad00";
+					ctx.fillStyle = colourGold;
+					ctx.strokeStyle = colourGold;
 					ctx.lineCap = "round";
 					if (checked("sidereal")) {
 						distance = 1.1 * r;
@@ -918,7 +921,7 @@
 						}
 						var star;
 						if (!justStars) {
-							ctx.fillStyle = "#00001a";
+							ctx.fillStyle = colourNavy;
 							if (checked("trans")) {
 								ctx.fillStyle += "af";
 							}
@@ -939,7 +942,7 @@
 							}
 							ctx.closePath();
 							ctx.fill();
-							ctx.fillStyle = "#ccad00";
+							ctx.fillStyle = colourGold;
 							for (var i = 0; i < 360 * 4; i++) {
 								star = EcToEq(i / 4, ringBottom, JD, LMST);
 								distance = dist(star.dec);
@@ -988,11 +991,11 @@
 							ringBottom = -4;
 						}
 						if (!justStars) {
-							ctx.fillStyle = "#00001a";
+							ctx.fillStyle = colourNavy;
 							if (checked("trans")) {
 								ctx.fillStyle += "af";
 							}
-							ctx.strokeStyle = "#ccad00";
+							ctx.strokeStyle = colourGold;
 							ctx.beginPath();
 							ctx.arc(centre.x, centre.y, centre.rad + ringTop2 * centre.unit, 0, 2 * Math.PI);
 							ctx.arc(centre.x, centre.y, centre.rad + ringBottom * centre.unit, 0, 2 * Math.PI, true);
@@ -1005,7 +1008,7 @@
 							ctx.arc(centre.x, centre.y, centre.rad + ringBottom * centre.unit, 0, 2 * Math.PI);
 							ctx.stroke();
 						}
-						ctx.fillStyle = "#ccad00";
+						ctx.fillStyle = colourGold;
 						for (var i = 0; i < 12; i++) {
 							for (var j = 0; j <= 180 * 5; j++) {
 								var starL = EcToEq(i * 30, j / 5 - 90, JD, LMST);
@@ -1045,7 +1048,7 @@
 					}
 					//Ecliptic
 					if (checked("ecliptic")) {
-						ctx.fillStyle = "#ccad00";
+						ctx.fillStyle = colourGold;
 						for (var i = 0; i < 360 * 3; i++) {
 							star = EcToEq(i / 3, 0, JD, LMST);
 							distance = dist(star.dec);
