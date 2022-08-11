@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 	<!--I don't know; I was bored one morning.-->
+	<!-- Version 2.0.2 -->
+	<!-- 11/8/2022-->
 	<head>
-		<!-- Version 2.0.1 -->
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
@@ -61,6 +62,10 @@
 	</head>
 	<body>
 		<script>
+			var singleDigits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+			var isDigit = function (x) {
+				return singleDigits.includes(x);
+			}
 			var single = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 			var ty = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 			var teen = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -258,35 +263,48 @@
 					}
 				}
 				var good = true;
+				var errorCode = 0; // nothing typed
+				var badChar = 0;
 				if (input === "") {
 					good = false;
 				}
-				var input2 = input.split(".");
-				var decimal = "";
-				if (input2.length === 2) {
-					input = input2[0];
-					decimal = input2[1];
-					if (decimal === "") {
-						good = false;
-					}
-				} else if (input2.length > 2) {
-					good = false;
-				}
-				for (var i = 0; i < input.length; i++) {
-					var check = true;
-					if (input[i] === "0" && (i != 0 || input.length === 1) || input[i] === "1" || input[i] === "2" || input[i] === "3" || input[i] === "4" || input[i] === "5" || input[i] === "6" || input[i] === "7" || input[i] === "8" || input[i] === "9") {
-						check = false;
-					}
-					if (check) {
-						good = false;
-						break;
-					}
-				}
-				if (decimal != "") {
-					for (var i = 0; i < decimal.length; i++) {
-						if (!(decimal[i] === "0" || decimal[i] === "1" || decimal[i] === "2" || decimal[i] === "3" || decimal[i] === "4" || decimal[i] === "5" || decimal[i] === "6" || decimal[i] === "7" || decimal[i] === "8" || decimal[i] === "9")) {
+				if (good) {
+					var input2 = input.split(".");
+					var decimal = "";
+					if (input2.length === 2) {
+						input = input2[0];
+						decimal = input2[1];
+						if (input === "") {
 							good = false;
+							errorCode = 4; // Starts with a .
+						} else if (decimal === "") {
+							good = false;
+							errorCode = 1; // ends in .
+						}
+					} else if (input2.length > 2) {
+						good = false;
+						errorCode = 2; // more than one .
+					}
+				}
+				if (good) {
+					for (var i = 0; i < input.length; i++) {
+						if (!(isDigit(input[i]) && (input[i] != "0" || i != 0 || input.length === 1))) {
+							good = false;
+							errorCode = 3; // Invalid character
+							badChar = input[i];
 							break;
+						}
+					}
+				}
+				if (good) {
+					if (decimal != "") {
+						for (var i = 0; i < decimal.length; i++) {
+							if (!isDigit(decimal[i])) {
+								good = false;
+								errorCode = 3;
+								badChar = decimal[i];
+								break;
+							}
 						}
 					}
 				}
@@ -317,8 +335,30 @@
 					}
 					document.getElementById("numresult").innerHTML = original;
 				} else {
-					document.getElementById("result").innerHTML = "{Invalid number}";
-					document.getElementById("numresult").innerHTML = "Try again.";
+					document.getElementById("result").innerHTML = "{ Invalid number }";
+					var errorMessage = "";
+					if (errorCode === 0) {
+						errorMessage = "You have to type more than that.";		
+					} else if (errorCode === 1) {
+						errorMessage = "Remove the decimal point at the end, or add more digits after it.";
+					} else if (errorCode === 2) {
+						errorMessage = "There's more than one decimal point in there.";
+					} else if (errorCode === 4) {
+						errorMessage = "Add a leading zero before the decimal point.";
+					} else {
+						if (badChar === "0") {
+							errorMessage = "Remove any leading zeros.";
+						} else if (badChar === "-") {
+							errorMessage = "There's an extra hyphen in there.";
+						} else if (badChar === ",") {
+							errorMessage = "Don't include any commas.";
+						} else if (badChar === " ") {
+							errorMessage = "Don't include any spaces.";
+						} else {
+							errorMessage = "Remove the '" + badChar + "'."
+						}
+					}
+					document.getElementById("numresult").innerHTML = errorMessage;
 				}
 			}
 			console.log("For the nth '-illion' word, use illion(n). For ordinal numbers, use ORD()");
@@ -365,6 +405,7 @@
 			<p id="in"><input id="num" type="text" placeholder="Enter numerals here." onkeydown="key(event)"> &nbsp; <span id="btn" onClick="go()">Go</span></p>
 			<p id="result">The name of the number will appear here.</p>
 			<p id="numresult">It's that simple.</p>
+			<!--Clap if you get the joke.-->
 		</center>
 	</body>
 </html>
