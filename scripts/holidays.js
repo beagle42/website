@@ -418,12 +418,20 @@ var Holidays = [
 		"&#128330;"
 	),
 	new Hol(
+		"Father's Day & National Flag Day",
+		function (D) {
+			return D.d === 3 && D.m === 9 && D.d === mod(D.DL + 2, 7) + 1;
+		},
+		"&#128153;<br>" + img("flag.png", "1em") + " &nbsp; " + img("red-ensign.png", "1em"),
+		"#4da6ff", "#00008B"
+	),
+	new Hol(
 		"Father's Day",
 		function (D) {
 			return D.m === 9 && D.d === mod(D.DL + 2, 7) + 1;
 		},
-		"&#128144;",
-		"#4da6ff", "#ff99cc"
+		"&#128153;",
+		"#4da6ff", "#17376a"
 	),
 	new Hol(
 		"National Flag Day",
