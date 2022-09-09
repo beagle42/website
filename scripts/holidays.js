@@ -236,6 +236,14 @@ var ChristmasEve = ["&#127850;&#129371;", "&#127877;", "&#129420;"];
 //List of holidays
 var Holidays = [
 	new Hol(
+		"Queen Elizabeth II, 1926-2022",
+		function (D) {
+			return D.y === 2022 && D.m === 9 && D.d >= 8 && D.d <= 19;
+		},
+		"&#128144;",
+		"#303030", "#303030", "#ffffff"
+	),
+	new Hol(
 		"New Year's Day",
 		isDate(1, 1),
 		"&#127878;<br>Happy New Year!<br>&#127881;",
@@ -586,7 +594,7 @@ var Holidays = [
 		'<span style="font-family: Emoji">&#128008;</span>'
 	),
 	new Hol(
-		"Christmas season",
+		"the Christmas season",
 		function (D) {
 			return D.m === 12 && D.d < 25;
 		},
