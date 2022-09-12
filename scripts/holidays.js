@@ -238,7 +238,7 @@ var Holidays = [
 	new Hol(
 		"Queen Elizabeth II, 1926-2022",
 		function (D) {
-			return D.y === 2022 && D.m === 9 && D.d >= 8 && D.d <= 19;
+			return D.y === 2022 && D.m === 9 && D.d >= 8 && D.d <= 22;
 		},
 		"&#128144;",
 		"#303030", "#303030", "#ffffff"
