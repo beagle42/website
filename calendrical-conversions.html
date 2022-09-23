@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
-	<!--Version 2.0.0, 22/7/2022-->
+	<!--Version 2.0.1, 23/9/2022-->
+	
 	<!--How much more boring can I get?-->
 	
 	<!-- Bibilography:
@@ -2203,6 +2204,10 @@
 				var display = cal[newCal].display(result, JD);
 				document.getElementById("todayResult").innerHTML = show(display);
 			}
+			var update = function () {
+				run();
+				setTimeout(update, 5 * 60 * 1000);
+			}
 			//Things
 			var nameCalendar = function(name) {
 				var b = name.indexOf("(");
@@ -2276,7 +2281,7 @@
 				document.getElementById("toSelect").innerHTML = fromSelect;
 				document.getElementById("inputBox").innerHTML = inputBox;
 				//document.getElementById("list").innerHTML = list;
-				run();
+				update();
 			}
 			//Change input
 			var change = function () {

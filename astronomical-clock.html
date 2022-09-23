@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 5.2-->
-	<!--31/7/2022-->
+	<!--Version 5.2.1-->
+	<!--23/9/2022-->
+	<!-- Changes:
+		Worked around annoying bug in Chrome that was making the sky disappear.
+	-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -518,7 +521,14 @@
 						lastSkyLat = latitude;
 						lastSkyPole = pole;
 						lastSkyProj = project;
-						ctx.putImageData(sky, 0, 0);
+						//ctx.putImageData(sky, 0, 0);
+						var skyCanvas = document.createElement('canvas');
+						var mctx = skyCanvas.getContext("2d");
+						skyCanvas.width = canvas.width;
+						skyCanvas.height = canvas.height;
+						mctx.putImageData(sky, 0, 0);
+						ctx.drawImage(skyCanvas, -0.5 * canvas.width, -0.5 * canvas.height, canvas.width, canvas.height);
+						skyCanvas.remove();
 					} else {
 						if (checked("lines") || checked("horizon") || checked("hours") || checked("inside")) {
 							ctx.fillStyle = "#65c2e7";
