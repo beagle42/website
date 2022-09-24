@@ -4,8 +4,16 @@
 	src: url(NotoEmoji-Regular.ttf);
 }
 @font-face {
-	font-family: ColourEmoji;
+	font-family: NewEmoji;
+	src: url(NotoEmoji-Regular-New.ttf);
+}
+@font-face {
+	font-family: OldColourEmoji;
 	src: url(NotoColorEmoji.ttf);
+}
+@font-face {
+	font-family: ColourEmoji;
+	src: url(NotoColorEmoji-New.ttf);
 }
 @font-face {
 	font-family: Symbols;
