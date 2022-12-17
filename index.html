@@ -153,9 +153,9 @@
 			var start = function () {
 				var now = new Date();
 				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
-				//var hol = holiday(3, 9, 2023, 15);
+				//var hol = holiday(27, 11, 2022, 15);
 				if (hol != Holidays.length) {
-					document.getElementById("greeting").innerHTML = '<span title="' + Holidays[hol].name + '">' + Holidays[hol].message + '</span>';
+					document.getElementById("greeting").innerHTML = '<span title="' + Holidays[hol].name.substring(0, 1).toUpperCase() + Holidays[hol].name.substring(1) + '">' + Holidays[hol].message + '</span>';
 					document.getElementById("holiday").innerHTML = " Today celebrating " + Holidays[hol].name + ".";
 					if (Holidays[hol].colour1 != "NA") {
 						var root = document.querySelector(':root');
