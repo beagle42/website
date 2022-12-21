@@ -318,22 +318,22 @@ var Holidays = [
 		"#89cff0", "#1a93cb"
 	),
 	new Hol(
-		"Autumn Equinox",
+		"the Autumn Equinox",
 		isInList(AutumnE),
 		"&#127810;"
 	),
 	new Hol(
-		"Winter Solstice",
+		"the Winter Solstice",
 		isInList(WinterS),
 		"&#10052;"
 	),
 	new Hol(
-		"Spring Equinox",
+		"the Spring Equinox",
 		isInList(SpringE),
 		"&#127799;"
 	),
 	new Hol(
-		"Summer Solstice",
+		"the Summer Solstice",
 		isInList(SummerS),
 		"&#9728;"
 	),
@@ -388,7 +388,7 @@ var Holidays = [
 		"&#127838;&#127863;"
 	),
 	new Hol(
-		"Labour Day",
+		"Labour Day / May Day",
 		function (D) {
 			return D.m === 5 && D.d === mod(D.DL, 7) + 1;
 		},
@@ -567,7 +567,7 @@ var Holidays = [
 		img("aboriginal-flag.png") + " &nbsp; " + img("islander-flag.png")
 	),
 	new Hol(
-		"First of Ramadan",
+		"the first day of Ramadan",
 		isInSunsetJDList(Ramadan),
 		"&#9770;"
 	),
