@@ -31,3 +31,11 @@
 	font-family: OldEnglish;
 	src: url(UnifrakturCook-Bold.ttf);
 }
+@font-face {
+	font-family: RomanNumeralsCondensed;
+	src: url(RomanNumeralsCondensed.otf);
+}
+@font-face {
+	font-family: RomanNumeralsCondensedBold;
+	src: url(RomanNumeralsCondensedBold.otf);
+}
