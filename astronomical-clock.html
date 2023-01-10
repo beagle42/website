@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 5.2.1-->
-	<!--23/9/2022-->
+	<!--Version 5.3.0-->
+	<!--10/1/2023-->
 	<!-- Changes:
-		Worked around annoying bug in Chrome that was making the sky disappear.
+		Replaced silly compressed roman numeral images with custom condensed font. 
+		Also used this font for numbers on 'date & time' clockface.
+		Replaced 'insert bitmap image' moon with fully drawn moon like the ones in Dials and Zodiac Clock. This gives a less pixelated look.
 	-->
-	<!--Bibliography
+	<!--Bibliography:
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
 			Astrological Symbols from the Google Noto Project.
@@ -14,6 +16,7 @@
 	-->
 	<head>
 		<title>Astronomical Clock</title>
+		<meta name="keywords" content="astronomical, clock, astronomical clock">
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
@@ -144,7 +147,7 @@
 			var canvas, ctx, r, r2, i, sky, points;
 			var signs = ["\u2648", "\u2649", "\u264a", "\u264b", "\u264c", "\u264d", "\u264e", "\u264f", "\u2650", "\u2651", "\u2652", "\u2653"];
 			var stars = ["★", "★", "★", "★", "★", "★", "★", "★", "★", "★", "★", "✯"];
-			var roman = ["N", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
+			var roman = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
 			var months = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 			var week = ["\u2609", "\uD83C\uDF19", "\u2642", "\u263f", "\u2643", "\u2640", "\u2644"];
 			var weekLetters = ["S", "M", "T", "W", "T", "F", "S"];
@@ -231,7 +234,6 @@
 				return deg(Math.atan2(y, x));
 			}
 			var dist = function (dec) {
-				//return cos((90 - dec) / 2) * r / 0.95;
 				if (document.getElementById("proj").value === "1") {
 					return (dec / 180 * Number(document.getElementById("pole").value) + 0.5) * canvas.width / 1.8;
 				} else {
@@ -239,7 +241,6 @@
 				}
 			}
 			var invdist = function (pixels) {
-				//return 90 - deg(Math.acos(pixels * 0.95 / r)) * 2;
 				if (document.getElementById("proj").value === "1") {
 					return (pixels * 1.8 / canvas.width - 0.5) * 180 * Number(document.getElementById("pole").value);
 				} else {
@@ -305,20 +306,6 @@
 			}
 			var checked = function (id) {
 				return document.getElementById(id).checked;
-			}
-			var numeralMemory = [];
-			var loadNumerals = function () {
-				for (var i = 1; i <= 24; i++) {
-					numeralMemory[i] = document.createElement('canvas');
-					var mctx = numeralMemory[i].getContext("2d");
-					numeralMemory[i].width = r * 10;
-					numeralMemory[i].height = r;
-					mctx.textBaseline = "middle";
-					mctx.textAlign = "center";
-					mctx.font = "bold " + r + "px Times";
-					mctx.fillStyle = "#ffffff"
-					mctx.fillText(roman[i], r * 10 / 2, r / 2);
-				}
 			}
 			var GST = function (decHours, JD) {
 				var S = JD - 2451545;
@@ -718,25 +705,23 @@
 						ctx.arc(0, 0, 0.49 * canvas.width, 0, 2 * Math.PI, true);
 						ctx.fill();
 						ctx.fillStyle = "#ffffff";
-						ctx.font = r * 0.12 + "px Arial";
-						if (document.getElementById("czechStyle").value === "2") {
-							ctx.font = r * 0.14 + "px Old English Text MT, OldEnglish";
+						ctx.font = r * 0.14 + "px Old English Text MT, OldEnglish";
+						if (document.getElementById("czechStyle").value === "1") {
+							ctx.font = r * 0.12 + "px RomanNumeralsCondensedBold";
 						}
 						for (var i = 1; i <= 24; i++) {
 							var ang = i * 360 / 24 + SUNSET;
 							ctx.rotate(rad(ang));
+							var n = i;
 							if (document.getElementById("czechStyle").value === "1") {
-								var mheight = r * 0.12;
-								var mwidth = mheight * 5;
-								ctx.drawImage(numeralMemory[i], mwidth / -2, -0.46 * canvas.width - mheight / 2, mwidth, mheight);
+								n = roman[i];
 							} else {
-								ctx.fillText(i.toString(), 0, -0.46 * canvas.width);
+								n = i.toString();
 							}
-							if (true) {
-								ctx.beginPath();
-								ctx.arc(0, -0.43 * canvas.width, r / 100, 0, 2 * Math.PI);
-								ctx.fill();
-							}
+							ctx.fillText(n, 0, -0.46 * canvas.width);
+							ctx.beginPath();
+							ctx.arc(0, -0.43 * canvas.width, r / 100, 0, 2 * Math.PI);
+							ctx.fill();
 							ctx.rotate(-1 * rad(ang));
 						}
 					}
@@ -801,22 +786,13 @@
 									ctx.lineTo(dialRad * sin(6 * i), -1 * dialRad * cos(6 * i));
 									ctx.stroke();
 								}
-								ctx.font = dialRad / 5 + "px Times";
+								ctx.font = dialRad * 0.3 + "px RomanNumeralsCondensedBold";
 								for (i = 1; i <= 12; i++) {
 									ctx.rotate(Math.PI / 6);
-									ctx.fillText(roman[i], 0, -0.7 * dialRad);
+									ctx.fillText(roman[i], 0, -0.675 * dialRad);
 								}
 								ctx.strokeStyle = "#000000";
 								ctx.fillStyle = "#000000";
-								/*ctx.lineWidth = dialRad / 15;
-								ctx.beginPath();
-								ctx.moveTo(0, 0);
-								ctx.lineTo(0.5 * dialRad * sin(30 * HOUR), -0.5 * dialRad * cos(30 * HOUR));
-								ctx.stroke();
-								ctx.beginPath();
-								ctx.moveTo(0, 0);
-								ctx.lineTo(0.85 * dialRad * sin(6 * MINUTE), -0.85 * dialRad * cos(6 * MINUTE));
-								ctx.stroke();*/
 								arrow(0.5 * dialRad, 30 * HOUR, dialRad / 4, dialRad / 7, dialRad / 15);
 								arrow(0.85 * dialRad, 6 * MINUTE, dialRad / 4, dialRad / 7, dialRad / 15);
 							} else if (j === 1) {
@@ -1101,43 +1077,39 @@
 					if (checked("smaller")) {
 						factor = 0.75;
 					}
-					var rm = Math.floor(r2 * factor) * 5;
-					var rm2 = r2 * factor;
+					var moonRad = r2 * factor;
 					distance = dist(MOON.dec);
 					if (document.getElementById("pointer").value === "1") {
-						distance -= r2 * factor;
+						distance -= moonRad;
 					}
-					var side = true;
-					if (phase > 180) {
-						side = false;
-						phase -= 180;
-					}
-					var img = ctx.createImageData(2 * rm, 2 * rm);
-					for (var i = 0; i < img.data.length; i += 4) {
-						var pixel = Math.floor(i / 4);
-						var row = Math.floor(pixel / (2 * rm)) - rm;
-						pixel %= 2 * rm;
-						pixel -= rm;
-						var slice = Math.sqrt(rm * rm - row * row);
-						if (pixel > -1 * slice && pixel < slice) {
-							var divide = pixel > slice * cos(phase);
-							img.data[i + 3] = 255;
-							if (divide && side || !divide && !side) {
-								img.data[i] = 255;
-								img.data[i + 1] = 255;
-								img.data[i + 2] = 255;
-							}
-						}
-					}
-					var memory = document.createElement('canvas');
-					var mctx = memory.getContext("2d");
-					memory.width = rm * 2;
-					memory.height = rm * 2;
-					mctx.putImageData(img, 0, 0);
 					ctx.rotate(rad(MOON.H));
-					ctx.drawImage(memory, -1 * rm2, -1 * distance - rm2, rm2 * 2, rm2 * 2);
-					ctx.rotate(rad(360 - MOON.H));
-					memory.remove();
+					ctx.fillStyle = "#000000";
+					if (phase === 180) {
+						ctx.fillStyle = "#ffffff";
+					}
+					ctx.beginPath();
+					ctx.arc(0, -1 * distance, moonRad, 0, 2 * Math.PI);
+					ctx.fill();
+					ctx.fillStyle = "#ffffff";
+					if (mod(phase, 180) != 0) {
+						var side = phase < 180;
+						var side2 = -1;
+						if (side) {
+							side2 = 1;
+						}
+						var n = 1000;
+						ctx.beginPath();
+						ctx.moveTo(0, -1 * distance - moonRad);
+						for (var i = 0; i <= n; i++) {
+							var moonY = i * 2 / n - 1;
+							var moonX = Math.sqrt(1 - moonY * moonY) * cos(phase) * side2;
+							ctx.lineTo(moonX * moonRad, -1 * distance + moonY * moonRad);
+						}
+						ctx.arc(0, -1 * distance, moonRad, 0.5 * Math.PI, 1.5 * Math.PI, side);
+						ctx.closePath();
+						ctx.fill();
+					}
+					ctx.rotate(-1 * rad(MOON.H));
 					//Hour hand
 					ctx.lineCap = "round";
 					if (checked("hand")) {
@@ -1272,7 +1244,6 @@
 				r2 = r * 0.1;
 				ctx.textBaseline = "middle";
 				ctx.textAlign = "center";
-				loadNumerals();
 				run();
 			}
 			var check = function (id) {
