@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<!--Version 1.0.0-->
+	<!--12/1/2023-->
+	<!--Created by Joshua in association with the General Clocks Working Group.-->
+	<head>
+		<title>Decimal Time</title>
+		<meta name="keywords" content="decimal, clock, decimal clock, decimal time">
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<link rel="stylesheet" href="stylesheets/general-clocks.css">
+	</head>
+	<body onLoad="start()">
+		<script src="scripts/maths.js"></script>
+		<script src="scripts/general-clocks.js"></script>
+		<script>
+			var canvas, ctx, r;
+			function run() {
+				// Calculations
+				var now = new Date();
+				var decTime = now.getHours() / 24 + now.getMinutes() / 1440 + now.getSeconds() / 86400 + now.getMilliseconds() / 86400000;
+				var HOUR = decTime * 10;
+				var intHOUR = floor(HOUR);
+				var MINUTE = (HOUR - intHOUR) * 100;
+				var intMINUTE = floor(MINUTE);
+				var SECOND = (MINUTE - intMINUTE) * 100;
+				var intSECOND = floor(SECOND);
+				// Analogue clock
+				var numbersArray = listOfNumbers(10);
+				if (checked("ten")) {
+					numbersArray[0] = 10;
+				}
+				var font = "'Inter', Arial";
+				var roman = checked("roman");
+				if (roman) {
+					numbersArray = arrayToRoman(numbersArray);
+					font = "RomanNumeralsCondensedBold, Times, serif";
+				}
+				ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
+				drawClockFace(ctx, r, 100, 5, numbersArray, 0.275, font, 0.775, roman);
+				drawClockHands(ctx, r, HOUR * 360 / 10, MINUTE * 360 / 100, intSECOND * 360 / 100, checked("seconds"));
+				// Digital clock
+				var space = "";
+				if (checked("spaces")) {
+					space = " ";
+				}
+				var fraction = checked("fraction");
+				var digital = "";
+				if (fraction) {
+					digital += "0.";
+				}
+				digital += intHOUR;
+				if (fraction) {
+					digital += space;
+				} else {
+					digital += ".";
+				}
+				digital += zero(intMINUTE);
+				if (checked("seconds")) {
+					digital += space + zero(intSECOND);
+				}
+				document.getElementById("time").innerHTML = digital;
+				// Repeat
+				setTimeout(run, 100);
+			}
+		</script>
+		<div id="page">
+			<div id="clockbox">
+				<canvas id="clock"></canvas>
+			</div>
+			<div id="digitalbox">
+				<p id="time" class="centred"></p>
+			</div>
+			<div id="optionsbox">
+				<div id="options">
+					<div class="optionscolumn">
+						<input id="seconds" type="checkbox"><label for="seconds"> &#8216;Seconds&#8217;</label>
+						<br><input id="ten" type="checkbox"><label for="ten"> Use &#8220;10&#8221; on clockface</label>
+						<br><input id="roman" type="checkbox"><label for="roman"> Roman numerals</label>
+					</div>
+					<div class="optionscolumn">
+						<input id="fraction" type="checkbox"><label for="fraction"> Fractional day</label>
+						<br><input id="spaces" type="checkbox" checked><label for="spaces"> Spaces</label>
+					</div>
+					<div id="notesbox">In this system, there are 10 &#8216;hours&#8217; in a day, 100 &#8216;minutes&#8217; in an &#8216;hour&#8217; and 100 &#8216;seconds&#8217; in a &#8216;minute&#8217;. Thus, all three form one decimal number representing the fraction of the day elapsed.<br>A system of this kind was officially instituted in revolutionary France in 1793. Unlike the metric system which was also introduced during this period, decimal time proved very unpopular and was made non-mandatory in 1795.<br>&copy; Joshua, 2023.</div>
+				</div>
+			</div>
+		</div>
+		<div id="header">
+			<div id="home">
+				<a href="index.html">
+					<img src="images/logo.png" id="homeLogo">
+				</a>
+			</div>
+			<div id="title">
+				<p id="titlep">Decimal Time</p>
+			</div>
+		</div>
+	</body>
+</html>
