@@ -121,8 +121,8 @@ function start() {
 	var digitalBoxTop = 0;
 	var optionsBoxTop = boxWidth / 2;
 	var pageWidth = 2 * boxWidth;
-	if (useableHeight >= 3 / 2 * useableWidth) {
-		boxWidth = useableWidth;
+	if (useableHeight > useableWidth) {
+		boxWidth = useableHeight / 2;
 		digitalBoxTop = boxWidth;
 		optionsBoxTop = boxWidth * 3 / 2;
 		pageWidth = boxWidth;
