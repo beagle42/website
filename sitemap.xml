@@ -38,4 +38,9 @@
 <loc>https://beagle42.github.io/website/sitemap.html</loc>
 <priority>0.0</priority>
 </url>
-</urlset>
+<url>
+<loc>https://beagle42.github.io/website/decimal-time.html</loc>
+</url>
+<url>
+<loc>https://beagle42.github.io/website/local-time.html</loc>
+</url>
