@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 1.0.0-->
-	<!--12/1/2023-->
+	<!--Version 1.0.1-->
+	<!--18/1/2023-->
 	<!--Created by Joshua in association with the General Clocks Working Group.-->
 	<head>
-		<title>Decimal Time</title>
+		<title>Decimal Time Clock</title>
 		<meta name="keywords" content="decimal, clock, decimal clock, decimal time">
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
@@ -13,6 +13,7 @@
 	</head>
 	<body onLoad="start()">
 		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
 		<script src="scripts/general-clocks.js"></script>
 		<script>
 			var canvas, ctx, r;
@@ -60,7 +61,7 @@
 				if (checked("seconds")) {
 					digital += space + zero(intSECOND);
 				}
-				document.getElementById("time").innerHTML = digital;
+				setHTML("time", digital);
 				// Repeat
 				setTimeout(run, 100);
 			}
@@ -94,7 +95,7 @@
 				</a>
 			</div>
 			<div id="title">
-				<p id="titlep">Decimal Time</p>
+				<p id="titlep">Decimal Time Clock</p>
 			</div>
 		</div>
 	</body>

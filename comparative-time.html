@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+	<!--Version 1.0.0-->
+	<!--16/1/2023-->
+	<!--Created by Joshua in association with the General Clocks Working Group.-->
+	<!--Bibliography:
+			All astronomical formulae sourced directly from:
+				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
+	-->
+	<head>
+		<title>Compare Local Times</title>
+		<meta name="keywords" content="local time, local apparent time, local mean time, mean time, apparent solar time, true solar time">
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<link rel="stylesheet" href="stylesheets/general-clocks.css">
+		<style>
+			.box {
+				width: var(--box-width);
+				height: calc(var(--box-width) / 2);
+				position: absolute;
+			}
+			#box1 {
+				top: 0;
+			}
+			#box1, #box3 {
+				left: 0;
+			}
+			#box2, #box4 {
+				right: 0;
+			}
+			.times {
+				font-size: calc(var(--box-width) * 0.125);
+				margin: calc(var(--box-width) * 0.04) 0;
+				font-family: 'Inter', Arial, sans-serif;
+				font-variant-numeric: tabular-nums;
+			}
+			.label {
+				font-size: calc(var(--box-width) * 0.04);
+				margin: calc(var(--box-width) * 0.08) 0 0 0;
+			}
+			.comparison {
+				font-size: calc(var(--box-width) / 40);
+				margin: 0;
+				color: #444444;
+				line-height: 1.75;
+			}
+			#zone {
+				width: calc(var(--box-width) * 80 / 800);
+			}
+			#displayLong {
+				font-size: calc(var(--box-width) / 25);
+				margin-top: 1em;
+				margin-bottom: 1em;
+			}
+		</style>
+	</head>
+	<body onLoad="begin()">
+		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
+		<script src="scripts/astro.js"></script>
+		<script src="scripts/general-clocks.js"></script>
+		<script src="scripts/local-time.js"></script>
+		<script>
+			function decDiffToHMS(decDiff) {
+				var decDiffAdj = mod(decDiff + 0.5, 1) - 0.5;
+				var secDiff = round(decDiffAdj * 86400);
+				var secAbsDiff = abs(secDiff);
+				var hour = floor(secAbsDiff / 3600);
+				var minSec = secAbsDiff - hour * 3600;
+				var minute = floor(minSec / 60);
+				var second = minSec - minute * 60;
+				var diffString = "";
+				if (hour != 0) {
+					diffString += hour + "hr";
+				}
+				if (hour != 0 || minute != 0) {
+					diffString += " " + minute + "min";
+				}
+				diffString += " " + second + "s ";
+				if (decDiffAdj >= 0) {
+					diffString += "ahead of";
+				} else {
+					diffString += "behind";
+				}
+				return diffString;
+			}
+			function run() {
+				var now = new Date();
+				// Inputs
+				var longitude = getNumValue("long");
+				var timeZone;
+				if (checked("autoZone")) {
+					timeZone = now.getTimezoneOffset() / -60;
+					setValue("zone", timeZone);
+				} else {
+					timeZone = getNumValue("zone");
+				}
+				var useSecond = checked("seconds");
+				var whichHour = getNumValue("hour");
+				var useLeadingZero = checked("zero");
+				var useComparisons = checked("comparisons");
+				// Calculations
+				var GMTdec = now.getUTCHours() / 24 + now.getUTCMinutes() / 1440 + now.getUTCSeconds() / 86400 + now.getUTCMilliseconds() / 86400000; // Greenwich mean time in decimal form
+				var JD0 = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate()); // Julian date at midnight UTC
+				var JD = JD0 + GMTdec; // Julian date now
+				var decHours = GMTdec * 24;
+				var GSTdec = GST(decHours, JD0) / 24; // Greenwich sidereal time in decimal form
+				var sun = Sun(JD);
+				var GATdec = mod(GSTdec - (sun.eq.RA / 360) + 0.5, 1); // Greenwich apparent time in decimal form
+				var SMTdec = mod(GMTdec + timeZone / 24, 1);
+				var LMTdec = mod(GMTdec + longitude / 360, 1);
+				var LATdec = mod(GATdec + longitude / 360, 1);
+				// Standard mean time
+				var output = localTimeOutputs(SMTdec, whichHour, useLeadingZero, useSecond);
+				setHTML("SMT", output.digital);
+				var timeZoneToDisplay = "";
+				var roundedZone = roundTo(timeZone, 5);
+				if (roundedZone != 0) {
+					if (roundedZone > 0) {
+						timeZoneToDisplay += "+";
+					} else {
+						timeZoneToDisplay += "-";
+					}
+					timeZoneToDisplay += abs(roundedZone);
+				}
+				setHTML("displayZone", timeZoneToDisplay);
+				// Local mean time
+				output = localTimeOutputs(LMTdec, whichHour, useLeadingZero, useSecond);
+				setHTML("LMT", output.digital);
+				var compare = "&nbsp;";
+				if (useComparisons) {
+					compare = "Always " + decDiffToHMS(LMTdec - SMTdec) + " GMT" + timeZoneToDisplay + " at this longitude.";
+				}
+				setHTML("LMTcomp", compare);
+				// Local apparent time
+				output = localTimeOutputs(LATdec, whichHour, useLeadingZero, useSecond);
+				setHTML("LAT", output.digital);
+				var compare = "&nbsp;";
+				if (useComparisons) {
+					compare = "Currently " + decDiffToHMS(LATdec - LMTdec) + " LMT everywhere.<br>Currently " + decDiffToHMS(LATdec - SMTdec) + " GMT" + timeZoneToDisplay + " at this longitude.";
+				}
+				setHTML("LATcomp", compare);
+				// Display longitude
+				setHTML("displayLong", displayLongitude(longitude));
+				// Repeat
+				setTimeout(run, 100);
+			}
+			function begin() {
+				var useableHeight = window.innerHeight - 160;
+				var useableWidth = window.innerWidth;
+				var boxWidth = min(useableHeight, useableWidth / 2);
+				var box2Top = 0;
+				var box3Top = boxWidth / 2;
+				var box4Top = boxWidth / 2;
+				var pageWidth = 2 * boxWidth;
+				if (useableHeight > useableWidth) {
+					boxWidth = useableHeight / 2;
+					box2Top = boxWidth / 2;
+					box3Top = boxWidth;
+					box4Top = boxWidth * 3 / 2;
+					pageWidth = boxWidth;
+				}
+				document.getElementById("page").style.width = pageWidth + "px";
+				document.getElementById("box2").style.top = box2Top + "px";
+				document.getElementById("box3").style.top = box3Top + "px";
+				document.getElementById("box4").style.top = box4Top + "px";
+				document.querySelector(':root').style.setProperty('--box-width', boxWidth + "px");
+				run();
+			}
+		</script>
+		<div id="page">
+			<div id="box1" class="box centred">
+				<p class="label">Local apparent time (LAT)</p>
+				<p class="times" id="LAT"></p>
+				<p class="comparison" id="LATcomp"></p>
+			</div>
+			<div id="box2" class="box centred">
+				<p class="label">Local mean time (LMT)</p>
+				<p class="times" id="LMT"></p>
+				<p class="comparison" id="LMTcomp"></p>
+			</div>
+			<div id="box3" class="box centred">
+				<p class="label">Standard mean time (GMT<span id="displayZone"></span>)</p>
+				<p class="times" id="SMT"></p>
+				<p class="comparison" id="SMTcomp"></p>
+			</div>
+			<div id="box4" class="box">
+				<p id="displayLong" class="centred">&nbsp;</p>
+				<div id="options">
+					<div class="optionscolumn">
+						Longitude: <input type="number" max="180" min="-180" id="long">&deg;&nbsp; &nbsp;<span id="auto" onclick="auto()" title="Use device location">Auto</span>
+						<br><br>Time zone: +<input type="number" max="14" min="-12" id="zone" disabled>&nbsp; &nbsp;(<input id="autoZone" type="checkbox" checked onChange="autoZone()"><label for="autoZone" title="Use device time zone"> Auto</label>)
+					</div>
+					<div class="optionscolumn">
+						Format: <select id="hour">
+							<option value="3">12-hour</option>
+							<option value="2">24-hour</option>
+						</select>
+						<br><input id="zero" type="checkbox"><label for="zero"> Leading zero</label>
+						<br><input id="seconds" type="checkbox"><label for="seconds"> Seconds</label>
+						<br><input id="comparisons" type="checkbox"><label for="comparisons"> Comparisons</label>
+					</div>
+					<div id="notesbox">In this context, Greenwich mean time (GMT) specifically refers to UTC. Time differences do not take the international date line into account. Accuracy of apparent time is to within a second or two.<br>The difference between apparent time and mean time is called the <a href="equation-of-time.html" class="alink">Equation of Time</a>. See also: <a href="local-time.html" class="alink">Local Time Clock</a>.<br>&copy; Joshua, 2023.</div>
+				</div>
+			</div>
+		</div>
+		<div id="header">
+			<div id="home">
+				<a href="index.html">
+					<img src="images/logo.png" id="homeLogo">
+				</a>
+			</div>
+			<div id="title">
+				<p id="titlep">Compare Local Times</p>
+			</div>
+		</div>
+	</body>
+</html>

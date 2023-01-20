@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 1.0.0-->
-	<!--12/1/2023-->
+	<!--Version 1.0.1-->
+	<!--18/1/2023-->
 	<!--Created by Joshua in association with the General Clocks Working Group.-->
 	<!--Bibliography:
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
 	-->
 	<head>
-		<title>Local Time</title>
+		<title>Local Time Clock</title>
 		<meta name="keywords" content="clock, local time, sidereal time, local apparent time, local mean time, mean time, apparent solar time, true solar time">
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
@@ -28,78 +28,32 @@
 	</head>
 	<body onLoad="start()">
 		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
+		<script src="scripts/astro.js"></script>
 		<script src="scripts/general-clocks.js"></script>
+		<script src="scripts/local-time.js"></script>
 		<script>
 			var canvas, ctx, r;
-			// Astronomical formule
-			var JulianDate = function (Y, M, D, h = 0, min = 0, s = 0, ms = 0) {
-				if (M <= 2) {
-					Y--;
-					M += 12;
-				}
-				var A = floor(Y / 100);
-				var B = floor(A / 4);
-				var C = 2 - A + B;
-				var E = floor(365.25 * (Y + 4716));
-				var F = floor(30.6001 * (M + 1));
-				return C + D + E + F - 1524.5 + h / 24 + min / 1440 + s / 86400 + ms / 86400000;
-			}
-			var GST = function (decHours, JD0) { // decHours = decimal hours since midnight UTC, JD0 = Julian date at midnight UTC. Returns GST in decimal form.
-				var S = JD0 - 2451545;
-				var T = S / 36525;
-				var T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * T * T);
-				var GMST = T0 + decHours * 1.002737909;
-				return mod(GMST, 24) / 24;
-			}
-			var obliquity = function (JD) {
-				var T = (JD - 2451545) / 36525;
-				var DE = 46.815 * T + 0.0006 * T * T - 0.00181 * T * T * T;
-				var eps = 23.439292 - DE / 3600;
-				return eps;
-			}
-			var EcToRA = function (eclipticLong, eclipticLat, JD) { //Right ascension from ecliptic coordinates.
-				var eps = obliquity(JD);
-				var RA = atan2(sin(eclipticLong) * cos(eps) - tan(eclipticLat) * sin(eps), cos(eclipticLong));
-				return mod(RA, 360);
-			}
-			var sunRA = function (JD) { // Gives right ascension of the Sun
-				var T = (JD - 2415020) / 36525;
-				var eps_g = mod(279.6966778 + 36000.76892 * T + 0.0003025 * T * T);
-				var po_g = mod(281.2208444 + 1.719175 * T + 0.000452778 * T * T);
-				var e = mod(0.01675104 - 0.0000418 * T - 0.000000126 * T * T);
-				var M_sun = mod(eps_g - po_g);
-				var E = rad(M_sun);
-				var del = E - e * Math.sin(E) - rad(M_sun);
-				while (Math.abs(del) > 0.000001) {
-					E -= del / (1 - e * Math.cos(E));
-					del = E - e * Math.sin(E) - rad(M_sun);
-				}
-				E = deg(E);
-				var v = mod(2 * atan(SqRt((1 + e) / (1 - e)) * tan(E / 2)));
-				var lam_sun = mod(v + po_g);
-				var RA_sun = EcToRA(lam_sun, 0, JD);
-				return RA_sun / 360;
-			}
 			function run() {
 				var now = new Date();
 				// Inputs
-				var longitude = getValue("long");
+				var longitude = getNumValue("long");
 				var timeZone;
 				if (checked("autoZone")) {
 					timeZone = now.getTimezoneOffset() / -60;
-					document.getElementById("zone").value = timeZone;
+					setValue("zone", timeZone);
 				} else {
-					timeZone = getValue("zone");
+					timeZone = getNumValue("zone");
 				}
-				var lg = getValue("LG");
-				var ams = getValue("AMS");
+				var lg = getNumValue("LG");
+				var ams = getNumValue("AMS");
 				if (ams === 2) {
-					document.getElementById("hour").value = 2;
-					document.getElementById("lock").checked = false;
+					setValue("hour", 2);
+					uncheck("lock");
 				}
 				var useSecond = checked("seconds");
 				var useRoman = checked("roman");
-				var whichHour = getValue("hour");
+				var whichHour = getNumValue("hour");
 				var lockTwelve = checked("lock");
 				var useLeadingZero = checked("zero");
 				// Calculations
@@ -107,8 +61,9 @@
 				var JD0 = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate()); // Julian date at midnight UTC
 				var JD = JD0 + GMTdec; // Julian date now
 				var decHours = GMTdec * 24;
-				var GSTdec = GST(decHours, JD0); // Greenwich sidereal time in decimal form
-				var GATdec = mod(GSTdec - sunRA(JD) + 0.5, 1); // Greenwich apparent time in decimal form
+				var GSTdec = GST(decHours, JD0) / 24; // Greenwich sidereal time in decimal form
+				var sun = Sun(JD);
+				var GATdec = mod(GSTdec - (sun.eq.RA / 360) + 0.5, 1); // Greenwich apparent time in decimal form
 				// Apparent, mean or sidereal?
 				var TIMEdec = GMTdec;
 				if (ams === 0) {
@@ -123,14 +78,33 @@
 					TIMEdec += timeZone / 24;
 				}
 				TIMEdec = mod(TIMEdec, 1);
-				// Extract values to display
-				var HOUR24 = TIMEdec * 24;
-				var intHOUR24 = floor(HOUR24);
-				var intHOUR12 = mod(intHOUR24 - 1, 12) + 1;
-				var ARVO = intHOUR24 >= 12;
-				var MINUTE = (HOUR24 - intHOUR24) * 60;
-				var intMINUTE = floor(MINUTE);
-				var intSECOND = floor((MINUTE - intMINUTE) * 60);
+				// Digital clock
+				var output = localTimeOutputs(TIMEdec, whichHour, useLeadingZero, useSecond);
+				var digital = output.digital;
+				var HOUR24 = output.HOUR24;
+				var MINUTE = output.MINUTE;
+				var intSECOND = output.intSECOND;
+				setHTML("time", digital);
+				// Label
+				var lgLabels = ["L", "G"];
+				var amsLabels = ["A", "M", "S"];
+				var label = lgLabels[lg] + amsLabels[ams] + "T";
+				var longLabel = "&nbsp;";
+				if (lg === 1) {
+					var roundedZone = roundTo(timeZone, 5);
+					if (roundedZone != 0) {
+						if (roundedZone > 0) {
+							label += "+";
+						} else {
+							label += "-";
+						}
+						label += abs(roundedZone);
+					}
+				} else if (lg === 0) {
+					longLabel = displayLongitude(longitude);
+				}
+				setHTML("label", label);
+				setHTML("longLabel", longLabel);
 				// Analogue clock
 				var numbersArray = listOfNumbers(24);
 				var displayHourAngle = HOUR24 * 360 / 24;
@@ -156,74 +130,8 @@
 				ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
 				drawClockFace(ctx, r, 60, 5, numbersArray, numberSize, font, numberRadius, useRoman);
 				drawClockHands(ctx, r, displayHourAngle, MINUTE * 360 / 60, intSECOND * 360 / 60, useSecond);
-				// Digital clock
-				var digital = "";
-				var displayHourDigits = intHOUR12;
-				if (whichHour === 2) {
-					displayHourDigits = intHOUR24;
-				}
-				displayHourDigits = zero(displayHourDigits, !useLeadingZero);
-				digital += displayHourDigits + ":" + zero(intMINUTE);
-				if (useSecond) {
-					digital += ":" + zero(intSECOND);
-				}
-				if (whichHour === 0 || whichHour === 3) {
-					digital += ' <span class="smallcaps">';
-					if (!ARVO) {
-						digital += "a";
-					} else {
-						digital += "p";
-					}
-					digital += "m</span>";
-				}
-				document.getElementById("time").innerHTML = digital;
-				// Label
-				var lgLabels = ["L", "G"];
-				var amsLabels = ["A", "M", "S"];
-				var label = lgLabels[lg] + amsLabels[ams] + "T";
-				var longLabel = "&nbsp;";
-				if (lg === 1) {
-					roundedZone = roundTo(timeZone, 5);
-					if (roundedZone != 0) {
-						if (roundedZone > 0) {
-							label += "+";
-						} else {
-							label += "-";
-						}
-						label += abs(roundedZone);
-					}
-				} else if (lg === 0) {
-					var roundedLong = roundTo(longitude, 5);
-					longLabel = abs(roundedLong) + "&deg;"
-					if (roundedLong === 0 || abs(roundedLong) === 180) {
-						// Lol nope
-					} else if (roundedLong > 0) {
-						longLabel += "E";
-					} else if (roundedLong < 0) {
-						longLabel += "W";
-					}
-				}
-				document.getElementById("label").innerHTML = label;
-				document.getElementById("longLabel").innerHTML = longLabel;
 				// Repeat
 				setTimeout(run, 100);
-			}
-			var success = function (position) {
-				document.getElementById("long").value = roundTo(position.coords.longitude, 5);
-			}
-			var auto = function () {
-				if (navigator.geolocation) {
-					navigator.geolocation.getCurrentPosition(success);
-				} else { 
-					alert("Sorry, couldn't find your location.");
-				}
-			}
-			var autoZone = function () {
-				if (document.getElementById("autoZone").checked) {
-					document.getElementById("zone").disabled = true;
-				} else {
-					document.getElementById("zone").disabled = false;
-				}
 			}
 		</script>
 		<div id="page">
@@ -262,7 +170,7 @@
 						<br><input id="seconds" type="checkbox"><label for="seconds"> Seconds </label>
 						<br><input id="roman" type="checkbox"><label for="roman"> Roman numerals</label>
 					</div>
-					<div id="notesbox">In this context, Greenwich mean time (GMT) specifically refers to UTC.<br>Accuracy of apparent and sidereal times is to within a second or two.<br>The difference between apparent time and mean time is called the <a href="equation-of-time.html" class="alink">equation of time</a>.<br>&copy; Joshua, 2023.</div>
+					<div id="notesbox">In this context, Greenwich mean time (GMT) specifically refers to UTC.<br>Accuracy of apparent and sidereal times is to within a second or two.<br>The difference between apparent time and mean time is called the <a href="equation-of-time.html" class="alink">Equation of Time</a>.<br>See also: <a href="comparative-time.html" class="alink">Compare Local Times</a>.<br>&copy; Joshua, 2023.</div>
 				</div>
 			</div>
 		</div>
@@ -273,7 +181,7 @@
 				</a>
 			</div>
 			<div id="title">
-				<p id="titlep">Local Time</p>
+				<p id="titlep">Local Time Clock</p>
 			</div>
 		</div>
 	</body>
