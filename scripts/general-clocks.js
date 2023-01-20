@@ -1,6 +1,10 @@
 // General clocks script
 // Version 1.0.0
-// (11/1/2023)
+// (13/1/2023)
+
+// Requires math.js
+
+// For Decimal Time and Local Time
 
 var romanNumerals = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
 var listOfNumbers = function (n, noZero=false) {
@@ -37,12 +41,6 @@ var arrayToRoman = function (arr) {
 		result.push(romanNumerals[arr[i]]);
 	}
 	return result;
-}
-var checked = function (id) {
-	return document.getElementById(id).checked;
-}
-var getValue = function (id) {
-	return Number(document.getElementById(id).value);
 }
 var drawClockFace = function (ctx, r, NoOfMinor, majorEvery, numbersArray, numberSize, font, numbersRadius, rotateNumbers) {
 	// Clockface

@@ -4,6 +4,7 @@ var mod = function (n, p = 360) {
 var floor = Math.floor;
 var ceil = Math.ceil;
 var round = Math.round;
+var trunc = Math.trunc;
 var SqRt = Math.sqrt;
 var abs = Math.abs;
 var exp = Math.exp;

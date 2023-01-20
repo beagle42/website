@@ -19,6 +19,7 @@ var index = [
 	new Page("Flag Resizing", "Resize the Australian Flag to different aspect ratios", "flag-resizing.html"),
 	new Page("Stars on the U.S. Flag", "Change the number of stars on the U.S. Flag", "us-stars.html"),
 	new Page("Site map", "A list of every page on this site", "sitemap.html"),
-	new Page("Decimal Time", "A decimal time clock", "decimal-time.html"),
-	new Page("Local Time", "The mean, apparent and sidereal time at any location", "local-time.html")
+	new Page("Decimal Time Clock", "A clock showing 10 hours in a day.", "decimal-time.html"),
+	new Page("Local Time Clock", "The mean, apparent and sidereal time at any location", "local-time.html"),
+	new Page("Compare Local Times", "Compare the local apparent, local mean and standard times at any location.", "comparative-time.html")
 ];
