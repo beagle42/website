@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
-	<!--Version 2.0.1, 23/9/2022-->
+	<!--Version 2.0.2, 20/2/2023-->
 	
 	<!--How much more boring can I get?-->
 	
@@ -15,9 +15,22 @@
 			Janson, S. (2011). 'The Icelandic Calendar', Scripta Islandica, 62. URL: https://uu.diva-portal.org/smash/get/diva2:436604/FULLTEXT01.pdf
 			Van Gent, R.. URL: https://webspace.science.uu.nl/~gent0113/islam/islam_tabcal.htm
 	-->
-	<!-- By the way, I named in 'Calendrical' before I discovered the book, so... -->
+	<!-- By the way, I named it 'Calendrical' before I discovered the Reingold & Dershowitz book, so... -->
+	
+	<!--
+		 _____________
+		|M T W T F S S|
+		|=|=|=|=|=|=|=|
+		|-|-|-|-|-|-|-|
+		|-|-|-|-|-|-|-|
+		|-|-|-|-|-|-|-|
+		|-|-|-|-|-|-|-|
+		|-|-|-|-|-|-|-|
+	-->
+	
 	<head>
 		<title>Calendrical Conversions</title>
+		<meta name="keywords" content="calendar converter, arithmetic calendar">
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -169,7 +182,7 @@
 			var floor = Math.floor;
 			//Initiallising
 			var cal = [];
-			var Cal = function (name, to, from, out, check, input, today = true) {
+			var Cal = function (name, to, from, out, check, input, today = true, hidden = false) {
 				this.name = name;
 				this.fromJD = to;
 				this.toJD = from;
@@ -177,6 +190,7 @@
 				this.valid = check;
 				this.input = input;
 				this.today = today;
+				this.hidden = hidden;
 			}
 			//Data
 			//Gregorian/Julian
@@ -596,6 +610,42 @@
 				}
 				return result;
 			}
+			//Easter Egg
+			// I invented a calendar as a joke. (Deal with it.)
+			var Easter = function (Y) {
+				var a = floor(Y / 19);
+				var b = floor(Y / 100);
+				var c = floor(b / 4);
+				var d = floor((b + 7) / 25);
+				var e = mod(b + 7, 25);
+				var f = floor(e / 3);
+				var g = floor(e / 24);
+				var h = mod(19 * Y - a + b - c - 8 * d - f + g + 17, 30);
+				var i = floor(h / 29);
+				var j = mod(Y, 19);
+				var k = floor(h / 28);
+				var l = floor(j / 11);
+				var m = h - i - l * (k - i);
+				var n = floor(Y / 4);
+				var o = mod(6 * (Y + n - b + c + m) + 4, 7);
+				var p = m + o + 22;
+				var q = floor(p / 32);
+				var day = p - 31 * q;
+				var month = 3 + q;
+				return [day, month, Y];
+			}
+			var EasterEggNewYear = function (Y) {
+				return cal[0].toJD(Easter(Y)) - 73;
+			}
+			var EasterEggMonthLengths = [0, 27, 33, 29, 29, 29, 30, 29, 30, 29, 30, 29, 33, 28];
+			var EasterEggMonthLength = function (M, yearLength_weeks) {
+				var result = EasterEggMonthLengths[M];
+				if (M === 12 && (yearLength_weeks === 50 || yearLength_weeks === 54)) {
+					result -= 7;
+				}
+				return result;
+			}
+			var EasterEggMonths = [0, "Shrovamon", "Lentamon", "Paschamon", "Tetramon", "Pentamon", "Hexamon", "Heptamon", "Octamon", "Nonamon", "Decamon", "Elemon", "Dozemon", "Intercalamon"];
 			// Shorthand
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
@@ -1218,7 +1268,7 @@
 					var len = NYs[j] - ny;
 					var year = y + j - 2;
 					var T = JD - ny;
-					var k = 1
+					var k = 1;
 					while (T - GLunarMonthLengths(k, len) >= 0) {
 						T -= GLunarMonthLengths(k, len);
 						k++;
@@ -2195,6 +2245,63 @@
 				},
 				DMYInput(35, PersianMonths, 31)
 			);
+			cal[36] = new Cal(
+				"&ZeroWidthSpace;Easter Egg",
+				function (JD) {
+					var GY = cal[0].fromJD(JD)[2];
+					var NYs = [];
+					for (var i = 0; i <= 3; i++) {
+						NYs[i] = EasterEggNewYear(GY - 1 + i);
+					}
+					var j = 0;
+					while (JD >= NYs[j]) {
+						j++;
+					}
+					var NY = NYs[j - 1];
+					var yearLength_weeks = (NYs[j] - NY) / 7;
+					var year = GY + j - 2;
+					var T = JD - NY;
+					var k = 1;
+					while (T - EasterEggMonthLength(k, yearLength_weeks) >= 0) {
+						T -= EasterEggMonthLength(k, yearLength_weeks);
+						k++;
+					}
+					return [T + 1, k, year];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var T = EasterEggNewYear(Y);
+					var yearLength_weeks = (EasterEggNewYear(Y + 1) - T) / 7;
+					var i = 1;
+					while (i < M) {
+						T += EasterEggMonthLength(i, yearLength_weeks);
+						i++;
+					}
+					return T + D - 1;
+				},
+				function (A, JD) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return [week[mod(JD, 7)] + "day,", D + " " + EasterEggMonths[M] + " " + Y, "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var yearLength_weeks = (EasterEggNewYear(Y + 1) - EasterEggNewYear(Y)) / 7;
+					var result = false;
+					if (M >= 1 && (M <= 12 || (M === 13 && yearLength_weeks > 52))) {
+						result = D >= 1 && D <= EasterEggMonthLength(M, yearLength_weeks);
+					}
+					return result;
+				},
+				DMYInput(36, EasterEggMonths, 33),
+				true,
+				true
+			);
 			//Today
 			var run = function () {
 				var now = new Date();
@@ -2209,7 +2316,7 @@
 				setTimeout(update, 5 * 60 * 1000);
 			}
 			//Things
-			var nameCalendar = function(name) {
+			var nameCalendar = function (name) {
 				var b = name.indexOf("(");
 				var result = name + " calendar";
 				if (b >= 0) {
@@ -2253,9 +2360,16 @@
 				}
 				document.getElementById("firstCalDisplay").innerHTML = firstCalDisplayBox;
 				document.getElementById("secondCalDisplay").innerHTML = secondCalDisplayBox;
+				if (firstCal === 0 && integerInput) {
+					Y = dateIn[2];
+					easterDate = Easter(Y);
+					if (dateIn[0] === -easterDate[0] && dateIn[1] === easterDate[1]) {
+						EasterEgg();
+					}
+				}
 			}
 			//Setup
-			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 23, 15, 27, 28, 29, 30];
+			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 23, 15, 27, 28, 29, 30, 36];
 			var setup = function () {
 				var todaySelect = "";
 				var fromSelect = "";
@@ -2263,7 +2377,11 @@
 				//var list = ""; 
 				for (var i = 0; i < order.length; i++) {
 					var j = order[i];
-					var option = '<option value="' + j + '">' + cal[j].name + '</option>';
+					var option = '<option value="' + j + '"'
+					if (cal[j].hidden) {
+						option += 'class="hiddenoptions" hidden';
+					}
+					option += '>' + cal[j].name + '</option>';
 					if (cal[j].today) {
 						todaySelect += option;
 					}
@@ -2354,6 +2472,19 @@
 				applyDate(theCal, result);
 				convert();
 			}
+			var EasterEggActivated = false;
+			function EasterEgg() {
+				if (!EasterEggActivated) {
+					EasterEggActivated = true;
+					for (i = 0; i < document.getElementsByClassName("hiddenoptions").length; i++) {
+						document.getElementsByClassName("hiddenoptions")[i].hidden = false;
+					}
+				}
+				document.getElementById("todaySelect").value = "36";
+				run();
+			}
+			var konamiCode = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
+			var codePosition = 0;
 			var key = function (event) {
 				var k = event.key.toLowerCase();
 				if (k === "enter") {
@@ -2366,6 +2497,16 @@
 					swap();
 				} else if (k === "t") {
 					applyToday();
+				}
+				if (k === konamiCode[codePosition]) {
+					if (codePosition === konamiCode.length - 1) {
+						EasterEgg();
+						codePosition = 0;
+					} else {
+						codePosition++;
+					}
+				} else {
+					codePosition = 0;
 				}
 			}
 		</script>
@@ -2422,7 +2563,7 @@
 		</div>
 		<hr>
 		<div id="footer">
-			<p>N.B. This converter serves only <i>arithmetic</i> calendars (ie. calendars determined by fixed rules) as opposed to <i>observational</i> calendars (ie. calendars determined by astronomical observation).<br>Apologies if your favourite calendar is observational. More sincere apologies if your favourite calendar is arithemtic but not (yet) served here.<br>&#169; Joshua, 2022.</p>
+			<p>N.B. This converter serves only <i>arithmetic</i> calendars (ie. calendars determined by fixed rules) as opposed to <i>observational</i> calendars (ie. calendars determined by astronomical observation).<br>Apologies if your favourite calendar is observational. More sincere apologies if your favourite calendar is arithemtic but not (yet) served here.<br>&#169; Joshua, 2023.</p>
 		</div>
 		<div id="home">
 			<a href="index.html">
