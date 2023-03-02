@@ -236,6 +236,13 @@ var ChristmasEve = ["&#127850;&#129371;", "&#127877;", "&#129420;"];
 //List of holidays
 var Holidays = [
 	new Hol(
+		"the third day of the third month of the third year of the third decade of the Third Millenium",
+		function (D) {
+			return D.y === 2023 && D.m === 3 && D.d === 3;
+		},
+		"&#51;&#65039;&#8419;"
+	),
+	new Hol(
 		"Queen Elizabeth II, 1926-2022",
 		function (D) {
 			return D.y === 2022 && D.m === 9 && D.d >= 8 && D.d <= 22;
