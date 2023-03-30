@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
-	<!--Version 2.0.2, 20/2/2023-->
+	<!--Version 2.0.3, 30/3/2023-->
 	
 	<!--How much more boring can I get?-->
 	
 	<!-- Bibilography:
-		Principle sources:
+		Principal sources:
 			Reingold, E. & Dershowitz, N. (2018). 'Calendrical Calculations: The Ultimate Edition'. Cambridge University Press. DOI: https://doi.org/10.1017/9781107415058
 			Basically, all of Wikipedia.
 		Other sources (not an exhaustive list \_(-_-)_/):
@@ -646,6 +646,9 @@
 				return result;
 			}
 			var EasterEggMonths = [0, "Shrovamon", "Lentamon", "Paschamon", "Tetramon", "Pentamon", "Hexamon", "Heptamon", "Octamon", "Nonamon", "Decamon", "Elemon", "Dozemon", "Intercalamon"];
+			//Egyptian
+			var EgyptianJDEpoch = 1448638;
+			var EgyptianMonths = [0, "Thoth", "Phaophi", "Athyr", "Choiak", "Tybi", "Mechir", "Phamenoth", "Pharmuthi", "Pachon", "Payni", "Epiphi", "Mesori", "Epagomenae"];
 			// Shorthand
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
@@ -2302,6 +2305,35 @@
 				true,
 				true
 			);
+			cal[37] = new Cal(
+				"Egyptian",
+				function (JD) {
+					var T = JD - EgyptianJDEpoch;
+					var Y = floor(T / 365) + 1;
+					var M = floor(mod(T, 365) / 30) + 1;
+					var D = T - 365 * (Y - 1) - 30 * (M - 1) + 1;
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return EgyptianJDEpoch + 365 * (Y - 1) + 30 * (M - 1) + D - 1;
+				},
+				function (A, JD) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return [D + " " + EgyptianMonths[M] + " " + Y + " " + abbr("N.E.", "Nabonassar era"), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return M >= 1 && D >= 1 && D <= 30 && (M <= 12 || (M === 13 && D <= 5));
+				},
+				DMYInput(37, EgyptianMonths, 30)
+			);
 			//Today
 			var run = function () {
 				var now = new Date();
@@ -2369,7 +2401,7 @@
 				}
 			}
 			//Setup
-			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 23, 15, 27, 28, 29, 30, 36];
+			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 23, 15, 37, 27, 28, 29, 30, 36];
 			var setup = function () {
 				var todaySelect = "";
 				var fromSelect = "";
