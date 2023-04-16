@@ -173,9 +173,9 @@ var JDToJul = function (JD) {
 	return {d: T + 1, m: k, y: Y};
 }
 var JulianEaster = function (Y) {
-	var a = mod(Y, 19);
+	var a = Y % 19;
 	var b = floor(Y / 4)
-	var c = (19 * a + 14) % 30;
+	var c = (19 * a + 15) % 30;
 	var d = (6 * (Y + b + c) + 6) % 7;
 	var e = 22 + c + d;
 	var f = floor(e / 32);
@@ -524,7 +524,7 @@ var Holidays = [
 		"&#129511;"
 	),
 	new Hol(
-		"Orthodox Easter Sunday",
+		"Orthodox Easter",
 		function (D) {
 			return D.Julian.d === D.JulianEaster.d && D.Julian.m === D.JulianEaster.m;
 		},
