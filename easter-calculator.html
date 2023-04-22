@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+	<!--Easter Calculator, 22/4/2023-->
+	<!--Version 1.0.0, 22/4/2023-->
+	<head>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<title>Easter Calculator</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
+		<style>
+			* {
+				text-size-adjust: none;
+			}
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				background-color: #fce9f1;
+			}
+			p {
+				margin: 1em 0;
+			}
+			.centretext {
+				text-align: center;
+			}
+			.righttext {
+				text-align: right;
+			}
+			#header {
+				padding: 2vmin max(80px, 20vmin);
+				/*background-color: #faffb3;*/
+				/*background-color: #d8f3ed;*/
+				background-color: #fffccc;
+			}
+			#pagetitle {
+				font-size: 6vmin;
+				margin: 0;
+				font-family: 'Satisfy';
+				/*line-height: 1;*/
+			}
+			#subtitle {
+				font-size: 2vmin;
+				font-style: italic;
+				margin-top: 0;
+			}
+			#spiel {
+				font-size: 1.5vmin;
+				margin-bottom: 0;
+			}
+			#main {
+				/*border-top: 0.3vmin solid #cccccc;*/
+				padding: 4vmin;
+				background-color: #deedde;
+			}
+			#main-input-line {
+				font-size: 3vmin;
+				margin: 0;
+			}
+			input, select {
+				font-size: inherit;
+				background-color: #ffffff;
+				border: 0.3vmin solid #999999;
+				border-radius: 1vmin;
+			}
+			select {
+				cursor: pointer;
+			}
+			select:focus, input:focus {
+				outline: none;
+			}
+			input:focus, select:focus {
+				border-color: #000000;
+			}
+			#main-input {
+				width: 12vmin;
+				padding: 1vmin 1.5vmin;
+			}
+			#main-error-line {
+				color: #ff0000;
+				font-size: 2vmin;
+				margin: 1vmin 0;
+			}
+			.btn {
+				background-color: #cccccc;
+				border-radius: 1vmin;
+				padding: 1.3vmin 2vmin;
+				cursor: pointer;
+				/*border: 0.2vmin solid #ffffff;*/
+				display: inline-block;
+				transition: background-color 0.2s;
+			}
+			.btn:hover {
+				background-color: #999999;
+			}
+			.btn:active {
+				background-color: #bbbbbb;
+			}
+			.box {
+				border-radius: 2vmin;
+				margin: auto;
+			}
+			#main-box {
+				/*background-color: #eeeeee;*/
+				background-color: #c1e1c1;
+				width: 90vmin;
+				padding: 2vmin 1vmin;
+			}
+			#container {
+				display: grid;
+				height: auto;
+				grid-template-rows: 1fr auto;
+				grid-template-columns: 1fr 1fr;
+				gap: 0;
+				font-size: 2vmin;
+			}
+			#date-tile {
+				grid-row: 1;
+				grid-column: 1;
+			}
+			#details-tile {
+				grid-row: 2;
+				grid-column: 1;
+			}
+			#cycle-tile {
+				grid-row: 1 / 3;
+				grid-column: 2;
+			}
+			.smallcaps {
+				font-variant: small-caps;
+			}
+			.justify {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.table {
+				border-top: 0.3vmin solid #000000;
+				border-bottom: 0.3vmin solid #000000;
+				width: 40vmin;
+				margin: auto;
+			}
+			#details-table {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+			}
+			.details-cell {
+				padding: 1.5vmin 0;
+			}
+			#cycle-table {
+				display: grid;
+				grid-template-columns: 1fr 4fr 3fr;
+			}
+			.cycle-cell {
+				padding: 1vmin 0;
+			}
+			.bold {
+				font-weight: bold;
+			}
+			.emojiFont {
+				font-family: ColourEmoji;
+				line-height: 1;
+			}
+			.symbolsFont {
+				font-family: Symbols, Symbols2;
+				line-height: 1;
+			}
+			#year-display-line {
+				font-size: 5vmin;
+				margin: 0 0 2vmin 0;
+			}
+			#date {
+				font-size: 5vmin;
+				margin: 2vmin 0;
+			}
+			.table-heading {
+				margin: 0 0 1vmin 0;
+			}
+			#list-modules-container {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				/*border-top: 0.3vmin solid #cccccc;*/
+				font-size: 2vmin;
+			}
+			.list-input-line-container {
+				padding: 3vmin 4vmin 0;
+			}
+			.list-input-line {
+				line-height: 2.25;
+				margin: 0;
+			}
+			.list-input {
+				padding: 0.5vmin;
+				width: 7vmin;
+			}
+			.list-select {
+				padding: 0.5vmin;
+			}
+			.nobr {
+				white-space: nowrap;
+			}
+			.list-result-box {
+				padding: 2vmin;
+				width: 38vmin;
+				height: 60vmin;
+				overflow: auto;
+				margin-bottom: 4vmin;
+			}
+			.list-dates-module {
+				background-color: #d7e6f4;
+			}
+			#list-dates-result-box {
+				background-color: #a7c7e7;
+			}
+			.list-years-module {
+				background-color: #e3daf1;
+			}
+			#list-years-result-box {
+				background-color: #c3b1e1;
+			}
+			#list-dates-result-grid {
+				display: grid;
+				width: max-content;
+				grid-template-columns: max-content max-content;
+				margin: auto;
+				font-variant-numeric: tabular-nums;
+			}
+			#list-years-result-container {
+				width: max-content;
+				margin: auto;
+				font-variant-numeric: tabular-nums;
+			}
+			.list-result-heading {
+				/*font-weight: bold;*/
+				margin-top: 0.5vmin;
+			}
+			#footer {
+				background-color: #fce9f1;
+				padding: 2vmin;
+				font-size: 1.5vmin;
+			}
+		</style>
+	</head>
+	<body onLoad="start()">
+		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
+		<script>
+			var isLeapYear = function (Y) {
+				return mod(Y, 400) === 0 || (mod(Y, 100) != 0 && mod(Y, 4) === 0);
+			}
+			var yearLength = function (Y) {
+				var result = 365;
+				if (isLeapYear(Y)) {
+					result++;
+				}
+				return result;
+			}
+			var monthNames = [0, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; // January = 1
+			var monthLengths = [31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29]; // March = 0
+			var MarchDayToDate = function (marchDay, y) { //1 => 1 March. Works for dates around 1 March.
+				var D = marchDay;
+				var Y = y;
+				if (D <= 0) {
+					Y--;
+					D += yearLength(y);
+				}
+				var i = 0;
+				while (D > monthLengths[i]) {
+					D -= monthLengths[i];
+					i++;
+				}
+				M = mod(i + 2, 12) + 1;
+				if (M <= 2) {
+					Y++;
+				}
+				return [D, M, Y];
+			}
+			var dateString = function (A) {
+				D = A[0];
+				M = A[1];
+				return D + " " + monthNames[M];
+			}
+			var alphabet = ["A", "B", "C", "D", "E", "F", "G"];
+			var Easter = function (Y) {
+				var a = floor(Y / 19);
+				var b = floor(Y / 100);
+				var c = floor(b / 4);
+				var d = floor((b + 7) / 25);
+				var e = mod(b + 7, 25);
+				var f = floor(e / 3);
+				var g = floor(e / 24);
+				var h = mod(19 * Y - a + b - c - 8 * d - f + g + 17, 30);
+				var i = floor(h / 29);
+				var j = mod(Y, 19);
+				var k = floor(h / 28);
+				var l = floor(j / 11);
+				var m = h - i - l * (k - i);
+				var n = floor(Y / 4);
+				var q = mod(6 * (Y + n - b + c), 7);
+				var r = mod(q + 1, 7);
+				var o = mod(6 * m + q + 4, 7);
+				var p = m + o + 22;
+				// Extract values:
+				var easter = p;
+				var goldenNumber = j + 1;
+				var epact = mod(23 + 29 * h, 30);
+				var domLetter = alphabet[q];
+				if (isLeapYear(Y)) {
+					domLetter = alphabet[r] + domLetter;
+				}
+				var fullMoon = m + 21;
+				return {easter: p, goldenNumber: goldenNumber, epact: epact, domLetter: domLetter, fullMoon: fullMoon};
+			}
+			var Holiday = function (name, emoji, add, bold = false) {
+				this.name = name;
+				this.emoji = emoji;
+				this.add = add;
+				this.bold = bold;
+			}
+			var holidays = [
+				new Holiday("Shrove Tuesday", "&#129374;", -47),
+				new Holiday("Ash Wednesday", '<span style="font-family:Symbols;color:#4d4d4d">&#10010;</span>', -46),
+				new Holiday("Palm Sunday", "&#127796;", -7),
+				new Holiday("Maundy Thursday", "&#127838;", -3),
+				new Holiday("Good Friday", '<span style="font-family:Symbols">&#128327;</span>', -2, true),
+				new Holiday("Holy Saturday", "&#128007;", -1, true),
+				new Holiday("Easter Sunday", "&#128035;", 0, true),
+				new Holiday("Easter Monday", "&#128036;", 1, true),
+				new Holiday("Ascension Day", "&#9925;", 39),
+				new Holiday("Pentecost / Whitsun", "&#128330;", 49)
+			];
+			var signedNumberString = function (x) {
+				var result = abs(x).toString();
+				if (x > 0) {
+					result = "+" + result;
+				} else if (x < 0) {
+					result = "&minus;" + result;
+				}
+				return result;
+			}
+			var getValidIntegerInput = function (id) {
+				var str = getValue(id);
+				var no = Number(str);
+				var result = 0.5;
+				if (no % 1 === 0 && str != "") {
+					result = no;
+				}
+				return result;
+			}
+			var mainGo = function () {
+				var Y = getValidIntegerInput("main-input");
+				if (Y != 0.5) {
+					mainRun(Y);
+					setHTML("main-error-line", "&nbsp;");
+				} else {
+					setHTML("main-error-line", "Error");
+				}
+			}
+			var mainRun = function (Y) {
+				var E = Easter(Y);
+				setHTML("year-display", Y);
+				setHTML("date", dateString(MarchDayToDate(E.easter, Y)));
+				setHTML("golden-number", E.goldenNumber);
+				setHTML("epact", E.epact);
+				setHTML("dominical-letter", E.domLetter);
+				setHTML("full-moon", dateString(MarchDayToDate(E.fullMoon, Y)));
+				for (var i = 0; i < holidays.length; i++) {
+					setHTML("holiday" + i, dateString(MarchDayToDate(E.easter + holidays[i].add, Y)));
+				}
+			}
+			var dateListRun = function () {
+				var Y1 = getValidIntegerInput("list-dates-year1");
+				var Y2 = getValidIntegerInput("list-dates-year2");
+				var result = "";
+				var resultHeading = "";
+				if (Y1 != 0.5 && Y2 != 0.5 && Y2 >= Y1) {
+					var resultHeading = 'Dates of Easter Sunday in the period <span class="nobr">' + Y1 + '-' + Y2 + ':</span>';
+					for (var i = Y1; i <= Y2; i++) {
+						result += '<div>' + dateString(MarchDayToDate(Easter(i).easter, i)) + '</div><div>&nbsp;' + i + '</div>';
+					}
+				} else {
+					resultHeading = "Error"
+				}
+				setHTML("list-dates-result-heading", resultHeading);
+				setHTML("list-dates-result-grid", result);
+			}
+			var yearListRun = function () {
+				var D = getValidIntegerInput("list-years-day");
+				var M = getNumValue("list-years-month");
+				var Y1 = getValidIntegerInput("list-years-year1");
+				var Y2 = getValidIntegerInput("list-years-year2");
+				var result = "";
+				var resultHeading = "";
+				if (Y1 != 0.5 && Y2 != 0.5 && Y2 >= Y1 && D >= 1 && ((M === 3 && D <= 31) || (M === 4 && D <= 30))) {
+					var dateName = dateString([D, M]);
+					if ((M === 3 && D >= 22) || (M === 4 && D <= 25)) {
+						var firstListing = true;
+						var count = 0;
+						for (var i = Y1; i <= Y2; i++) {
+							var Edate = MarchDayToDate(Easter(i).easter, i);
+							if (Edate[0] === D && Edate[1] === M) {
+								if (firstListing) {
+									firstListing = false;
+								} else {
+									result += "<br>";
+								}
+								result += i;
+								count++;
+							}
+						}
+						if (count === 0) {
+							resultHeading = 'In the period <span class="nobr">' + Y1 + "-" + Y2 + ',</span> Easter Sunday never falls on <span class="nobr">' + dateName + '.</span>';
+						} else if (count === 1) {
+							resultHeading = 'In the period <span class="nobr">' + Y1 + '-' + Y2 + ',</span> Easter Sunday falls on <span class="nobr">' + dateName + '</span> in the year:';
+						} else {
+							resultHeading = 'In the period <span class="nobr">' + Y1 + '-' + Y2 + ',</span> Easter Sunday falls on <span class="nobr">' + dateName + '</span> in the years:';
+						}
+					} else {
+						resultHeading = 'Easter Sunday never falls on <span class="nobr">' + dateName + ',</span> ever.';
+					}
+				} else {
+					resultHeading = "Error";
+				}
+				setHTML("list-years-result-heading", resultHeading);
+				setHTML("list-years-result-container", result);
+			}
+			var start = function () {
+				var cycleTable = "";
+				for (var i = 0; i < holidays.length; i++) {
+					var clss = 'cell cycle-cell';
+					if (holidays[i].bold) {
+						clss += ' bold';
+					}
+					//cycleTable += '<div class="cell cycle-cell emojiFont">' + holidays[i].emoji + '</div><div class="' + clss + '">' + holidays[i].name + '</div><div class="' + clss + '">(' + signedNumberString(holidays[i].add) + ')</div><div class="' + clss + '" id="holiday' + i + '"></div>';
+					cycleTable += '<div class="cell cycle-cell emojiFont">' + holidays[i].emoji + '</div><div class="' + clss + '">' + holidays[i].name + '</div><div class="' + clss + '" id="holiday' + i + '"></div>';
+				}
+				setHTML("cycle-table", cycleTable);
+				var now = new Date();
+				mainRun(now.getFullYear());
+			}
+			var key = function (event, module) {
+				var k = event.key.toLowerCase();
+				if (k === "enter") {
+					if (module === 0) {
+						mainGo();
+					} else if (module === 1) {
+						dateListRun();
+					} else if (module === 2) {
+						yearListRun();
+					}
+				}
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<div id="header" class="centretext">
+			<p id="subtitle">Presenting an</p>
+			<p id="pagetitle">Easter Calculator</p>
+			<p id="spiel">A tool for computing the date of Easter. All dates are given in the Gregorian calendar (or the proleptic Gregorian calendar). The calculator exclusively shows the Gregorian date of Easter, which is used by most of Western Christianity and the cultures it has influenced. This system was first used for the Easter of 1583 by the Catholic church. Entering a year prior to this will produce mathematically consistent but historically redundant results. It may be important to note that the British Empire (encompassing many modern anglophone countries) first used this method for the Easter of 1753.</p>
+		</div>
+		<div id="main" class="centretext">
+			<p id="main-input-line"><input type="number" id="main-input" placeholder="Year" onkeydown="key(event, 0)"> &nbsp; <span class="btn" id="mainbutton" onClick="mainGo()">Compute</span></p>
+			<p id="main-error-line">&nbsp;</p>
+			<div id="main-box" class="box">
+				<p id="year-display-line">&#8764; &nbsp; <span id="year-display"></span> <span class="smallcaps">ad</span> &nbsp; &#8765;</p>
+				<div id="container">
+					<div id="date-tile" class="justify ">
+						<div>
+							<p id="date-intro-text">Date of Easter Sunday:</p>
+							<p id="date"></p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div id="details-tile">
+						<p class="table-heading">Details</p>
+						<div id="details-table" class="table">
+							<div class="cell details-cell">Golden number</div>
+							<div class="cell details-cell" id="golden-number"></div>
+							<div class="cell details-cell">Epact</div>
+							<div class="cell details-cell" id="epact"></div>
+							<div class="cell details-cell">Dominical letter</div>
+							<div class="cell details-cell" id="dominical-letter"></div>
+							<div class="cell details-cell">Paschal full moon</div>
+							<div class="cell details-cell" id="full-moon"></div>
+						</div>
+					</div>
+					<div id="cycle-tile">
+						<p class="table-heading">Easter-based holidays</p>
+						<div id="cycle-table" class="table"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="list-modules-container" class="centretext">
+			<div class="list-dates-module list-input-line-container justify">
+				<p class="list-input-line">List all the dates of Easter Sunday in the period <span class="nobr"><input type="number" class="list-input" id="list-dates-year1" placeholder="year" onkeydown="key(event, 1)">&nbsp;-&nbsp;<input type="number" class="list-input" id="list-dates-year2" placeholder="year" onkeydown="key(event, 1)">.</span></p>
+			</div>
+			<div class="list-years-module list-input-line-container justify">
+				<p class="list-input-line">List all the years in which Easter Sunday falls on <span class="nobr"><input type="number" class="list-input" id="list-years-day" placeholder="day" min="1" max="31" onkeydown="key(event, 2)">&nbsp;<select class="list-select" id="list-years-month">
+					<option value="0" hidden>month</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+				</select></span> in the period <span class="nobr"><input type="number" class="list-input" id="list-years-year1" placeholder="year" onkeydown="key(event, 2)">&nbsp;-&nbsp;<input type="number" class="list-input" id="list-years-year2" placeholder="year" onkeydown="key(event, 2)">.</span></p>
+			</div>
+			<div class="list-dates-module">
+				<p><span class="btn" onClick="dateListRun()">Compute</span></p>
+			</div>
+			<div class="list-years-module">
+				<p><span class="btn" onClick="yearListRun()">Compute</span></p>
+			</div>
+			<div class="list-dates-module">
+				<div class="box list-result-box" id="list-dates-result-box">
+					<p class="list-result-heading" id="list-dates-result-heading"></p>
+					<div class="righttext" id="list-dates-result-grid"></div>
+				</div>
+			</div>
+			<div class="list-years-module">
+				<div class="box list-result-box" id="list-years-result-box">
+					<p class="list-result-heading" id="list-years-result-heading"></p>
+					<div class="righttext" id="list-years-result-container"></div>
+				</div>
+			</div>
+		</div>
+		<div class="centretext" id="footer">Not associated with any Christian denomination or organisation. Nothing on this page is intended to imply that you should or should not celebrate any particular religious holiday; do whatever you want.<br>&copy; Joshua, 2023.</div>
+	</body>
+</html>
