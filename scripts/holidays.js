@@ -236,6 +236,14 @@ var ChristmasEve = ["&#127850;&#129371;", "&#127877;", "&#129420;"];
 //List of holidays
 var Holidays = [
 	new Hol(
+		"the Coronation of King Charles III",
+		function (D) {
+			return D.y === 2023 && D.m === 5 && (D.d === 6 || D.d === 7);
+		},
+		img("crown.png"),
+		"#4b006e", "#4b006e", "#D4AF37"
+	),
+	new Hol(
 		"the third day of the third month of the third year of the third decade of the Third Millenium",
 		function (D) {
 			return D.y === 2023 && D.m === 3 && D.d === 3;
@@ -421,7 +429,7 @@ var Holidays = [
 		"#73182C", "#73182C", "#ffffff"
 	),
 	new Hol(
-		"Queen's Birthday (National)",
+		"King's Birthday (National)",
 		function (D) {
 			return D.m === 6 && D.d === mod(D.DL + 4, 7) + 8;
 		},
@@ -455,7 +463,7 @@ var Holidays = [
 		"#00008B", "#ff0000", "#ffffff"
 	),
 	new Hol(
-		"Queen's Birthday (Qld.)",
+		"King's Birthday (Qld.)",
 		function (D) {
 			return D.m === 10 && D.d === mod(D.DL + 1, 7) + 1;
 		},
