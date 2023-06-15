@@ -141,6 +141,9 @@ var SunAndMoon = function (JD) {
 		moon: Object.assign(ecCoords.moon, {eq: moonEqCoords})
 	};
 }
+var EquationOfTime = function (greenwichSolarHourAngle, UTCdeg) { // In degrees
+	return mod(greenwichSolarHourAngle - UTCdeg, 360) - 180; // Sun hour angle is 180 degrees out of phase with GAT
+}
 var Planets_Ec = function (JD) {
 	var result = [];
 	var D = JD - 2455196.5;
