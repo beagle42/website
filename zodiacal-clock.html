@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 1.1-->
-	<!--31/7/2022-->
+	<!--Version 1.2-->
+	<!--20/6/2023-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -107,61 +107,16 @@
 	</head>
 	<body onLoad="start()">
 		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
+		<script src="scripts/astro.js"></script>
 		<script>
-			var canvas, ctx, r, r2, i, sky, points;
+			var canvas, ctx, r, r2, i;
 			var signs = ["\u2648", "\u2649", "\u264a", "\u264b", "\u264c", "\u264d", "\u264e", "\u264f", "\u2650", "\u2651", "\u2652", "\u2653"];
-			var stars = ["★", "★", "★", "★", "★", "★", "★", "★", "★", "★", "★", "✯"];
 			var roman = ["N", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
 			var months = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 			var week = ["\u2609", "\uD83C\uDF19", "\u2642", "\u263f", "\u2643", "\u2640", "\u2644"];
 			var weekLetters = ["S", "M", "T", "W", "T", "F", "S"];
 			var monthLetters = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-			var planets = [];
-			var Planet = function (name, T, eps, po, e, a, i, leo, thet_0, v_0, symbol, colour, radius) {
-				this.name = name;
-				this.T = T;
-				this.eps = eps;
-				this.po = po;
-				this.e = e;
-				this.a = a;
-				this.i = i;
-				this.leo = leo;
-				this.thet_0 = thet_0;
-				this.v_0 = v_0;
-				this.colour = colour;
-				this.radius = radius;
-				this.symbol = symbol;
-			}
-			planets[0] = new Planet("Mercury", 0.24085, 75.5671, 77.612, 0.205627, 0.387098, 7.0051, 48.449, 6.74, -0.42, "\u263f", "#808080", 2.5);
-			planets[1] = new Planet("Venus", 0.615207, 272.30044, 131.54, 0.006812, 0.723329, 3.3947, 76.769, 16.92, -4.4, "\u2640", "#ffcc00", 3);
-			var earth = new Planet("Earth", 0.999996, 99.556772, 103.2055, 0.016671, 0.999985);
-			planets[2] = new Planet("Mars", 1.880765, 109.09646, 336.217, 0.093348, 1.523689, 1.8497, 49.632, 9.36, -1.52, "\u2642", "#ff0000", 2.75);
-			planets[3] = new Planet("Jupiter", 11.857911, 337.917132, 14.6633, 0.048907, 5.20278, 1.3035, 100.595, 196.74, -9.4, "\u2643", "#feac49", 6);
-			planets[4] = new Planet("Saturn", 29.310579, 172.398316, 89.567, 0.053853, 9.51134, 2.4873, 113.752, 165.6, -8.88, "\u2644", "#d6b977", 5);
-			planets[5] = new Planet("Uranus", 84.039492, 356.1354, 172.884833, 0.046321, 19.21814, 0.773059, 73.926961, 65.8, -7.19, "\u2645", "#a8eef0", 4); //eps value is incorrect in referenced book. Correct value sourced from: https://www.cambridge.org/files/4113/6680/1018/pawycos-errata.pdf. Alternative symbol: \u26e2
-			planets[6] = new Planet("Neptune", 165.84539, 326.895127, 23.07, 0.010483, 30.1985, 1.7673, 131.879, 62.2, -6.87, "\u2646", "#0000ff", 4);
-			var JulianDate = function (y, m, d, h = 0, min = 0, s = 0, ms = 0) {
-				var y2 = y;
-				var m2 = m;
-				if (m <= 2) {
-					y2--;
-					m2 += 12;
-				}
-				var A, B, C, D;
-				if (y2 > 1582 || y2 === 1582 && m2 > 10 || y2 === 1582 && m2 === 10 && d > 15) {
-					A = Math.trunc(y2 / 100);
-					B = 2 - A + Math.trunc(A / 4);
-				} else {
-					B = 0;
-				}
-				if (y2 < 0) {
-					C = Math.trunc(365.25 * y2 - 0.75);
-				} else {
-					C = Math.trunc(365.25 * y2);
-				}
-				D = Math.trunc(30.6001 * (m2 + 1));
-				return B + C + D + d + 1720994.5 + h / 24 + min / 1440 + s / 86400 + ms / 86400000;
-			}
 			var arrow = function (length, ang, h, w, lin) {
 				var len = length;
 				ctx.lineWidth = lin;
@@ -203,10 +158,8 @@
 				ctx.fill();
 				ctx.rotate(-1 * rad(ang + 180));
 			}
-			var checked = function (id) {
-				return document.getElementById(id).checked;
-			}
 			var run = function () {
+				//Calculations
 				var now = new Date();
 				var MINUTE = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
 				var decDay = now.getHours() / 24 + MINUTE / 1440;
@@ -214,368 +167,311 @@
 				var HOUR = mod(decDay * 24, 12);
 				var JD = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
 				var JD0 = JulianDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate());
-				//The Sun:
-				var T = (JD - 2415020) / 36525;
-				var eps_g = mod(279.6966778 + 36000.76892 * T + 0.0003025 * T * T);
-				var po_g = mod(281.2208444 + 1.719175 * T + 0.000452778 * T * T);
-				var e = mod(0.01675104 - 0.0000418 * T - 0.000000126 * T * T);
-				var M_sun = mod(eps_g - po_g);
-				var E = rad(M_sun);
-				var del = E - e * Math.sin(E) - rad(M_sun);
-				while (Math.abs(del) > 0.000001) {
-					E -= del / (1 - e * Math.cos(E));
-					del = E - e * Math.sin(E) - rad(M_sun);
-				}
-				E = deg(E);
-				var v = mod(2 * atan(Math.sqrt((1 + e) / (1 - e)) * tan(E / 2)));
-				var lam_sun = mod(v + po_g);
-				var SUN = lam_sun;
-				//The Moon:
-				var D = JD - 2455196.5;
-				var l = mod(13.1763966 * D + 91.929336);
-				var M_m = mod(l - 0.1114041 * D - 130.143076);
-				var N = mod(291.682547 - 0.0529539 * D);
-				var C = l - lam_sun;
-				var E_v = 1.2739 * sin(2 * C - M_m);
-				var A_e = 0.1858 * sin(M_sun);
-				var A_3 = 0.37 * sin(M_sun);
-				var M_m2 = M_m + E_v - A_e - A_3;
-				var E_c = 6.2886 * sin(M_m2);
-				var A_4 = 0.214 * sin(2 * M_m2);
-				var l2 = l + E_v + E_c - A_e - A_4;
-				var V = 0.6583 * sin(2 * (l2 - lam_sun));
-				var l3 = l2 + V;
-				var N2 = N - 0.16 * sin(M_sun);
-				var lam_m = atan2(sin(l3 - N2) * cos(5.145396), cos(l3 - N2)) + N2;
-				var beta_m = asin(sin(l3 - N2) * sin(5.145396));
-				var MOON = lam_m;
-				var Dragon = mod(N2);
-				//Moon Phase:
-				var PHASE = mod(l3 - lam_sun);
-				//Planets
+				var SUNandMOON = SunAndMoon_Ec(JD);
+				var SUN = SUNandMOON.sun.ec.ecLong;
+				var MOON = SUNandMOON.moon.ec.ecLong;
+				var DRAGON = SUNandMOON.moon.ascNode;
+				var PHASE = SUNandMOON.moon.age;
+				var PLANETSobj = Planets_Ec(JD);
 				var PLANET = [];
-				if (true) {
-					for (var i = 0; i < planets.length; i++) {
-						var N_p = mod(360 / 365.242191 * D / planets[i].T);
-						var M_p = N_p + planets[i].eps - planets[i].po;
-						var v_p = mod(M_p + 360 / Math.PI * planets[i].e * sin(M_p));
-						var l_p = mod(v_p + planets[i].po);
-						var lr = planets[i].a * (1 - planets[i].e * planets[i].e) / (1 + planets[i].e * cos(v_p));
-						var N_E = mod(360 / 365.242191 * D / earth.T);
-						var M_E = N_E + earth.eps - earth.po;
-						var v_E = mod(M_E + 360 / Math.PI * earth.e * sin(M_E));
-						var L = mod(v_E + earth.po);
-						var bR = earth.a * (1 - earth.e * earth.e) / (1 + earth.e * cos(v_E));
-						var psi = asin(sin(l_p - planets[i].leo) * sin(planets[i].i));
-						var l2 = atan2(sin(l_p - planets[i].leo) * cos(planets[i].i), cos(l_p - planets[i].leo)) + planets[i].leo;
-						var lr2 = lr * cos(psi);
-						var lam;
-						if (i > 1) {
-							lam = mod(atan(bR * sin(l2 - L) / (lr2 - bR * cos(l2 - L))) + l2);
-						} else {
-							lam = mod(180 + L + atan(lr2 * sin(L - l2) / (bR - lr2 * cos(L - l2))));
-						}
-						var beta = mod(atan(lr2 * tan(psi) * sin(lam - l2) / (bR * sin(l2 - L))));
-						PLANET[i] = lam;
-					}
+				for (var i = 0; i < PLANETSobj.length; i++) {
+					PLANET[i] = PLANETSobj[i].ec.ecLong;
 				}
 				//Display
-				if (true) {
-					ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
-					//Getting the info
-					var direction = Number(document.getElementById("direction").value);
-					var firstPoint = Number(document.getElementById("firstPoint").value) * 30;
-					//Shorthanding
-					var angle = function (lam) {
-						return mod(firstPoint + direction * lam);
-					}
-					var position = function (ang, dist) {
-						return {x: dist * r * sin(ang), y: -1 * dist * r * cos(ang)};
-					}
-					var lamPos = function (lam, dist) {
-						return position(angle(lam), dist);
-					}
-					ctx.lineCap = "butt";
-					//Colours
-					var goldColour = "#ccad00";
-					var blueColour = "#000033";
-					var blackColour = "#222222";
-					var handColour = "#e6c300";
-					var handColour = "#808080";
-					var handColour = "#999999";
-					//var handColour = "#805e00";
-					var handColour2 = "#808080";
-					//Clock bg
-					if (checked("time")) {
-						ctx.fillStyle = blackColour;
-						ctx.beginPath();
-						ctx.arc(0, 0, r, 0, TwoPi);
-						ctx.fill();
-						ctx.strokeStyle = goldColour;
-						ctx.fillStyle = goldColour;
-						ctx.lineWidth = r / 100;
-						ctx.beginPath();
-						ctx.arc(0, 0, r, 0, TwoPi);
-						ctx.stroke();
-						ctx.lineWidth = r / 200;
-						ctx.beginPath();
-						ctx.arc(0, 0, r * 0.96, 0, TwoPi);
-						ctx.stroke();
-						for (i = 0; i < 60; i++) {
-							if (i % 5 === 0) {
-								ctx.lineWidth = r / 100;
-							} else {
-								ctx.lineWidth = r / 200;
-							}
-							ctx.beginPath();
-							ctx.moveTo(0.96 * r * sin(6 * i), -0.96 * r * cos(6 * i));
-							ctx.lineTo(r * sin(6 * i), -1 * r * cos(6 * i));
-							ctx.stroke();
-						}
-						ctx.font = r * 0.14 + "px Times";
-						for (i = 1; i <= 12; i++) {
-							ctx.rotate(Pi / 6);
-							ctx.fillText(roman[i], 0, -0.87 * r);
-						}
-					}
-					//Zodiac bg
-					ctx.fillStyle = blueColour;
+				ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
+				//Getting the info
+				var direction = getNumValue("direction");
+				var firstPoint = getNumValue("firstPoint") * 30;
+				//Shorthanding
+				var angle = function (lam) {
+					return mod(firstPoint + direction * lam);
+				}
+				var position = function (ang, dist) {
+					return {x: dist * r * sin(ang), y: -1 * dist * r * cos(ang)};
+				}
+				var lamPos = function (lam, dist) {
+					return position(angle(lam), dist);
+				}
+				ctx.lineCap = "butt";
+				//Colours
+				var colourWhite = "#ffffff";
+				var colourBlack = "#000000";
+				var goldColour = "#ccad00";
+				var blueColour = "#000033";
+				var blackColour = "#222222";
+				var handColour = "#999999";
+				var handColour2 = "#808080";
+				//Clock bg
+				if (checked("time")) {
+					ctx.fillStyle = blackColour;
 					ctx.beginPath();
-					ctx.arc(0, 0, r * 0.8, 0, TwoPi);
+					ctx.arc(0, 0, r, 0, TwoPi);
 					ctx.fill();
 					ctx.strokeStyle = goldColour;
+					ctx.fillStyle = goldColour;
 					ctx.lineWidth = r / 100;
 					ctx.beginPath();
-					ctx.arc(0, 0, r * 0.8, 0, TwoPi);
+					ctx.arc(0, 0, r, 0, TwoPi);
 					ctx.stroke();
 					ctx.lineWidth = r / 200;
 					ctx.beginPath();
-					ctx.arc(0, 0, r * 0.76, 0, TwoPi);
+					ctx.arc(0, 0, r * 0.96, 0, TwoPi);
 					ctx.stroke();
-					var pos, pos2, angl;
-					for (var i = 0; i < 72; i++) {
-						pos = lamPos(i * 5, 0.8);
-						pos2 = {x: 0, y: 0};
-						ctx.lineWidth = r / 100;
-						if (i % 6 != 0) {
-							pos2 = lamPos(i * 5, 0.76);
+					for (i = 0; i < 60; i++) {
+						if (i % 5 === 0) {
+							ctx.lineWidth = r / 100;
+						} else {
 							ctx.lineWidth = r / 200;
 						}
 						ctx.beginPath();
-						ctx.moveTo(pos2.x, pos2.y);
-						ctx.lineTo(pos.x, pos.y);
+						ctx.moveTo(0.96 * r * sin(6 * i), -0.96 * r * cos(6 * i));
+						ctx.lineTo(r * sin(6 * i), -1 * r * cos(6 * i));
 						ctx.stroke();
 					}
-					var rotate = checked("rotate");
-					var dist = 0.64;
+					ctx.font = r * 0.14 + "px Times";
+					for (i = 1; i <= 12; i++) {
+						ctx.rotate(Pi / 6);
+						ctx.fillText(roman[i], 0, -0.87 * r);
+					}
+				}
+				//Zodiac bg
+				ctx.fillStyle = blueColour;
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 0.8, 0, TwoPi);
+				ctx.fill();
+				ctx.strokeStyle = goldColour;
+				ctx.lineWidth = r / 100;
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 0.8, 0, TwoPi);
+				ctx.stroke();
+				ctx.lineWidth = r / 200;
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 0.76, 0, TwoPi);
+				ctx.stroke();
+				var pos, pos2, angl;
+				for (var i = 0; i < 72; i++) {
+					pos = lamPos(i * 5, 0.8);
+					pos2 = {x: 0, y: 0};
+					ctx.lineWidth = r / 100;
+					if (i % 6 != 0) {
+						pos2 = lamPos(i * 5, 0.76);
+						ctx.lineWidth = r / 200;
+					}
+					ctx.beginPath();
+					ctx.moveTo(pos2.x, pos2.y);
+					ctx.lineTo(pos.x, pos.y);
+					ctx.stroke();
+				}
+				var rotate = checked("rotate");
+				var dist = 0.64;
+				ctx.fillStyle = goldColour;
+				ctx.font = 0.15 * r + "px Emoji";
+				for (var i = 0; i < 12; i++) {
+					angl = angle(i * 30 + 15);
+					if (rotate) {
+						ctx.rotate(rad(angl));
+						pos = {x: 0, y: -1 * dist * r};
+					} else {
+						pos = position(angl, dist);
+					}
+					ctx.fillText(signs[i], pos.x, pos.y);
+					if (rotate) {
+						ctx.rotate(-1 * rad(angl));
+					}
+				}
+				//Week bg
+				if (checked("week")) {
+					ctx.fillStyle = blackColour;
+					ctx.beginPath();
+					ctx.arc(0, 0, r * 0.3, 0, TwoPi);
+					ctx.fill();
+					ctx.strokeStyle = goldColour;
 					ctx.fillStyle = goldColour;
-					ctx.font = 0.15 * r + "px Emoji";
-					for (var i = 0; i < 12; i++) {
-						angl = angle(i * 30 + 15);
+					ctx.lineWidth = r / 100;
+					ctx.beginPath();
+					ctx.arc(0, 0, r * 0.3, 0, TwoPi);
+					ctx.stroke();
+					dist = 0.2;
+					var font;
+					for (var i = 0; i < 7; i++) {
+						pos = position(i * 360 / 7, 0.3);
+						ctx.beginPath();
+						ctx.moveTo(0, 0);
+						ctx.lineTo(pos.x, pos.y);
+						ctx.stroke();
+						font = 0.13 * r;
+						if (i === 2 || i === 3 || i === 5) {
+							font *= 5 / 4;
+						} else if (i === 1) {
+							font *= 5 / 6;
+						}
+						ctx.font = font + "px Emoji, Symbols, Symbols2";
+						angl = (i + 0.5) * 360 / 7;
 						if (rotate) {
 							ctx.rotate(rad(angl));
 							pos = {x: 0, y: -1 * dist * r};
 						} else {
 							pos = position(angl, dist);
 						}
-						ctx.fillText(signs[i], pos.x, pos.y);
+						ctx.fillText(week[i], pos.x, pos.y);
 						if (rotate) {
 							ctx.rotate(-1 * rad(angl));
 						}
 					}
-					//Week bg
-					if (checked("week")) {
-						ctx.fillStyle = blackColour;
-						ctx.beginPath();
-						ctx.arc(0, 0, r * 0.3, 0, TwoPi);
-						ctx.fill();
-						ctx.strokeStyle = goldColour;
-						ctx.fillStyle = goldColour;
-						ctx.lineWidth = r / 100;
-						ctx.beginPath();
-						ctx.arc(0, 0, r * 0.3, 0, TwoPi);
-						ctx.stroke();
-						dist = 0.2;
-						var font;
-						for (var i = 0; i < 7; i++) {
-							pos = position(i * 360 / 7, 0.3);
-							ctx.beginPath();
-							ctx.moveTo(0, 0);
-							ctx.lineTo(pos.x, pos.y);
-							ctx.stroke();
-							font = 0.13 * r;
-							if (i === 2 || i === 3 || i === 5) {
-								font *= 5 / 4;
-							} else if (i === 1) {
-								font *= 5 / 6;
-							}
-							ctx.font = font + "px Emoji, Symbols, Symbols2";
-							angl = (i + 0.5) * 360 / 7;
-							if (rotate) {
-								ctx.rotate(rad(angl));
-								pos = {x: 0, y: -1 * dist * r};
-							} else {
-								pos = position(angl, dist);
-							}
-							ctx.fillText(week[i], pos.x, pos.y);
-							if (rotate) {
-								ctx.rotate(-1 * rad(angl));
-							}
-						}
-					}
-					//Centre bg
-					ctx.fillStyle = blackColour;
+				}
+				//Centre bg
+				ctx.fillStyle = blackColour;
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 0.1, 0, TwoPi);
+				ctx.fill();
+				ctx.strokeStyle = goldColour;
+				ctx.lineWidth = r / 100;
+				ctx.beginPath();
+				ctx.arc(0, 0, r * 0.1, 0, TwoPi);
+				ctx.stroke();
+				ctx.lineCap = "round";
+				//Dragon hand
+				if (checked("dragon")) {
+					ctx.strokeStyle = "#006600";
+					ctx.fillStyle = "#006600";
+					ctx.lineWidth = r / 80;
+					ctx.rotate(rad(angle(DRAGON)));
+					var pos = -0.76 * r;
+					var headLength = 0.06 * r;
+					var headLength2 = 0.09 * r;
+					var headWidth = 0.03 * r;
 					ctx.beginPath();
-					ctx.arc(0, 0, r * 0.1, 0, TwoPi);
-					ctx.fill();
-					ctx.strokeStyle = goldColour;
-					ctx.lineWidth = r / 100;
-					ctx.beginPath();
-					ctx.arc(0, 0, r * 0.1, 0, TwoPi);
+					ctx.moveTo(0, -1 * pos);
+					ctx.lineTo(0, pos + headLength);
 					ctx.stroke();
-					ctx.lineCap = "round";
-					//Dragon hand
-					if (checked("dragon")) {
-						ctx.strokeStyle = "#006600";
-						ctx.fillStyle = "#006600";
-						ctx.lineWidth = r / 80;
-						ctx.rotate(rad(angle(Dragon)));
-						var pos = -0.76 * r;
-						var headLength = 0.06 * r;
-						var headLength2 = 0.09 * r;
-						var headWidth = 0.03 * r;
-						ctx.beginPath();
-						ctx.moveTo(0, -1 * pos);
-						ctx.lineTo(0, pos + headLength);
-						ctx.stroke();
-						ctx.beginPath();
-						ctx.moveTo(0, pos + headLength);
-						ctx.lineTo(headWidth, pos + headLength2);
-						ctx.lineTo(0, pos);
-						ctx.lineTo(-1 * headWidth, pos + headLength2);
-						ctx.closePath();
-						ctx.fill();
-						ctx.rotate(-1 * rad(angle(Dragon)));
-					}
-					//Moon hand
-					if (checked("hands")) {
-						ctx.fillStyle = "#ffffff";
-						ctx.strokeStyle = "#ffffff";
-						arrow(0.76 * r, angle(MOON), 0.08 * r, 0.04 * r, r / 100);
-					}
-					//Moon
-					var moonRad = 0.075 * r;
-					ctx.rotate(rad(angle(MOON)));
-					pos = position(0, 0.35);
-					ctx.fillStyle = "#000000";
-					if (PHASE === 180) {
-						ctx.fillStyle = "#ffffff";
-					}
 					ctx.beginPath();
-					ctx.arc(pos.x, pos.y, moonRad, 0, TwoPi);
-					ctx.fill();
-					ctx.fillStyle = "#ffffff";
-					ctx.strokeStyle = "#ffffff";
-					ctx.lineWidth = r / 100;
-					if (mod(PHASE, 180) != 0) {
-						var side = PHASE < 180;
-						var side2 = -1;
-						if (side) {
-							side2 = 1;
-						}
-						var n = 1000;
-						ctx.beginPath();
-						ctx.moveTo(pos.x, pos.y - moonRad);
-						for (var i = 0; i <= n; i++) {
-							var moonY = i * 2 / n - 1;
-							var moonX = SqRt(1 - moonY * moonY) * cos(PHASE) * side2;
-							ctx.lineTo(pos.x + moonX * moonRad, pos.y + moonY * moonRad);
-						}
-						ctx.arc(pos.x, pos.y, moonRad, 0.5 * Pi, 1.5 * Pi, side);
-						ctx.closePath();
-						ctx.fill();
-					}
-					ctx.rotate(-1 * rad(angle(MOON)));
-					//Sun hand
-					if (checked("hands")) {
-						ctx.fillStyle = "#ffff00";
-						ctx.strokeStyle = "#ffff00";
-						arrow(0.76 * r, angle(SUN), 0.08 * r, 0.04 * r, r / 100);
-					}
-					//Sun
-					var sunPoints = 11;
-					var halfPoint = 180 / sunPoints;
-					var innerRad = 0.055 * r;
-					var outerRad = 0.1 * r;
-					ctx.rotate(rad(angle(SUN)));
-					pos = position(0, 0.5);
-					ctx.fillStyle = "#ffe000";
-					ctx.beginPath();
-					ctx.moveTo(pos.x + innerRad * cos(270 - halfPoint), pos.y + innerRad * sin(270 - halfPoint));
-					ctx.lineTo(pos.x, pos.y - outerRad);
-					for (i = 0; i < sunPoints; i++) {
-						var a2 = i * 2 * halfPoint + 270;
-						var a1 = a2 - halfPoint;
-						ctx.lineTo(pos.x + innerRad * cos(a1), pos.y + innerRad * sin(a1));
-						ctx.lineTo(pos.x + outerRad * cos(a2), pos.y + outerRad * sin(a2));
-					}
+					ctx.moveTo(0, pos + headLength);
+					ctx.lineTo(headWidth, pos + headLength2);
+					ctx.lineTo(0, pos);
+					ctx.lineTo(-1 * headWidth, pos + headLength2);
 					ctx.closePath();
 					ctx.fill();
-					ctx.fillStyle = "#ffff00";
+					ctx.rotate(-1 * rad(angle(DRAGON)));
+				}
+				//Moon hand
+				if (checked("hands")) {
+					ctx.fillStyle = colourWhite;
+					ctx.strokeStyle = colourWhite;
+					arrow(0.76 * r, angle(MOON), 0.08 * r, 0.04 * r, r / 100);
+				}
+				//Moon
+				var moonRad = 0.075 * r;
+				ctx.rotate(rad(angle(MOON)));
+				pos = position(0, 0.35);
+				ctx.fillStyle = colourBlack;
+				if (PHASE === 180) {
+					ctx.fillStyle = colourWhite;
+				}
+				ctx.beginPath();
+				ctx.arc(pos.x, pos.y, moonRad, 0, TwoPi);
+				ctx.fill();
+				ctx.fillStyle = colourWhite;
+				ctx.strokeStyle = colourWhite;
+				ctx.lineWidth = r / 100;
+				if (mod(PHASE, 180) != 0) {
+					var side = PHASE < 180;
+					var side2 = -1;
+					if (side) {
+						side2 = 1;
+					}
+					var n = 1000;
 					ctx.beginPath();
-					ctx.arc(pos.x, pos.y, innerRad, 0, TwoPi);
+					ctx.moveTo(pos.x, pos.y - moonRad);
+					for (var i = 0; i <= n; i++) {
+						var moonY = i * 2 / n - 1;
+						var moonX = SqRt(1 - moonY * moonY) * cos(PHASE) * side2;
+						ctx.lineTo(pos.x + moonX * moonRad, pos.y + moonY * moonRad);
+					}
+					ctx.arc(pos.x, pos.y, moonRad, 0.5 * Pi, 1.5 * Pi, side);
+					ctx.closePath();
 					ctx.fill();
-					ctx.rotate(-1 * rad(angle(SUN)));
-					//Planets
-					if (checked("planets")) {
-						var planetRad = 0.03 * r;
-						for (var i = 0; i < planets.length; i++) {
-							ctx.rotate(rad(angle(PLANET[i])));
-							ctx.fillStyle = planets[i].colour;
-							pos = position(0, 0.65);
-							ctx.beginPath();
-							ctx.arc(pos.x, pos.y, planetRad, 0, TwoPi);
-							ctx.fill();
-							if (i === 4) {
-								ctx.strokeStyle = "#caa54e";
-								ctx.lineWidth = planetRad / 4;
-								var ringRad = 2 * planetRad;
-								ctx.beginPath();
-								ctx.moveTo(pos.x - ringRad, pos.y);
-								ctx.lineTo(pos.x + ringRad, pos.y);
-								ctx.stroke();
-							}
-							if (checked("symbols")) {
-								ctx.fillStyle = "#000000";
-								ctx.font = planetRad * 2 + "px Symbols, Symbols2, Emoji";
-								ctx.fillText(planets[i].symbol, pos.x, pos.y + r / 100);
-							}
-							ctx.rotate(-1 * rad(angle(PLANET[i])));
-						}
-					}
-					//Time hands
-					ctx.fillStyle = handColour;
-					ctx.strokeStyle = handColour;
-					if (checked("time")) {
-						//arrow(0.6 * r, HOUR * 30, 0.25 * r, 0.1 * r, 0.05 * r);
-						//arrow(0.96 * r, MINUTE * 6, 0.25 * r, 0.1 * r, 0.05 * r);
-						drawHand(0.55 * r, 0.6 * r, HOUR * 30, 0.2 * r, 0.06 * r, 0.035 * r, 0.02 * r);
-						drawHand(0.8 * r, 0.96 * r, MINUTE * 6, 0.25 * r, 0.05 * r, 0.035 * r, 0.02 * r);
-					}
-					//Week hand
-					ctx.fillStyle = handColour2;
-					ctx.strokeStyle = handColour2;
-					if (checked("week")) {
-						arrow(0.2 * r, WEEK * 360 / 7, 0.1 * r, 0.05 * r, r / 50);
-					}
-					//Centre
-					if (checked("hands") || checked("time") || checked("week") || checked("dragon")) {
-						ctx.fillStyle = handColour2;
+				}
+				ctx.rotate(-1 * rad(angle(MOON)));
+				//Sun hand
+				if (checked("hands")) {
+					ctx.fillStyle = "#ffff00";
+					ctx.strokeStyle = "#ffff00";
+					arrow(0.76 * r, angle(SUN), 0.08 * r, 0.04 * r, r / 100);
+				}
+				//Sun
+				var sunPoints = 11;
+				var halfPoint = 180 / sunPoints;
+				var innerRad = 0.055 * r;
+				var outerRad = 0.1 * r;
+				ctx.rotate(rad(angle(SUN)));
+				pos = position(0, 0.5);
+				ctx.fillStyle = "#ffe000";
+				ctx.beginPath();
+				ctx.moveTo(pos.x + innerRad * cos(270 - halfPoint), pos.y + innerRad * sin(270 - halfPoint));
+				ctx.lineTo(pos.x, pos.y - outerRad);
+				for (i = 0; i < sunPoints; i++) {
+					var a2 = i * 2 * halfPoint + 270;
+					var a1 = a2 - halfPoint;
+					ctx.lineTo(pos.x + innerRad * cos(a1), pos.y + innerRad * sin(a1));
+					ctx.lineTo(pos.x + outerRad * cos(a2), pos.y + outerRad * sin(a2));
+				}
+				ctx.closePath();
+				ctx.fill();
+				ctx.fillStyle = "#ffff00";
+				ctx.beginPath();
+				ctx.arc(pos.x, pos.y, innerRad, 0, TwoPi);
+				ctx.fill();
+				ctx.rotate(-1 * rad(angle(SUN)));
+				//Planets
+				if (checked("planets")) {
+					var planetRad = 0.03 * r;
+					for (var i = 0; i < planets.length; i++) {
+						ctx.rotate(rad(angle(PLANET[i])));
+						ctx.fillStyle = planets[i].colour;
+						pos = position(0, 0.65);
 						ctx.beginPath();
-						ctx.arc(0, 0, r * 0.05, 0, TwoPi);
+						ctx.arc(pos.x, pos.y, planetRad, 0, TwoPi);
 						ctx.fill();
+						if (i === 4) {
+							ctx.strokeStyle = "#caa54e";
+							ctx.lineWidth = planetRad / 4;
+							var ringRad = 2 * planetRad;
+							ctx.beginPath();
+							ctx.moveTo(pos.x - ringRad, pos.y);
+							ctx.lineTo(pos.x + ringRad, pos.y);
+							ctx.stroke();
+						}
+						if (checked("symbols")) {
+							ctx.fillStyle = colourBlack;
+							ctx.font = planetRad * 2 + "px Symbols, Symbols2, Emoji";
+							ctx.fillText(planets[i].symbol, pos.x, pos.y + r / 100);
+						}
+						ctx.rotate(-1 * rad(angle(PLANET[i])));
 					}
 				}
+				//Time hands
+				ctx.fillStyle = handColour;
+				ctx.strokeStyle = handColour;
+				if (checked("time")) {
+					//arrow(0.6 * r, HOUR * 30, 0.25 * r, 0.1 * r, 0.05 * r);
+					//arrow(0.96 * r, MINUTE * 6, 0.25 * r, 0.1 * r, 0.05 * r);
+					drawHand(0.55 * r, 0.6 * r, HOUR * 30, 0.2 * r, 0.06 * r, 0.035 * r, 0.02 * r);
+					drawHand(0.8 * r, 0.96 * r, MINUTE * 6, 0.25 * r, 0.05 * r, 0.035 * r, 0.02 * r);
+				}
+				//Week hand
+				ctx.fillStyle = handColour2;
+				ctx.strokeStyle = handColour2;
+				if (checked("week")) {
+					arrow(0.2 * r, WEEK * 360 / 7, 0.1 * r, 0.05 * r, r / 50);
+				}
+				//Centre
+				if (checked("hands") || checked("time") || checked("week") || checked("dragon")) {
+					ctx.fillStyle = handColour2;
+					ctx.beginPath();
+					ctx.arc(0, 0, r * 0.05, 0, TwoPi);
+					ctx.fill();
+				}
+				// The end
 				setTimeout(run, 100);
 			}
 			var start = function () {
@@ -606,7 +502,7 @@
 			}
 		</script>
 		<canvas id="clock"></canvas>
-		<p id="credit">Based on a variety of astronomical clocks.<br>&copy; Joshua, 2021.</p>
+		<p id="credit">Based on a variety of astronomical clocks.<br>&copy; Joshua, 2023.</p>
 		<div id="home">
 			<a href="index.html">
 				<img src="images/logo.png" id="homeLogo">
