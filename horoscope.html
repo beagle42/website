@@ -21,8 +21,10 @@
 		<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 		<style>
 			* {
-				font-family: Arial, serif;
 				text-size-adjust: none;
+			}
+			body {
+				font-family: Arial, serif;
 			}
 			#front {
 				text-align: center;
@@ -479,9 +481,9 @@
 		</div>
 		<div id="header"><span onClick="location.reload()" id="reload">Horoscope Generator</span></div>
 		<div id="front">
-			<p id="h3">Joshua the Divine of Joshua the Divine's Divinations presents a</p>
+			<p id="h3"><span class="nobr">Joshua the Divine</span> of Joshua the Divine's Divinations <span class="nobr">presents a</span></p>
 			<p id="h1">Horoscope Generator</p>
-			<p class="small">A horoscope is a chart representing the heavens at a specific time and place (often a birth). In astrology, such charts are used to make predictions. It doesn't work.</p>
+			<p class="small">A horoscope is a chart representing the heavens at the time and place of an event (often a birth). In astrology, such charts are used to make predictions. It doesn't work.</p>
 			<p class="p inputLine">Time:
 				<span class="nobr"><input type="number" min="0" max="23" id="hour" placeholder="hh" class="timeInput">&#8201;:&#8201;<input type="number" min="0" max="59" id="min" placeholder="mm" class="timeInput"></span> &nbsp; 
 				<span class="nobr"><input type="number" min="1" max="31" id="day" placeholder="dd" class="timeInput">&#8201;/&#8201;<input type="number" min="1" max="12" id="mon" placeholder="mm" class="timeInput">&#8201;/&#8201;<input type="number" id="year" placeholder="yyyy" class="timeInput"></span> &nbsp;
