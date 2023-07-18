@@ -181,8 +181,8 @@
 				objects.push(new Object("Mc", false, Mc));
 				// Sun and Moon
 				var SUNandMOON = SunAndMoon_Ec(JD);
-				objects.push(new Object("\u2609", true, SUNandMOON.sun.ec.ecLong));
-				objects.push(new Object("\u263d", true, SUNandMOON.moon.ec.ecLong));
+				objects.push(new Object("\u2609", true, mod(SUNandMOON.sun.ec.ecLong, 360)));
+				objects.push(new Object("\u263d", true, mod(SUNandMOON.moon.ec.ecLong, 360)));
 				// Planets
 				var PLANETS = Planets_Ec(JD);
 				var PLANETSsoon = Planets_Ec(JD + 0.00001);
@@ -191,7 +191,7 @@
 					if (mod(PLANETSsoon[i].ec.ecLong - PLANETS[i].ec.ecLong + 180, 360) - 180 < 0) {
 						retro = true;
 					}
-					objects.push(new Object(planets[i].symbol, true, PLANETS[i].ec.ecLong, retro));
+					objects.push(new Object(planets[i].symbol, true, mod(PLANETS[i].ec.ecLong, 360), retro));
 				}
 				// Sorting objects in best order to prevent crowding
 				objects.sort(function(a, b){return a.lambda - b.lambda});
