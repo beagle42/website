@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Search algorithm v. 2.0, 14/9/2023-->
 <html>
 	<head>
 		<title>Beagle Search</title>
@@ -220,21 +221,24 @@
 					index[i].score = 0;
 				}
 				for (var i = 0; i < index.length; i++) {
+					var name = index[i].name.toLowerCase();
 					for (var j = 0; j < query.length; j++) {
-						for (var k = 0; k < index[i].name.length; k++) {
-							if (query.charAt(j) === index[i].name.charAt(k).toLowerCase()) {
-								index[i].score += 1 / index[i].name.length;
-								if (j != 0 && k != 0) {
-									if (query.charAt(j - 1) === index[i].name.charAt(k - 1).toLowerCase()) {
-										index[i].score += 0.5 / index[i].name.length;
-										if (j != 1 && k != 1) {
-											if (query.charAt(j - 2) === index[i].name.charAt(k - 2).toLowerCase()) {
-												index[i].score += 0.25 / index[i].name.length;
-											}
-										}
-									}
+						for (var k = 0; k < name.length; k++) {
+							var charScore = 0;
+							var checking = true;
+							var l = 0;
+							while (l <= j && l <= k && checking) {
+								if (query.charAt(j - l) === name.charAt(k - l)) {
+									charScore += l + 1;
+								} else {
+									checking = false;
 								}
+								l++;
 							}
+							if (j === k && checking) {
+								charScore *= 3;
+							}
+							index[i].score += charScore / name.length;
 						}
 					}
 				}
