@@ -510,7 +510,7 @@ var Holidays = [
 	new Hol(
 		"United Nations Day",
 		isDate(24, 10),
-		img("un-flag.png")
+		"&#127482;&#127475;"
 	),
 	new Hol(
 		"Commonwealth Day",
