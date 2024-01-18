@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
-	<!--Version 2.0.3, 30/3/2023-->
+	<!--Version 2.0.4, 18/1/2024-->
 	
 	<!--How much more boring can I get?-->
 	
@@ -51,6 +51,9 @@
 				font-family: Old English Text MT, 'UnifrakturMaguntia', OldEnglish, Arial, sans-serif;
 				margin-bottom: 0;
 				padding: 0 80px;
+			}
+			p {
+				margin: 1em 0;
 			}
 			#subtitle {
 				font-family: Old English Text MT, OldEnglish, Arial, sans-serif;
@@ -166,6 +169,9 @@
 			}
 			.smallCaps {
 				font-variant: small-caps;
+			}
+			#shortcuts {
+				font-size: 16px;
 			}
 		</style>
 	</head>
@@ -649,6 +655,22 @@
 			//Egyptian
 			var EgyptianJDEpoch = 1448638;
 			var EgyptianMonths = [0, "Thoth", "Phaophi", "Athyr", "Choiak", "Tybi", "Mechir", "Phamenoth", "Pharmuthi", "Pachon", "Payni", "Epiphi", "Mesori", "Epagomenae"];
+			//Callippic
+			//*** Development cancelled ***
+			var CallippicJDEpoch = 1601070;
+			var daysInCallippicCycle = 27759;
+			var CallippicMonths = [0, "Hekatombaion", "Metageitnion", "Boedromion", "Pyanepsion", "Maimakterion", "Poseideon (I)", "Poseideon II", "Gamelion", "Anthesterion", "Elaphebolion", "Mounuchion", "Thargelion", "Skirophorion (I)", "Skirophorion II"];
+			var CallippicMonthLength = function (month, yearInCycle) {
+				var result = 30;
+				var yearInMetCycle = mod(yearInCycle, 19);
+				if ((month === 7 && !(yearInMetCycle === 1 || yearInMetCycle === 6 || yearInMetCycle === 14)) || (month === 14 && !(yearInMetCycle === 3 || yearInMetCycle === 9 || yearInMetCycle === 11 || yearInMetCycle === 17))) {
+					result = 0;
+				}
+				return result;
+			}
+			var CallippicMonthLengthFromIndex = function (x) {
+				return CallippicMonthLength(mod(x, 14) + 1, floor(x / 14) + 1);
+			}
 			// Shorthand
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
@@ -2334,6 +2356,43 @@
 				},
 				DMYInput(37, EgyptianMonths, 30)
 			);
+			/*cal[38] = new Cal(
+				"Callippic",
+				function (JD) {
+					var T = JD - CallippicJDEpoch; // zero-indexed
+					var C = floor(T / daysInCallippicCycle) + 1;
+					var solarDay = mod(T, daysInCallippicCycle);
+					var lunarDay = floor(solarDay * 64 / 63);
+					var i = 0;
+					while (lunarDay - CallippicMonthLengthFromIndex(i) > 0) {
+						lunarDay -= CallippicMonthLengthFromIndex(i);
+						i++;
+					}
+					var D = lunarDay + 1;
+					var M = mod(i, 14) + 1;
+					var Y = floor(i / 14) + 1;
+					return [D, M, C, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return EgyptianJDEpoch + 365 * (Y - 1) + 30 * (M - 1) + D - 1;
+				},
+				function (A, JD) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return [D + " " + EgyptianMonths[M] + " " + Y + " " + abbr("N.E.", "Nabonassar era"), "(" + date(A) + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return M >= 1 && D >= 1 && D <= 30 && (M <= 12 || (M === 13 && D <= 5));
+				},
+				DMYInput(38, CallippicMonths, 30)
+			);*/
 			//Today
 			var run = function () {
 				var now = new Date();
@@ -2362,18 +2421,24 @@
 			var getSecondCal = function () {
 				return Number(document.getElementById("toSelect").value);
 			}
+			var readDate = function (cal) {
+				var dateIn = [];
+				var integerInput = true;
+				for (var i = 0; i < document.getElementsByClassName("dateIn" + cal).length; i++) {
+					dateIn[i] = Number(document.getElementsByClassName("dateIn" + cal)[i].value);
+					if (dateIn[i] % 1 != 0 || document.getElementsByClassName("dateIn" + cal)[i].value === "") {
+						integerInput = false;
+					}
+				}
+				return {integerInput: integerInput, dateIn: dateIn};
+			}
 			//Convert
 			var convert = function () {
 				var firstCal = getFirstCal();
 				var secondCal = getSecondCal();
-				var dateIn = [];
-				var integerInput = true;
-				for (var i = 0; i < document.getElementsByClassName("dateIn" + firstCal).length; i++) {
-					dateIn[i] = Number(document.getElementsByClassName("dateIn" + firstCal)[i].value);
-					if (dateIn[i] % 1 != 0 || document.getElementsByClassName("dateIn" + firstCal)[i].value === "") {
-						integerInput = false;
-					}
-				}
+				var readDateObj = readDate(firstCal);
+				var dateIn = readDateObj.dateIn;
+				var integerInput = readDateObj.integerInput;
 				var firstCalDisplayBox = "";
 				var secondCalDisplayBox = "";
 				if (integerInput && cal[firstCal].valid(dateIn)) {
@@ -2456,14 +2521,9 @@
 			}
 			var increment = function (n) {
 				var firstCal = getFirstCal();
-				var dateIn = [];
-				var integerInput = true;
-				for (var i = 0; i < document.getElementsByClassName("dateIn" + firstCal).length; i++) {
-					dateIn[i] = Number(document.getElementsByClassName("dateIn" + firstCal)[i].value);
-					if (dateIn[i] % 1 != 0 || document.getElementsByClassName("dateIn" + firstCal)[i].value === "") {
-						integerInput = false;
-					}
-				}
+				var readDateObj = readDate(firstCal);
+				var dateIn = readDateObj.dateIn;
+				var integerInput = readDateObj.integerInput;
 				if (integerInput && cal[firstCal].valid(dateIn)) {
 					var JD = cal[firstCal].toJD(dateIn);
 					var dateOut = cal[firstCal].fromJD(JD + n);
@@ -2474,14 +2534,9 @@
 			var swap = function () {
 				var firstCal = getFirstCal();
 				var secondCal = getSecondCal();
-				var dateIn = [];
-				var integerInput = true;
-				for (var i = 0; i < document.getElementsByClassName("dateIn" + firstCal).length; i++) {
-					dateIn[i] = Number(document.getElementsByClassName("dateIn" + firstCal)[i].value);
-					if (dateIn[i] % 1 != 0 || document.getElementsByClassName("dateIn" + firstCal)[i].value === "") {
-						integerInput = false;
-					}
-				}
+				var readDateObj = readDate(firstCal);
+				var dateIn = readDateObj.dateIn;
+				var integerInput = readDateObj.integerInput;
 				if (integerInput && cal[firstCal].valid(dateIn)) {
 					var JD = cal[firstCal].toJD(dateIn);
 					var dateOut = cal[secondCal].fromJD(JD);
@@ -2592,10 +2647,11 @@
 					</p>
 				</div>
 			</div>
+			<p id="shortcuts"><span class="btn" onClick="applyToday()">Today</span> &nbsp; <span class="btn" onClick="increment(1)">+1 day</span> &nbsp; <span class="btn" onClick="increment(-1)">&minus;1 day</span> &nbsp; <span class="btn" onClick="swap()">Swap</span></p>
 		</div>
 		<hr>
 		<div id="footer">
-			<p>N.B. This converter serves only <i>arithmetic</i> calendars (ie. calendars determined by fixed rules) as opposed to <i>observational</i> calendars (ie. calendars determined by astronomical observation).<br>Apologies if your favourite calendar is observational. More sincere apologies if your favourite calendar is arithemtic but not (yet) served here.<br>&#169; Joshua, 2023.</p>
+			<p>N.B. This converter serves only <i>arithmetic</i> calendars (ie. calendars determined by fixed rules) as opposed to <i>observational</i> calendars (ie. calendars determined by astronomical observation).<br>Apologies if your favourite calendar is observational. More sincere apologies if your favourite calendar is arithemtic but not (yet) served here.<br>&#169; Joshua, 2024.</p>
 		</div>
 		<div id="home">
 			<a href="index.html">
