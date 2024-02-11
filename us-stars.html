@@ -61,7 +61,7 @@
 				padding: 0 30px;
 			}
 			#optionsContainer {
-				width: max-content;
+				width: 90vw;
 				display: grid;
 				grid-template-columns: 1fr max-content 1fr;
 				margin: auto;
@@ -107,9 +107,14 @@
 			}
 			#numbersOption {
 				line-height: 2.5;
+				font-size: 15px;
+				margin: 10px 0;
 			}
 			#optimiseOption {
 				line-height: 1.5;
+			}
+			.nobr {
+				white-space: nowrap;
 			}
 		</style>
 	</head>
@@ -152,15 +157,15 @@
 			}
 			var ProvArrange = function (works, w, h, sq) {
 				this.works = works;
-				this.w = w;
-				this.h = h;
+				this.w = w; // w is the number of stars in the first row of the arrangement.
+				this.h = h; // h is the number of rows of stars.
 				this.sq = sq;
 			}
 			var Arrange = function (patIndex, w, h, score) {
 				this.patIndex = patIndex;
 				this.w = w;
 				this.h = h;
-				this.score = score;
+				this.score = score; 
 			}
 			var getSq = function (widthDivs, heightDivs) {
 				return abs(log((jackWToH / widthDivs) / (1 / heightDivs)));
@@ -628,9 +633,9 @@
 		<div id="optionsContainer">
 			<div class="right boxContainer">
 				<p class="optionsHead">&nbsp;</p>
-				<p id="numbersOption" class="optionsBody">
-					No. in first row: <input type="number" min="1" max="1000" step="1" id="firstRow" class="minorInput"> (<input type="checkbox" id="manualFirstRow"><label for="manualFirstRow"> Manual</label>)
-					<br>No. of rows: <input type="number" min="1" max="1000" step="1" id="numRows" class="minorInput"> (<input type="checkbox" id="manualNumRows"><label for="manualNumRows"> Manual</label>)
+				<p id="numbersOption">
+					No. in first row: <input type="number" min="1" max="1000" step="1" id="firstRow" class="minorInput"> <span class="nobr">(<input type="checkbox" id="manualFirstRow"><label for="manualFirstRow"> Manual</label>)</span>
+					<br>No. of rows: <input type="number" min="1" max="1000" step="1" id="numRows" class="minorInput"> <span class="nobr">(<input type="checkbox" id="manualNumRows"><label for="manualNumRows"> Manual</label>)</span>
 				</p>
 			</div>
 			<div id="patBoxContainer">
