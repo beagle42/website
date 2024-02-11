@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 2.0 - 9/3/2022-->
+	<!--Version 3.0 - 11/2/2024-->
 	<head>
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Smokum&display=swap" rel="stylesheet">
 		<title>U.S. Stars</title>
 		<style>
 			* {
-				font-family: Arial, sans-serif;
 				text-size-adjust: none;
 			}
 			body {
 				background-color: #dddddd;
 				margin: 0;
+				font-family: Arial, sans-serif;
 			}
 			#head {
-				font-size: 40px;
+				font-size: 60px;
+				margin: 40px 0;
 				padding: 0 80px;
+				font-family: 'Smokum';
 			}
-			#descript {
-				font-size: 15px;
-				padding: 0 150px;
-			}
-			#options {
+			#starsLine {
 				font-size: 30px;
 				margin: 1.5em 0;
 			}
@@ -47,17 +48,8 @@
 				color: #000000;
 				cursor: text;
 			}
-			input[type=checkbox], label {
+			input[type=checkbox], input[type=radio], label {
 				cursor: pointer;
-			}
-			#patterns {
-				font-size: 20px;
-				margin: 0.5em 0;
-				line-height: 1.5;
-			}
-			#patHead {
-				font-size: 20px;
-				margin: 0.5em 0;
 			}
 			.justify {
 				display: flex;
@@ -68,10 +60,32 @@
 				font-size: 15px;
 				padding: 0 30px;
 			}
+			#optionsContainer {
+				width: max-content;
+				display: grid;
+				grid-template-columns: 1fr max-content 1fr;
+				margin: auto;
+			}
 			#patBox {
 				background-color: #cccccc;
 				border-radius: 10px;
 				padding: 10px;
+			}
+			#patBoxContainer {
+				padding: 0 50px;
+			}
+			.optionsBody {
+				font-size: 20px;
+				margin: 0.5em 0;
+				line-height: 1.5;
+			}
+			.optionsHead {
+				font-size: 20px;
+				margin: 0.5em 0;
+				font-weight: bold;
+			}
+			.boxContainer {
+				padding: 10px 0;
 			}
 			canvas {
 				display: block;
@@ -80,18 +94,28 @@
 			.centred {
 				text-align: center;
 			}
-			#firstRowOption {
-				font-size: 15px;
+			.right {
+				text-align: right;
 			}
-			#firstRow {
-				width: 50px;
+			.minorOptions {
+				font-size: 20px;
+			}
+			.minorInput {
+				width: 40px;
 				padding: 4px 8px;
 				border-radius: 8px
+			}
+			#numbersOption {
+				line-height: 2.5;
+			}
+			#optimiseOption {
+				line-height: 1.5;
 			}
 		</style>
 	</head>
 	<body onload="start()">
 		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
 		<script>
 			var ctx, canvas, Height;
 			//Basics
@@ -118,11 +142,12 @@
 			}
 			//Patterns
 			var patterns = [];
-			var Pattern = function (name, seedMax, makePattern, drawPattern, onStart = true) {
+			var Pattern = function (name, seedMax, makePattern, drawPattern, canTr = true, onStart = true) {
 				this.name = name;
 				this.seedMax = seedMax;
 				this.makePattern = makePattern;
 				this.drawPattern = drawPattern;
+				this.canTr = canTr;
 				this.onStart = onStart;
 			}
 			var ProvArrange = function (works, w, h, sq) {
@@ -131,14 +156,17 @@
 				this.h = h;
 				this.sq = sq;
 			}
-			var Arrange = function (patIndex, w, h, sq) {
+			var Arrange = function (patIndex, w, h, score) {
 				this.patIndex = patIndex;
 				this.w = w;
 				this.h = h;
-				this.sq = sq;
+				this.score = score;
 			}
 			var getSq = function (widthDivs, heightDivs) {
 				return abs(log((jackWToH / widthDivs) / (1 / heightDivs)));
+			}
+			var getTr = function (sq) {
+				return abs(sq - log(sqrt(3)));
 			}
 			patterns[0] = new Pattern( // Square
 				"Square",
@@ -167,7 +195,8 @@
 						list.push([x, y]);
 					}
 					return list;
-				}
+				},
+				false
 			);
 			patterns[1] = new Pattern( // Big rhombic
 				"Big rhombic",
@@ -348,6 +377,7 @@
 					}
 					return list;
 				},
+				false,
 				false
 			);
 			patterns[7] = new Pattern(
@@ -389,6 +419,7 @@
 					}
 					return list;
 				},
+				false,
 				false
 			);
 			patterns[8] = new Pattern(
@@ -430,22 +461,35 @@
 					}
 					return list;
 				},
+				false,
 				false
 			);
-			var getBestArrange = function (stars, patsToUse, manual, firstRow) {
+			var getBestArrange = function (stars, patsToUse, manualFirstRow, firstRow, manualNumRows, numRows, optimiseSq, optimiseTr) {
 				var arrangements = [];
 				for (var i = 0; i < patsToUse.length; i++) {
-					for (var seed = 1; seed <= patterns[patsToUse[i]].seedMax(stars); seed++) {
-						var prov = patterns[patsToUse[i]].makePattern(stars, seed);
-						if (prov.works && (!manual || seed === firstRow)) {
-							arrangements.push(new Arrange(patsToUse[i], prov.w, prov.h, prov.sq));
+					if (optimiseSq || (optimiseTr && patterns[patsToUse[i]].canTr)) {
+						for (var seed = 1; seed <= patterns[patsToUse[i]].seedMax(stars); seed++) {
+							var prov = patterns[patsToUse[i]].makePattern(stars, seed);
+							if (prov.works && (!manualFirstRow || prov.w === firstRow) && (!manualNumRows || prov.h === numRows)) {
+								var sq = prov.sq;
+								var tr = getTr(sq);
+								var score = sq;
+								if (patterns[patsToUse[i]].canTr) {
+									if (optimiseSq && optimiseTr) {
+										score = min(sq, tr);
+									} else if (optimiseTr) {
+										score = tr;
+									}
+								}
+								arrangements.push(new Arrange(patsToUse[i], prov.w, prov.h, score));
+							}
 						}
 					}
 				}
 				//console.log(arrangements);
 				var bestArrange = 0;
 				for (var j = 0; j < arrangements.length; j++) {
-					if (arrangements[j].sq < arrangements[bestArrange].sq) {
+					if (arrangements[j].score < arrangements[bestArrange].score) {
 						bestArrange = j;
 					}
 				}
@@ -456,28 +500,40 @@
 					patUsed = arrangements[bestArrange].patIndex;
 					list = patterns[patUsed].drawPattern(stars, arrangements[bestArrange].w, arrangements[bestArrange].h);
 					w = arrangements[bestArrange].w;
+					h = arrangements[bestArrange].h;
 				}
-				return {list: list, patUsed: patUsed, w: w};
+				return {list: list, patUsed: patUsed, w: w, h: h};
 			}
 			var drawFlag = function () {
 				//Data
-				var stars = Number(document.getElementById("stars").value);
+				var stars = getNumValue("stars");
 				if (!(Number.isInteger(stars) && stars >= 1 && stars <= 1000)) {
 					stars = 0;
 				}
 				var patsToUse = [];
 				for (var i = 0; i < patterns.length; i++) {
-					if (document.getElementById("pattern" + i).checked) {
+					if (checked("pattern" + i)) {
 						patsToUse.push(i);
 					}
 				}
-				var manual = document.getElementById("manual").checked;
-				var firstRow = Number(document.getElementById("firstRow").value);
+				var manualFirstRow = checked("manualFirstRow");
+				var manualNumRows = checked("manualNumRows");
+				var firstRow = getNumValue("firstRow");
+				var numRows = getNumValue("numRows")
+				var optimiseSq = checked("optimiseSq");
+				var optimiseTr = checked("optimiseTr");
+				if (checked("optimiseBoth")) {
+					optimiseSq = true;
+					optimiseTr = true;
+				}
 				if (!(Number.isInteger(firstRow) && firstRow >= 1 && firstRow <= 1000)) {
 					firstRow = 0;
 				}
+				if (!(Number.isInteger(numRows) && numRows >= 1 && numRows <= 1000)) {
+					numRows = 0;
+				}
 				//Getting configuration
-				var configuration = getBestArrange(stars, patsToUse, manual, firstRow);
+				var configuration = getBestArrange(stars, patsToUse, manualFirstRow, firstRow, manualNumRows, numRows, optimiseSq, optimiseTr);
 				var list = configuration.list;
 				//Setting up drawing;
 				var h = Height;
@@ -511,12 +567,15 @@
 					if (i === configuration.patUsed) {
 						fontColour = red;
 						underline = "underline";
+					} else if (!(optimiseSq || patterns[i].canTr) || !(optimiseSq || optimiseTr)) {
+						fontColour = "#666666";
+						underline = "line-through";
 					}
-					//document.getElementById("patternLabel" + i).style.color = fontColour;
-					document.getElementById("patternLabel" + i).style.textDecoration = underline;
+					document.getElementById("patternLabel" + i).style.color = fontColour;
+					//document.getElementById("patternLabel" + i).style.textDecoration = underline;
 				}
 				//Manual first row option
-				if (!manual) {
+				if (!manualFirstRow) {
 					document.getElementById("firstRow").disabled = true;
 					if (list != 0) {
 						document.getElementById("firstRow").value = configuration.w;
@@ -525,6 +584,16 @@
 					}
 				} else {
 					document.getElementById("firstRow").disabled = false;
+				}
+				if (!manualNumRows) {
+					document.getElementById("numRows").disabled = true;
+					if (list != 0) {
+						document.getElementById("numRows").value = configuration.h;
+					} else {
+						document.getElementById("numRows").value = "";
+					}
+				} else {
+					document.getElementById("numRows").disabled = false;
 				}
 				//Repeating
 				setTimeout(drawFlag, 500);
@@ -539,7 +608,7 @@
 					if (patterns[i].onStart) {
 						result += ' checked';
 					}
-					result += '><label for="pattern' + i + '"> <span id="patternLabel' + i + '">' + "'" + patterns[i].name + "'</span></label>";
+					result += '><label for="pattern' + i + '"> <span id="patternLabel' + i + '">&lsquo;' + patterns[i].name + "&rsquo;</span></label>";
 				}
 				document.getElementById("patterns").innerHTML = result;
 				canvas = document.getElementById("flag");
@@ -554,22 +623,36 @@
 			</a>
 		</div>
 		<p id="head" class="centred">Stars on the U.S. Flag</p>
-		<p id="descript"></p>
 		<canvas id="flag"></canvas>
-		<p id="options" class="centred">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
-		<div class="justify">
-			<div id="patBox">
-				<p id="patHead" class="centred"><b>Allowed patterns:</b></p>
-				<p id="patterns"></p>
+		<p id="starsLine" class="centred">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
+		<div id="optionsContainer">
+			<div class="right boxContainer">
+				<p class="optionsHead">&nbsp;</p>
+				<p id="numbersOption" class="optionsBody">
+					No. in first row: <input type="number" min="1" max="1000" step="1" id="firstRow" class="minorInput"> (<input type="checkbox" id="manualFirstRow"><label for="manualFirstRow"> Manual</label>)
+					<br>No. of rows: <input type="number" min="1" max="1000" step="1" id="numRows" class="minorInput"> (<input type="checkbox" id="manualNumRows"><label for="manualNumRows"> Manual</label>)
+				</p>
+			</div>
+			<div id="patBoxContainer">
+				<div id="patBox">
+					<p id="patHead" class="centred optionsHead">Allowed patterns:</p>
+					<p id="patterns" class="optionsBody"></p>
+				</div>
+			</div>
+			<div class="boxContainer">
+				<p class="optionsHead">Optimise for:</p>
+				<p class="optionsBody">
+					<input type="radio" name="optimiseGrid" id="optimiseSq" checked><label for="optimiseSq"> Square grid</label>
+					<br><input type="radio" name="optimiseGrid" id="optimiseTr"><label for="optimiseTr"> Triangular grid</label>
+					<br><input type="radio" name="optimiseGrid" id="optimiseBoth"><label for="optimiseBoth"> Either</label>
+				</p>
 			</div>
 		</div>
-		<p id="firstRowOption" class="centred">No. of stars in first row: <input type="number" min="1" max="1000" step="1" id="firstRow"> (<input type="checkbox" id="manual"><label for="manual"> Manual</label>)</p>
 		<p id="notes" class="centred"><br><b>Notes:</b>
 			<br>This is not supposed to be an accurate representaion of any actual historical (or future) flags.
-			<br>It always tries to show the 'best looking' configuration it can find (within the given parameters).
-			<br>The designs are not preselected; all the maths to find possible configurations and then determine the best one is done here and now on your device.
-			<br>I couldn't think of very descriptive names for the different patterns so just experiment if you're interested.
+			<br>I couldn't think of very descriptive names for the different patterns, so just experiment if you're interested.
 			<br>Yes, the stars are always the same size.
+			<br>&copy; Joshua 2024.
 		</p>
 	</body>
 </html>
