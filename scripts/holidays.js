@@ -182,13 +182,15 @@ var JulianEaster = function (Y) {
 	return {d: e - 31 * f, m: 3 + f};
 }
 //Object thingy
-var Hol = function (name, date, message, colour1 = "NA", colour2 = "NA", colour3 = "#000000") {
-	this.name = name;
-	this.date = date;
-	this.message = message;
-	this.colour1 = colour1;
-	this.colour2 = colour2;
-	this.colour3 = colour3;
+class Hol {
+	constructor(name, date, message, colour1 = "NA", colour2 = "NA", colour3 = "#000000") {
+		this.name = name;
+		this.date = date;
+		this.message = message;
+		this.colour1 = colour1;
+		this.colour2 = colour2;
+		this.colour3 = colour3;
+	}
 }
 //Shorthand
 var isDate = function (d, m) {
@@ -301,7 +303,7 @@ var Holidays = [
 		"rgb(224, 176, 255)", "#000000",
 	),
 	new Hol(
-		"Easter (Holy) Saturday",
+		"Holy Saturday",
 		afterEaster(-1),
 		"&#128007;",
 		"#00ff7f", "#00b359"
@@ -386,6 +388,11 @@ var Holidays = [
 		"Ash Wednesday",
 		afterEaster(-46),
 		'<span style="color:#4d4d4d">&#10010;</span>'
+	),
+	new Hol(
+		"the leap day",
+		isDate(29, 2),
+		"&#128056;&#128467;"
 	),
 	new Hol(
 		"St. Patrick's Day",
