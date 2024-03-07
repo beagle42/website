@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 1.0.1-->
+	<!--Version 1.1-->
 	<!--18/1/2023-->
 	<!--Created by Joshua in association with the General Clocks Working Group.-->
 	<head>
@@ -27,6 +27,8 @@
 				var intMINUTE = floor(MINUTE);
 				var SECOND = (MINUTE - intMINUTE) * 100;
 				var intSECOND = floor(SECOND);
+				var intHOURTENTH = floor(intMINUTE / 10);
+				var intHOURHUNDREDTH = intMINUTE % 10;
 				// Analogue clock
 				var numbersArray = listOfNumbers(10);
 				if (checked("ten")) {
@@ -46,20 +48,20 @@
 				if (checked("spaces")) {
 					space = " ";
 				}
-				var fraction = checked("fraction");
+				var style = getValue("style");
 				var digital = "";
-				if (fraction) {
-					digital += "0.";
+				if (style === "0") {
+					digital = intHOUR + "." + zero(intMINUTE);
+				} else if (style === "1") {
+					digital = "0." + intHOUR + space + zero(intMINUTE);
+				} else if (style === "2") {
+					digital = intHOUR + space + intHOURTENTH + "." + intHOURHUNDREDTH;
 				}
-				digital += intHOUR;
-				if (fraction) {
-					digital += space;
-				} else {
-					digital += ".";
-				}
-				digital += zero(intMINUTE);
 				if (checked("seconds")) {
 					digital += space + zero(intSECOND);
+				}
+				if (style === "2") {
+					digital += space + "%";
 				}
 				setHTML("time", digital);
 				// Repeat
@@ -76,15 +78,19 @@
 			<div id="optionsbox">
 				<div id="options">
 					<div class="optionscolumn">
-						<input id="seconds" type="checkbox"><label for="seconds"> &#8216;Seconds&#8217;</label>
-						<br><input id="ten" type="checkbox"><label for="ten"> Use &#8220;10&#8221; on clockface</label>
+						<input id="seconds" type="checkbox"><label for="seconds"> &lsquo;Seconds&rsquo;</label>
+						<br><input id="ten" type="checkbox"><label for="ten"> Use &ldquo;10&rdquo; on clockface</label>
 						<br><input id="roman" type="checkbox"><label for="roman"> Roman numerals</label>
 					</div>
 					<div class="optionscolumn">
-						<input id="fraction" type="checkbox"><label for="fraction"> Fractional day</label>
-						<br><input id="spaces" type="checkbox" checked><label for="spaces"> Spaces</label>
+						Style: <select id="style">
+							<option value="0">&lsquo;Hours&rsquo;</option>
+							<option value="1">Fractional day</option>
+							<option value="2">Percentage</option>
+						</select>
+						<br><input id="spaces" type="checkbox" checked><label for="spaces"> Separate &lsquo;hours&rsquo;/&lsquo;minutes&rsquo;/&lsquo;seconds&rsquo;</label>
 					</div>
-					<div id="notesbox">In this system, there are 10 &#8216;hours&#8217; in a day, 100 &#8216;minutes&#8217; in an &#8216;hour&#8217; and 100 &#8216;seconds&#8217; in a &#8216;minute&#8217;. Thus, all three form one decimal number representing the fraction of the day elapsed.<br>A system of this kind was officially instituted in revolutionary France in 1793. Unlike the metric system which was also introduced during this period, decimal time proved very unpopular and was made non-mandatory in 1795.<br>&copy; Joshua, 2023.</div>
+					<div id="notesbox">In this system, there are 10 &lsquo;hours&#8217; in a day, 100 &lsquo;minutes&rsquo; in an &lsquo;hour&rsquo; and 100 &lsquo;seconds&rsquo; in a &lsquo;minute&rsquo;. Thus, all three form one decimal number representing the fraction of the day elapsed.<br>A system of this kind was officially instituted in revolutionary France in 1793. Unlike the metric system which was also introduced during this period, decimal time proved to be very unpopular and its use was made non-mandatory in 1795.<br>&copy; Joshua, 2024.</div>
 				</div>
 			</div>
 		</div>
