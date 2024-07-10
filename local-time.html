@@ -2,8 +2,8 @@
 <html>
 	<!--Local Time Clock-->
 	<!--18/1/2023-->
-	<!--Version 1.0.2-->
-	<!--1/7/2023-->
+	<!--Version 1.2-->
+	<!--10/7/2024-->
 	<!--Created by Joshua in association with the General Clocks Working Group.-->
 	<!--Bibliography:
 			All astronomical formulae sourced directly from:
@@ -111,7 +111,7 @@
 				var numbersArray = listOfNumbers(24);
 				var displayHourAngle = HOUR24 * 360 / 24;
 				var numberSize = 0.15;
-				var numberRadius = 0.85;
+				var numberRadius = 0.82;
 				if (whichHour != 2 || lockTwelve) {
 					numbersArray = listOfNumbers(12, true);
 					if (whichHour === 1 || whichHour === 3 || lockTwelve) {
@@ -131,6 +131,9 @@
 				}
 				ctx.clearRect(canvas.width / -2, canvas.height / -2, canvas.width, canvas.height);
 				drawClockFace(ctx, r, 60, 5, numbersArray, numberSize, font, numberRadius, useRoman);
+				if (whichHour === 2 && !lockTwelve) {
+					drawMarkers(ctx, r, 0.67, 24, 1);
+				}
 				drawClockHands(ctx, r, displayHourAngle, MINUTE * 360 / 60, intSECOND * 360 / 60, useSecond);
 				// Repeat
 				setTimeout(run, 100);

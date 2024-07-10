@@ -2,8 +2,8 @@
 <html>
 	<!--'Dials' - a clock-->
 	<!--15/1/2021-->
-	<!--Version 2.0-->
-	<!--15/6/2023-->
+	<!--Version 2.1-->
+	<!--10/7/2024-->
 	<!--Bibliography
 			All astronomical formulae sourced directly from:
 				Duffet-Smith, P. & Zwart, J. (2011). Practical Astronomy with your Calculator or Spreadsheet (4th ed.). Cambridge University Press : Cambridge. ISBN: 9780511861161
@@ -96,6 +96,21 @@
 				ctx.fill();
 				fillCircle(lin);
 			}
+			var clockHand = function (length, baseWidth, endWidth, angle) {
+				var b = r * baseWidth / 2;
+				var e = r * endWidth / 2;
+				var l = r * length;
+				ctx.rotate(rad(angle));
+				ctx.beginPath();
+				ctx.moveTo(-1 * b, 0);
+				ctx.lineTo(b, 0);
+				ctx.lineTo(e, -1 * l);
+				var alpha = Math.atan((b - e) / l);
+				ctx.arc(0, -1 * l + e * Math.tan(alpha), e / Math.cos(alpha), -1 * alpha, Pi + alpha, true);
+				ctx.closePath();
+				ctx.fill();
+				ctx.rotate(-1 * rad(angle));
+			}
 			var dial = function () {
 				ctx.lineWidth = borderLine;
 				circle(r2);
@@ -167,11 +182,13 @@
 				ctx.lineCap = "round";
 				ctx.lineWidth = r / 20;
 				colourSet(black);
-				radialLine(0, 0.5 * r, 30 * HOUR);
-				radialLine(0, 0.9 * r, 6 * MINUTE);
+				//radialLine(0, 0.5 * r, 30 * HOUR);
+				//radialLine(0, 0.9 * r, 6 * MINUTE);
+				clockHand(0.55, 0.08, 0.03, 30 * HOUR);
+				clockHand(0.9, 0.07, 0.03, 6 * MINUTE);
 				ctx.lineWidth = r / 40;
 				radialLine(0, 0.9 * r, 6 * SECOND);
-				fillCircle(r / 20);
+				fillCircle(r * 0.05);
 				ctx.lineWidth = borderLine;
 				circle(r);
 				//Moon
