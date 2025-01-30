@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<!--Version 3.0 - 11/2/2024-->
+	<!--Version 4.0 - 30/1/2025-->
 	<head>
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
@@ -28,17 +28,16 @@
 				font-size: 30px;
 				margin: 1.5em 0;
 			}
-			input[type=number] {
+			#stars {
+				width: 100px;
 				border-radius: 10px;
 				padding: 5px 10px;
 			}
 			input[type=number] {
 				background-color: white;
 				font-size: inherit;
+				font-family: inherit;
 				border: none;
-			}
-			#stars {
-				width: 100px;
 			}
 			input[type=number]:focus {
 				outline: 1px solid black;
@@ -64,6 +63,7 @@
 				width: 90vw;
 				display: grid;
 				grid-template-columns: 1fr max-content 1fr;
+				grid-template-rows: max-content 1fr;
 				margin: auto;
 			}
 			#patBox {
@@ -73,6 +73,27 @@
 			}
 			#patBoxContainer {
 				padding: 0 50px;
+				grid-column: 2;
+				grid-row: 1 / 3;
+			}
+			#topLeft {
+				grid-column: 1;
+				grid-row: 1;
+			}
+			#bottomLeft {
+				grid-column: 1;
+				grid-row: 2;
+			}
+			#topRight {
+				grid-column: 3;
+				grid-row: 1;
+			}
+			#bottomRight {
+				grid-column: 3;
+				grid-row: 2;
+			}
+			.patternLabel {
+				transition: color 0.2s;
 			}
 			.optionsBody {
 				font-size: 20px;
@@ -101,20 +122,38 @@
 				font-size: 20px;
 			}
 			.minorInput {
-				width: 40px;
+				width: 50px;
 				padding: 4px 8px;
-				border-radius: 8px
+				border-radius: 8px;
+				text-align: left;
 			}
-			#numbersOption {
-				line-height: 2.5;
+			.numbersOption {
+				line-height: 1.5;
 				font-size: 15px;
-				margin: 10px 0;
+				margin: 10px 0 0 0;
 			}
 			#optimiseOption {
 				line-height: 1.5;
 			}
 			.nobr {
 				white-space: nowrap;
+			}
+			#ratingFrame {
+				width: min(250px, 90%);
+				height: 12px;
+				border: 4px solid white;
+				background-color: #f0f0f0;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+			#ratingBar {
+				background-color: #0A3161;
+				height: 100%;
+				width: 85%;
+				transition: 0.2s;
+			}
+			#found {
+				display: inline-block;
 			}
 		</style>
 	</head>
@@ -132,18 +171,53 @@
 			//Shorthand
 			var gramAng = 36;
 			var gonAng = 108;
-			var drawStar = function (x, y, outerRad) {
+			var drawStar = function (x, y, outerRad, orient=0) {
 				var innerRad = outerRad * sin(gramAng / 2) / sin(gonAng / 2);
 				var a = 360 / 5;
 				ctx.beginPath();
-				ctx.moveTo(x, y - outerRad);
-				ctx.lineTo(x + innerRad * sin(a / 2), y - innerRad * cos(a / 2));
+				ctx.moveTo(x + outerRad * sin(orient), y - outerRad * cos(orient));
+				ctx.lineTo(x + innerRad * sin(a / 2 + orient), y - innerRad * cos(a / 2 + orient));
 				for (var i = 1; i < 5; i++) {
-					ctx.lineTo(x + outerRad * sin(i * a), y - outerRad * cos(i * a));
-					ctx.lineTo(x + innerRad * sin((i + 0.5) * a), y - innerRad * cos((i + 0.5) * a));
+					ctx.lineTo(x + outerRad * sin(i * a + orient), y - outerRad * cos(i * a + orient));
+					ctx.lineTo(x + innerRad * sin((i + 0.5) * a + orient), y - innerRad * cos((i + 0.5) * a + orient));
 				}
 				ctx.closePath();
 				ctx.fill();
+			}
+			var drawUnionJack = function (jackH, jackW) {
+				var ratio = jackW / jackH;
+				var ang = atan(ratio);
+				var andW = jackH / 7;
+				var fimbW = jackH / 7 * 5 / 3;
+				var geoW = jackH / 7;
+				//St. Andrew's
+				var crossXwise = andW / 2 / cos(ang);
+				var crossYwise = andW / 2 / sin(ang);
+				ctx.fillStyle = white;
+				ctx.beginPath();
+				ctx.moveTo(0, 0);
+				ctx.lineTo(crossXwise, 0);
+				ctx.lineTo(jackW, jackH - crossYwise);
+				ctx.lineTo(jackW, jackH);
+				ctx.lineTo(jackW - crossXwise, jackH);
+				ctx.lineTo(0, crossYwise);
+				ctx.closePath();
+				ctx.fill();
+				ctx.beginPath();
+				ctx.moveTo(jackW, 0);
+				ctx.lineTo(jackW, crossYwise);
+				ctx.lineTo(crossXwise, jackH);
+				ctx.lineTo(0, jackH);
+				ctx.lineTo(0, jackH - crossYwise);
+				ctx.lineTo(jackW - crossXwise, 0);
+				ctx.closePath();
+				ctx.fill();
+				//St. Georges's
+				ctx.fillRect(0, (jackH - fimbW) / 2, jackW, fimbW);
+				ctx.fillRect((jackW - fimbW) / 2, 0, fimbW, jackH);
+				ctx.fillStyle = red;
+				ctx.fillRect(0, (jackH - geoW) / 2, jackW, geoW);
+				ctx.fillRect((jackW - geoW) / 2, 0, geoW, jackH);
 			}
 			//Patterns
 			var patterns = [];
@@ -469,7 +543,7 @@
 				false,
 				false
 			);
-			var getBestArrange = function (stars, patsToUse, manualFirstRow, firstRow, manualNumRows, numRows, optimiseSq, optimiseTr) {
+			var getBestArrange = function (stars, patsToUse, manualFirstRow, firstRow, manualNumRows, numRows, optimiseSq, optimiseTr, rank) {
 				var arrangements = [];
 				for (var i = 0; i < patsToUse.length; i++) {
 					if (optimiseSq || (optimiseTr && patterns[patsToUse[i]].canTr)) {
@@ -491,27 +565,25 @@
 						}
 					}
 				}
-				//console.log(arrangements);
-				var bestArrange = 0;
-				for (var j = 0; j < arrangements.length; j++) {
-					if (arrangements[j].score < arrangements[bestArrange].score) {
-						bestArrange = j;
-					}
-				}
+				var bestArrange = rank - 1;
+				arrangements.sort(function(a, b) {return a.score - b.score});
 				var list = 0;
 				var patUsed = -1;
 				var w = 0;
-				if (arrangements.length != 0) {
+				var bestScore = 0;
+				if (arrangements.length != 0 && bestArrange < arrangements.length && bestArrange >= 0) {
 					patUsed = arrangements[bestArrange].patIndex;
 					list = patterns[patUsed].drawPattern(stars, arrangements[bestArrange].w, arrangements[bestArrange].h);
 					w = arrangements[bestArrange].w;
 					h = arrangements[bestArrange].h;
+					bestScore = arrangements[bestArrange].score;
 				}
-				return {list: list, patUsed: patUsed, w: w, h: h};
+				return {list: list, patUsed: patUsed, w: w, h: h, numArrangements: arrangements.length, score: bestScore};
 			}
 			var drawFlag = function () {
 				//Data
 				var stars = getNumValue("stars");
+				var actualStars = stars;
 				if (!(Number.isInteger(stars) && stars >= 1 && stars <= 1000)) {
 					stars = 0;
 				}
@@ -531,14 +603,22 @@
 					optimiseSq = true;
 					optimiseTr = true;
 				}
+				var best = checked("best");
+				var rank = getNumValue("rank");
+				if (best) {
+					rank = 1;
+				}
 				if (!(Number.isInteger(firstRow) && firstRow >= 1 && firstRow <= 1000)) {
 					firstRow = 0;
 				}
 				if (!(Number.isInteger(numRows) && numRows >= 1 && numRows <= 1000)) {
 					numRows = 0;
 				}
+				if (!(Number.isInteger(rank) && rank >= 1)) {
+					rank = 0;
+				}
 				//Getting configuration
-				var configuration = getBestArrange(stars, patsToUse, manualFirstRow, firstRow, manualNumRows, numRows, optimiseSq, optimiseTr);
+				var configuration = getBestArrange(stars, patsToUse, manualFirstRow, firstRow, manualNumRows, numRows, optimiseSq, optimiseTr, rank);
 				var list = configuration.list;
 				//Setting up drawing;
 				var h = Height;
@@ -564,6 +644,19 @@
 					for (var i = 0; i < list.length; i++) {
 						drawStar(list[i][0] * jackW, list[i][1] * jackH, starOuterRad);
 					}
+				} else if (actualStars === -2) {
+					drawUnionJack(ceil(jackH), jackW);
+				} else if (actualStars === -13) {
+					var betsyRad = jackH * 3 / 8;
+					for (var i = 0; i < 13; i++) {
+						var ang = 360 / 13 * i;
+						drawStar(jackW / 2 + betsyRad * sin(ang), jackH / 2 - betsyRad * cos(ang), starOuterRad, ang);
+					}
+				} else if (Number.isInteger(stars) && actualStars > 1000) {
+					ctx.textBaseline = "middle";
+					ctx.textAlign = "center";
+					ctx.font = (jackH * 1/10) + "px Arial";
+					ctx.fillText("(lots of stars)", jackW / 2, jackH / 2);
 				}
 				// Showing pattern used
 				for (var i = 0; i < patterns.length; i++) {
@@ -579,7 +672,7 @@
 					document.getElementById("patternLabel" + i).style.color = fontColour;
 					//document.getElementById("patternLabel" + i).style.textDecoration = underline;
 				}
-				//Manual first row option
+				//Manual first row and num. rows option
 				if (!manualFirstRow) {
 					document.getElementById("firstRow").disabled = true;
 					if (list != 0) {
@@ -600,6 +693,20 @@
 				} else {
 					document.getElementById("numRows").disabled = false;
 				}
+				// Best option
+				setHTML("found", configuration.numArrangements);
+				if (best) {
+					document.getElementById("rank").disabled = true;
+					setValue("rank", 1);
+				} else {
+					document.getElementById("rank").disabled = false;
+				}
+				// Rating
+				var rating = exp(-1 * configuration.score) * 100;
+				if (list === 0) {
+					rating = 0;
+				}
+				document.getElementById("ratingBar").style.width = rating + "%";
 				//Repeating
 				setTimeout(drawFlag, 500);
 			}
@@ -613,7 +720,7 @@
 					if (patterns[i].onStart) {
 						result += ' checked';
 					}
-					result += '><label for="pattern' + i + '"> <span id="patternLabel' + i + '">&lsquo;' + patterns[i].name + "&rsquo;</span></label>";
+					result += '><label for="pattern' + i + '"> <span class="patternLabel" id="patternLabel' + i + '">&lsquo;' + patterns[i].name + "&rsquo;</span></label>";
 				}
 				document.getElementById("patterns").innerHTML = result;
 				canvas = document.getElementById("flag");
@@ -629,14 +736,15 @@
 		</div>
 		<p id="head" class="centred">Stars on the U.S. Flag</p>
 		<canvas id="flag"></canvas>
-		<p id="starsLine" class="centred">No. of stars: <input type="number" min="1" max="1000" step="1" id="stars" value="50"></p>
+		<p id="starsLine" class="centred">No. of stars: <input type="number" min="0" max="1000" step="1" id="stars" value="50"></p>
 		<div id="optionsContainer">
-			<div class="right boxContainer">
+			<div class="right boxContainer" id="topLeft">
 				<p class="optionsHead">&nbsp;</p>
-				<p id="numbersOption">
-					No. in first row: <input type="number" min="1" max="1000" step="1" id="firstRow" class="minorInput"> <span class="nobr">(<input type="checkbox" id="manualFirstRow"><label for="manualFirstRow"> Manual</label>)</span>
-					<br>No. of rows: <input type="number" min="1" max="1000" step="1" id="numRows" class="minorInput"> <span class="nobr">(<input type="checkbox" id="manualNumRows"><label for="manualNumRows"> Manual</label>)</span>
-				</p>
+				<p class="numbersOption">No. in first row: <input type="number" min="1" max="1000" step="1" id="firstRow" class="minorInput"> <span class="nobr">(<input type="checkbox" id="manualFirstRow"><label for="manualFirstRow"> Manual</label>)</span></p>
+				<p class="numbersOption">No. of rows: <input type="number" min="1" max="1000" step="1" id="numRows" class="minorInput"> <span class="nobr">(<input type="checkbox" id="manualNumRows"><label for="manualNumRows"> Manual</label>)</span></p>
+			</div>
+			<div class="right boxContainer" id="bottomLeft">
+				<p class="numbersOption">No. of arrangements found: <span id="found" class="minorInput"></span></p>
 			</div>
 			<div id="patBoxContainer">
 				<div id="patBox">
@@ -644,7 +752,7 @@
 					<p id="patterns" class="optionsBody"></p>
 				</div>
 			</div>
-			<div class="boxContainer">
+			<div class="boxContainer" id="topRight">
 				<p class="optionsHead">Optimise for:</p>
 				<p class="optionsBody">
 					<input type="radio" name="optimiseGrid" id="optimiseSq" checked><label for="optimiseSq"> Square grid</label>
@@ -652,12 +760,19 @@
 					<br><input type="radio" name="optimiseGrid" id="optimiseBoth"><label for="optimiseBoth"> Either</label>
 				</p>
 			</div>
+			<div class="boxContainer" id="bottomRight">
+				<p class="numbersOption">Arrangement rank: <input type="number" min="1" step="1" id="rank" class="minorInput"> <span class="nobr">(<input type="checkbox" id="best" checked><label for="best"> Best</label>)</span></p>
+				<p class="numbersOption">Niceness:</p>
+				<div id="ratingFrame">
+					<div id="ratingBar"></div>
+				</div>
+			</div>
 		</div>
 		<p id="notes" class="centred"><br><b>Notes:</b>
 			<br>This is not supposed to be an accurate representaion of any actual historical (or future) flags.
 			<br>I couldn't think of very descriptive names for the different patterns, so just experiment if you're interested.
 			<br>Yes, the stars are always the same size.
-			<br>&copy; Joshua 2024.
+			<br>&copy; Joshua 2025.
 		</p>
 	</body>
 </html>
