@@ -22,5 +22,7 @@ var index = [
 	new Page("Decimal Time Clock", "A clock showing 10 hours in a day.", "decimal-time.html"),
 	new Page("Local Time Clock", "The mean, apparent and sidereal time at any location", "local-time.html"),
 	new Page("Compare Local Times", "Compare the local apparent, local mean and standard times at any location.", "comparative-time.html"),
-	new Page("Easter Calculator", "Computes the date of Easter", "easter-calculator.html")
+	new Page("Easter Calculator", "Computes the date of Easter", "easter-calculator.html"),
+	new Page("Julian Easter Calculator", "Computes the date of Julian (Orthodox) Easter", "julian-easter-calculator.html"),
+	new Page("Old Home", "The former home page", "index-v1.html")
 ];

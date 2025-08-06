@@ -183,11 +183,17 @@ var JulianEaster = function (Y) {
 }
 //Object thingy
 class Hol {
-	constructor(name, date, message, colour1 = "NA", colour2 = "NA", colour3 = "#000000") {
+	constructor(name, date, message, colour1 = "NA", colour2 = "NA", colour3 = "NA") {
 		this.name = name;
 		this.date = date;
 		this.message = message;
 		this.colour1 = colour1;
+		if (colour2 === "NA") {
+			colour2 = colour1;
+		}
+		if (colour3 === "NA") {
+			colour3 = colour1;
+		}
 		this.colour2 = colour2;
 		this.colour3 = colour3;
 	}
@@ -230,7 +236,7 @@ var isHebrewDate = function (d, m) { //1 = Nisan, 12 = Adar I, 13 = Adar II
 		return D.Hebrew.d === d && D.Hebrew.m === m;
 	}
 }
-var img = function (src, size = "1.6em") {
+var img = function (src, size = "1em") {
 	return '<img src="images/' + src + '" style="height: ' + size + '">';
 }
 //Misc.
@@ -243,7 +249,6 @@ var Holidays = [
 			return D.y === 2023 && D.m === 5 && (D.d === 6 || D.d === 7);
 		},
 		img("crown.png"),
-		"#4b006e", "#4b006e", "#D4AF37"
 	),
 	new Hol(
 		"the third day of the third month of the third year of the third decade of the Third Millenium",
@@ -258,55 +263,54 @@ var Holidays = [
 			return D.y === 2022 && D.m === 9 && D.d >= 8 && D.d <= 22;
 		},
 		"&#128144;",
-		"#303030", "#303030", "#ffffff"
 	),
 	new Hol(
 		"New Year's Day",
 		isDate(1, 1),
 		"&#127878;<br>Happy New Year!<br>&#127881;",
-		"#000066", "#000066", "#FFD700"
+		"#03172F", "NA", "#FFD700"
 	),
 	new Hol(
 		"New Year's Eve",
 		isDate(31, 12),
 		"&#127879; &#127881;",
-		"#000066", "#000066", "#C0C0C0"
+		"#03172F", "NA", "#C0C0C0"
 	),
 	new Hol(
 		"Australia Day",
 		isDate(26, 1),
 		"&#127462;&#127482;",
-		"#FFCD00", "#00843D", "#00843D"
+		"#FFCD00", "#00843D"
 	),
 	new Hol(
 		"Christmas Eve",
 		isDate(24, 12),
 		"&#127876;<br>" + ChristmasEve[floor(Math.random() * 3)],
-		"#009900", "#ee0000"
+		"#146b3a", "#c30f16", "#ffffff"
 	),
 	new Hol(
 		"Christmas Day",
 		isDate(25, 12),
 		"&#127876;<br>Merry Christmas!<br>&#127873;",
-		"#ee0000", "#009900"
+		"#c30f16", "#146b3a", "#ffffff"
 	),
 	new Hol(
 		"Boxing Day",
 		isDate(26, 12),
 		"&#128230;",
-		"#007700", "#cc0000"
+		"#146b3a", "#c30f16", "#ffffff"
 	),
 	new Hol(
 		"Good Friday",
 		afterEaster(-2),
 		'<span style="font-family:Symbols">&#10013;</span>',
-		"rgb(224, 176, 255)", "#000000",
+		"#ddb9fe"
 	),
 	new Hol(
 		"Holy Saturday",
 		afterEaster(-1),
 		"&#128007;",
-		"#00ff7f", "#00b359"
+		"#c1f3c9"
 	),
 	new Hol(
 		"ANZAC Day & Easter Sunday",
@@ -314,25 +318,25 @@ var Holidays = [
 			return D.d === 25 && D.m === 4 && D.JD === D.Easter;
 		},
 		img("rosemary.png") + img("poppy.png", "1em") + '<br>&#128035;',
-		"#00b359", "#303030"
+		"#303030"
 	),
 	new Hol(
 		"ANZAC Day",
 		isDate(25, 4),
-		img("rosemary.png") + img("poppy.png", "1em"),
-		"#303030", "#303030", "#a88924"
+		img("rosemary.png", "1.6em") + img("poppy.png", "1em"),
+		"#303030"
 	),
 	new Hol(
 		"Easter Sunday",
 		afterEaster(0),
 		"&#128035;<br>Happy Easter!",
-		"#faf884", "#00b359"
+		"#fafea3"
 	),
 	new Hol(
 		"Easter Monday",
 		afterEaster(1),
 		"&#128036;",
-		"#89cff0", "#1a93cb"
+		"#e1e6ff"
 	),
 	new Hol(
 		"the Autumn Equinox",
@@ -433,7 +437,7 @@ var Holidays = [
 		"Queensland Day",
 		isDate(6, 6),
 		img("qld-flag.png"),
-		"#73182C", "#73182C", "#ffffff"
+		"#73182C"
 	),
 	new Hol(
 		"King's Birthday (National)",
@@ -453,7 +457,7 @@ var Holidays = [
 			return D.d === 3 && D.m === 9 && D.d === mod(D.DL + 2, 7) + 1;
 		},
 		"&#128153;<br>" + img("flag.png", "1em") + " &nbsp; " + img("red-ensign.png", "1em"),
-		"#4da6ff", "#00008B"
+		"#4da6ff", "#17376a"
 	),
 	new Hol(
 		"Father's Day",
@@ -467,7 +471,6 @@ var Holidays = [
 		"National Flag Day",
 		isDate(3, 9),
 		img("flag.png") + " &nbsp; " + img("red-ensign.png"),
-		"#00008B", "#ff0000", "#ffffff"
 	),
 	new Hol(
 		"King's Birthday (Qld.)",
@@ -480,7 +483,7 @@ var Holidays = [
 		"Halloween",
 		isDate(31, 10),
 		"&#127875;",
-		"#ffa500", "#000000"
+		"#e66c2c", "NA", "#000000"
 	),
 	new Hol(
 		"All Saints' Day",
@@ -496,7 +499,7 @@ var Holidays = [
 		"Remembrance Day",
 		isDate(11, 11),
 		img("poppy.png"),
-		"#303030", "#303030", "#a88924"
+		"#303030"
 	),
 	new Hol(
 		"Advent Sunday",
