@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<!--Easter Calculator, 23/4/2023-->
-	<!--Version 1.0.2, 27/2/2025-->
+	<!--Version 1.1.0, 27/2/2025-->
 	<head>
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="stylesheet" href="stylesheets/common.css">
@@ -11,26 +11,12 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="stylesheets/easter.css">
 		<style>
-			* {
-				text-size-adjust: none;
-			}
 			body {
-				font-family: Arial, sans-serif;
-				margin: 0;
 				background-color: #fce9f1;
 			}
-			p {
-				margin: 1em 0;
-			}
-			.centretext {
-				text-align: center;
-			}
-			.righttext {
-				text-align: right;
-			}
 			#header {
-				padding: 2vmin max(80px, 4vmin);
 				background-color: #fffccc;
 			}
 			#pagetitle {
@@ -38,80 +24,13 @@
 				margin: 0;
 				font-family: 'Satisfy';
 				/*line-height: 1;*/
-			}
-			#subtitle {
-				font-size: 2.1vmin;
-				font-style: italic;
-				margin-top: 0;
-			}
-			#spiel {
-				font-size: 1.6vmin;
-				margin-bottom: 0;
+				color: #444444;
 			}
 			#main {
-				padding: 4vmin;
 				background-color: #deedde;
-			}
-			#main-input-line {
-				font-size: 3vmin;
-				margin: 0;
-			}
-			input, select {
-				font-size: inherit;
-				font-family: inherit;
-				background-color: #ffffff;
-				border: 0.3vmin solid #999999;
-				border-radius: 1vmin;
-			}
-			select {
-				cursor: pointer;
-			}
-			select:focus, input:focus {
-				outline: none;
-			}
-			input:focus, select:focus {
-				border-color: #000000;
-			}
-			#main-input {
-				width: 12vmin;
-				padding: 1vmin 1.5vmin;
-			}
-			#main-error-line {
-				color: #ff0000;
-				font-size: 2vmin;
-				margin: 1vmin 0;
-				line-height: 1;
-			}
-			.btn {
-				background-color: #cccccc;
-				border-radius: 1vmin;
-				padding: 1.3vmin 2vmin;
-				cursor: pointer;
-				display: inline-block;
-				transition: background-color 0.2s;
-			}
-			.btn:hover {
-				background-color: #999999;
-			}
-			.btn:active {
-				background-color: #bbbbbb;
-			}
-			.box {
-				border-radius: 2vmin;
-				margin: auto;
 			}
 			#main-box {
 				background-color: #c1e1c1;
-				width: 90vmin;
-				padding: 2.1vmin 1vmin;
-			}
-			#container {
-				display: grid;
-				height: auto;
-				grid-template-rows: 1fr auto;
-				grid-template-columns: 1fr 1fr;
-				gap: 0;
-				font-size: 2.1vmin;
 			}
 			#date-tile {
 				grid-row: 1;
@@ -125,55 +44,11 @@
 				grid-row: 1 / 3;
 				grid-column: 2;
 			}
-			.smallcaps {
-				font-variant: small-caps;
-			}
-			.justify {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
 			.table {
 				border-top: 0.3vmin solid #000000;
 				border-bottom: 0.3vmin solid #000000;
 				width: 40vmin;
 				margin: auto;
-			}
-			#details-table {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-			}
-			.details-cell {
-				padding: 1.4vmin 0;
-			}
-			#cycle-table {
-				display: grid;
-				grid-template-columns: 1fr 4fr 3fr;
-			}
-			.cycle-cell {
-				padding: 0.9vmin 0;
-			}
-			.bold {
-				font-weight: bold;
-			}
-			.emojiFont {
-				font-family: ColourEmoji;
-				line-height: 1;
-			}
-			.symbolsFont {
-				font-family: Symbols, Symbols2;
-				line-height: 1;
-			}
-			#year-display-line {
-				font-size: 5vmin;
-				margin: 0 0 2.1vmin 0;
-			}
-			#date {
-				font-size: 5vmin;
-				margin: 2vmin 0;
-			}
-			.table-heading {
-				margin: 0 0 1vmin 0;
 			}
 			#list-modules-container {
 				display: grid;
@@ -194,9 +69,6 @@
 			}
 			.list-select {
 				padding: 0.5vmin;
-			}
-			.nobr {
-				white-space: nowrap;
 			}
 			.list-result-box {
 				padding: 2vmin;
@@ -233,17 +105,13 @@
 				/*font-weight: bold;*/
 				margin-top: 0.5vmin;
 			}
-			#footer {
-				background-color: #fce9f1;
-				padding: 2vmin;
-				font-size: 1.6vmin;
-			}
 		</style>
 	</head>
 	<body onLoad="start()">
 		<script src="scripts/maths.js"></script>
 		<script src="scripts/dom.js"></script>
 		<script>
+			var year = 0;
 			var isLeapYear = function (Y) {
 				return mod(Y, 400) === 0 || (mod(Y, 100) != 0 && mod(Y, 4) === 0);
 			}
@@ -275,8 +143,8 @@
 				return [D, M, Y];
 			}
 			var dateString = function (A) {
-				D = A[0];
-				M = A[1];
+				var D = A[0];
+				var M = A[1];
 				return D + " " + monthNames[M];
 			}
 			var alphabet = ["A", "B", "C", "D", "E", "F", "G"];
@@ -356,6 +224,7 @@
 				}
 			}
 			var mainRun = function (Y) {
+				year = Y;
 				var E = Easter(Y);
 				setHTML("year-display", Y);
 				setHTML("date", dateString(MarchDayToDate(E.easter, Y)));
@@ -423,6 +292,12 @@
 				setHTML("list-years-result-heading", resultHeading);
 				setHTML("list-years-result-container", result);
 			}
+			var nextYear = function () {
+				mainRun(year + 1);
+			}
+			var previousYear = function () {
+				mainRun(year - 1);
+			}
 			var start = function () {
 				var cycleTable = "";
 				for (var i = 0; i < holidays.length; i++) {
@@ -462,10 +337,21 @@
 		<div id="header" class="centretext">
 			<p id="subtitle">Presenting an</p>
 			<p id="pagetitle">Easter Calculator</p>
-			<p id="spiel">All dates are given in the Gregorian calendar (or the proleptic Gregorian calendar). The calculator exclusively uses the Gregorian method to find the date of Easter, which is currently used by most of Western Christianity and the cultures it has influenced (including Australia). This system was first used for the Easter of 1583 by the Catholic church. Entering a year prior to this will produce results that are mathematically consistent but historically redundant. It may be important to note that the British Empire (encompassing many modern anglophone countries) first used the Gregorian method for the Easter of 1753.</p>
+			<p class="spiel">All dates are given in the Gregorian calendar (or the proleptic Gregorian calendar). The calculator exclusively uses the Gregorian method to find the date of Easter, which is currently used by most of Western Christianity and the cultures it has influenced (including Australia). This system was first used for the Easter of 1583 by the Catholic church. Entering a year prior to this will produce results that are mathematically consistent but historically redundant. It may be important to note that the British Empire (encompassing many modern anglophone countries) first used the Gregorian method for the Easter of 1753. Prior to the adoption of the Gregorian method, the Julian method of finding the date of Easter was used throughout Europe. This method continues to be used among much of Eastern Christianity to find the date of &lsquo;Orthodox Easter&rsquo;.</p>
+			<p class="spiel"><a href="julian-easter-calculator.html">Go to a Julian Easter Calculator.</a></p>
 		</div>
 		<div id="main" class="centretext">
-			<p id="main-input-line"><input type="number" id="main-input" placeholder="Year" onkeydown="key(event, 0)"> &nbsp; <span class="btn" id="mainbutton" onClick="mainGo()">Compute</span></p>
+			<div id="main-input-container">
+				<div class="increment-btn-container justify-left" id="increment-btn-container-left">
+					<div class="btn smallbutton increment-btn" onClick="previousYear()">Previous</div>
+				</div>
+				<div id="main-input-line-container">
+					<p id="main-input-line"><input type="number" id="main-input" placeholder="Year" onkeydown="key(event, 0)"> &nbsp; <span class="btn bigbutton" id="mainbutton" onClick="mainGo()">Compute</span></p>
+				</div>
+				<div class="increment-btn-container justify-right" id="increment-btn-container-right">
+					<div class="btn smallbutton increment-btn" onCLick="nextYear()">Next</div>
+				</div>
+			</div>
 			<p id="main-error-line">&nbsp;</p>
 			<div id="main-box" class="box">
 				<p id="year-display-line">&#8764; &nbsp; <span id="year-display"></span> <span class="smallcaps">ad</span> &nbsp; &#8765;</p>
@@ -509,10 +395,10 @@
 				</select></span> in the period <span class="nobr"><input type="number" class="list-input" id="list-years-year1" placeholder="year" onkeydown="key(event, 2)">&nbsp;-&nbsp;<input type="number" class="list-input" id="list-years-year2" placeholder="year" onkeydown="key(event, 2)">.</span></p>
 			</div>
 			<div class="list-dates-module">
-				<p><span class="btn" onClick="dateListRun()">Compute</span></p>
+				<p><span class="btn bigbutton" onClick="dateListRun()">Compute</span></p>
 			</div>
 			<div class="list-years-module">
-				<p><span class="btn" onClick="yearListRun()">Compute</span></p>
+				<p><span class="btn bigbutton" onClick="yearListRun()">Compute</span></p>
 			</div>
 			<div class="list-dates-module">
 				<div class="box list-result-box" id="list-dates-result-box">
@@ -527,6 +413,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="centretext" id="footer">Not associated with any Christian denomination or organisation. Nothing on this page is intended to imply that you should or should not celebrate any particular religious holiday; do whatever you want.<br>&copy; Joshua, 2025.</div>
+		<div class="centretext" id="footer">
+			<p class="spiel"><a target="_blank" href="calendrical-conversions.html">Convert dates to other calendars.</a></p>
+			<p id="footer-line">Not associated with any Christian denomination or organisation. Nothing on this page is intended to imply that you should or should not celebrate any particular religious holiday; do whatever you want.<br>&copy; Joshua, 2023, 2025.</p>
+		</div>
 	</body>
 </html>

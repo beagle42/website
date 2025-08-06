@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+	<!--
+		Look, I made a website.
+	-->
+	<head>
+		<title>Joshua's website</title>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Literata&display=swap" rel="stylesheet">
+		<style>
+			:root {
+				--colour-one: #ffd700;
+				--colour-two: #800080;
+				--bg-colour: #ffffff;
+				--title-colour: #000000;
+			}
+			a:link, a:visited {
+				color: inherit;
+				text-decoration: inherit;
+				cursor: pointer;
+			}
+			a:link:active, a:visited:active {
+				color: inherit;
+			}
+			body {
+				margin: 0;
+				font-family: Arial, sans-serif;
+				background-color: var(--bg-colour);
+			}
+			#header {
+				width: 100%;
+				background: var(--colour-one);
+				margin: 0;
+			}
+			#titleBox {
+				margin: auto;
+				padding: 9vmin 3vmin;
+			}
+			#subheader {
+				background-color: var(--colour-two);
+				margin: 0;
+				padding: 10px;
+			}
+			#body {
+				width: 90%;
+				max-width: 140vmin;
+				margin: auto;
+			}
+			#tiles {
+				width: 100%;
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				grid-auto-rows: auto;
+			}
+			@media only screen and (max-aspect-ratio: 4/3) {
+				#tiles {
+					grid-template-columns: repeat(3, 1fr);
+				}
+			}
+			@media only screen and (max-aspect-ratio: 1/1) {
+				#tiles {
+					grid-template-columns: repeat(2, 1fr);
+				}
+			}
+			.tilebox {
+				padding: 1.2vmin;
+				color: var(--colour-two);
+			}
+			.tile {
+				display: block;
+				width: 100%;
+				height: 100%;
+				background-color: transparent;
+				border-radius: 2.4vmin;
+				cursor: pointer;
+				border: 5px solid var(--colour-two);
+				color: var(--colour-two);
+				transition: background-color 0.5s, color 0.5s;
+				text-align: center;
+				font-size: 3.6vmin;
+				padding: 3.6vmin 2.4vmin;
+				box-sizing: border-box;
+				font-family: Arial, Emoji, Symbols, Symbols2, NewEmoji, sans-serif;
+			}
+			.tile:hover {
+				background-color: var(--colour-two);
+				color: var(--bg-colour);
+			}
+			.tile:active {
+				background-color: transparent;
+				color: var(--colour-two);
+			}
+			.justify {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#title {
+				font-size: 12vmin;
+				color: var(--title-colour);
+				text-align: center;
+				font-family: 'Literata', Georgia, sans-serif;
+				line-height: 1;
+				margin: 1.2vmin;
+			}
+			#about {
+				font-size: 2.4vmin;
+				font-family: Arial;
+			}
+			#greeting {
+				font-size: 3.6vmin;
+				text-align: center;
+				font-family: Arial, ColourEmoji, sans-serif;
+				line-height: 1.6;
+			}
+			#headLogo {
+				height: 14.4vmin;
+				margin: auto;
+				display: block;
+			}
+			#quotebox {
+				width: 60vmin;
+				margin: auto;
+			}
+			#quote {
+				font-style: italic;
+				font-family: Georgia, Times, Times New Roman, serif;
+				color: #999999;
+				text-align: center;
+				font-size: 4.8vmin;
+				margin-bottom: 0.5em;
+			}
+			#attr {
+				font-family: Georgia, serif;
+				color: #999999;
+				text-align: right;
+				font-size: 2.4vmin;
+			}
+			#footer {
+				font-family: Arial, serif;
+				font-size: 1.8vmin;
+				margin: 3.6vmin 1.2vmin;
+			}
+		</style>
+		<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+	</head>
+	<body onload="start()">
+		<script src="scripts/holidays.js"></script>
+		<script>
+			var start = function () {
+				var now = new Date();
+				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
+				//var hol = holiday(31, 3, 2024, 15);
+				if (hol != Holidays.length) {
+					document.getElementById("greeting").innerHTML = '<span title="' + Holidays[hol].name.substring(0, 1).toUpperCase() + Holidays[hol].name.substring(1) + '">' + Holidays[hol].message + '</span>';
+					document.getElementById("holiday").innerHTML = " Today celebrating " + Holidays[hol].name + ".";
+					if (Holidays[hol].colour1 != "NA") {
+						var root = document.querySelector(':root');
+						//root.style.setProperty('--colour-one', Holidays[hol].colour1);
+						//root.style.setProperty('--colour-two', Holidays[hol].colour2);
+						//root.style.setProperty('--title-colour', Holidays[hol].colour3);
+					}
+				}
+			}
+		</script>
+		<div id="header">
+			<div id="titleBox">
+				<img id="headLogo" src="images/logo.png">
+				<p id="title">Joshua&#8217;s website</p>
+			</div>
+		</div>
+		<div id="body">
+			<p id="greeting">Hello.</p>
+			<!--<p id="about">Sometimes I make things.</p>-->
+			<div id="tiles">
+				<div class="tilebox justify">
+					<a class="tile justify" href="beagle.html">&#128269;<br>Beagle<br>Search</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="astronomical-clock.html">&#127771;<br>Astronomical<br>Clock</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="calendrical-conversions.html">&#128197;<br>Calendrical<br>Conversions</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="dials.html">&#128339;<br>Dials<br>(a clock)</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="horoscope.html">&#9811;<br>Horoscope<br>Generator</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="english-numbers.html">&#128290;<!--&#10140;&#128288;--><br>English<br>Numbers</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="zodiacal-clock.html">&#127774;<br>Zodiacal<br>Clock</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="easter-calculator.html">&#128007;<br>Easter<br>Calculator</a>
+				</div>
+				<!--<div class="tilebox justify">
+					<a class="tile justify" href="equation-of-time.html">&#128200;<br>Equation<br>of Time</a>
+				</div>-->
+				<div class="tilebox justify">
+					<a class="tile justify" href="local-time.html">&#8986;<br>Local<br>Time</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="decimal-time.html">&#128287;<br>Decimal<br>Time</a>
+				</div>
+				<div class="tilebox justify">
+					<a class="tile justify" href="us-stars.html">&#127482;&#127480;<br>U.S.<br>Stars</a>
+				</div>
+				<!--<div class="tilebox justify">
+					<a class="tile justify" href="flag-resizing.html">&#127988;<br>Flag<br>Resizing</a>
+				</div>-->
+				<div class="tilebox justify">
+					<a class="tile justify" href="sitemap.html">&#128642;<br>Other<br>things</a>
+				</div>
+			</div>
+			<div id="quotebox">
+				<p id="quote">&#8220;Painfully boring.&#8221;</p>
+				<p id="attr">- Most people.</p>
+			</div>
+			<div id="footer">&#169; Joshua, 2023. Hosted on Github Pages.<span id="holiday"></span></div>
+		</div>
+	</body>
+</html>

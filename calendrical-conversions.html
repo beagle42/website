@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<!--'Calendrical Coversions' by Joshua, 25/6/2021-->
-	<!--Version 2.0.4, 18/1/2024-->
+	<!--Version 2.1.0, 18/1/2024-->
 	
 	<!--How much more boring can I get?-->
 	
@@ -14,6 +14,7 @@
 			Haberl, C. (2021). 'Of Calendars—and Kings—and Why the Winter is Boiling Hot'. Journal of the Royal Asiatic Society, 31, 3. DOI: https://doi.org/10.1017/S1356186320000759
 			Janson, S. (2011). 'The Icelandic Calendar', Scripta Islandica, 62. URL: https://uu.diva-portal.org/smash/get/diva2:436604/FULLTEXT01.pdf
 			Van Gent, R.. URL: https://webspace.science.uu.nl/~gent0113/islam/islam_tabcal.htm
+			Tolkien, J.R.R. (1955) 'The Return of the King', Appendix D.
 	-->
 	<!-- By the way, I named it 'Calendrical' before I discovered the Reingold & Dershowitz book, so... -->
 	
@@ -32,6 +33,7 @@
 		<title>Calendrical Conversions</title>
 		<meta name="keywords" content="calendar converter, arithmetic calendar">
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<link rel="stylesheet" href="stylesheets/common.css">
 		<link rel="stylesheet" href="fonts/fonts.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +50,7 @@
 			h1 {
 				font-size: 48px;
 				text-align: center;
-				font-family: Old English Text MT, 'UnifrakturMaguntia', OldEnglish, Arial, sans-serif;
+				font-family: 'UnifrakturMaguntia', Old English Text MT, OldEnglish, Arial, sans-serif;
 				margin-bottom: 0;
 				padding: 0 80px;
 			}
@@ -56,17 +58,18 @@
 				margin: 1em 0;
 			}
 			#subtitle {
-				font-family: Old English Text MT, OldEnglish, Arial, sans-serif;
+				font-family: 'UnifrakturMaguntia', Old English Text MT, OldEnglish, Arial, sans-serif;
 				font-size: 24px;
 			}
 			#header, #body {
 				text-align: center;
 				font-size: 24px;
+				margin: 36px 10px;
 			}
 			#footer {
 				font-size: 16px;
 				margin: 0px 20px;
-				font-family: Gill Sans MT, Arial, sans-serif;
+				font-family: Arial, sans-serif;
 			}
 			select {
 				cursor: pointer;
@@ -118,6 +121,7 @@
 			hr {
 				border: 2px solid #000000;
 				background-color: #000000;
+				margin: 0;
 			}
 			.resultBox {
 				background-color: #eeeeee;
@@ -158,14 +162,6 @@
 			}
 			.small {
 				font-size: 16px;
-			}
-			#home {
-				position: absolute;
-				left: 15px;
-				top: 15px;
-			}
-			#homeLogo {
-				height: 50px;
 			}
 			.smallCaps {
 				font-variant: small-caps;
@@ -671,6 +667,9 @@
 			var CallippicMonthLengthFromIndex = function (x) {
 				return CallippicMonthLength(mod(x, 14) + 1, floor(x / 14) + 1);
 			}
+			//Shire
+			var ShireMonths = [0, "Afteryule", "Solmath", "Rethe", "Astron", "Thrimidge", "Forelithe", "Afterlithe", "Wedmath", "Halimath", "Winterfilth", "Blotmath", "Foreyule", "Yule", "Lithe", "Mid-year's Day", "Overlithe"];
+			var ShireWeek = ["Sterday", "Sunday", "Monday", "Trewsday", "Hevensday", "Mersday", "Highday"];
 			// Shorthand
 			var date = function (x) {
 				return x[0] + "/" + x[1] + "/" + x[2];
@@ -757,9 +756,9 @@
 					return [T + 1, k, Y];
 				},
 				function (G) {
-					D = G[0];
-					M = G[1];
-					Y = G[2];
+					var D = G[0];
+					var M = G[1];
+					var Y = G[2];
 					if (M <= 2) {
 						Y--;
 						M += 12;
@@ -1040,8 +1039,7 @@
 					}
 					return result;
 				},
-				DMYInput(5, months, 31),
-				false
+				DMYInput(5, months, 31)
 			);
 			cal[6] = new Cal(
 				"Julian Day",
@@ -1434,7 +1432,7 @@
 				DMYInput(17, IslamicMonths, 30)
 			);
 			cal[18] = new Cal(
-				"Fatimid",
+				"Fatimid Islamic",
 				function (JD) {
 					var diff = 1948439;
 					var T = mod(JD - diff, 30 * 354 + 11);
@@ -1628,7 +1626,7 @@
 				DMYInput(22, HebrewMonths, 30)
 			);
 			cal[23] = new Cal(
-				"Byzantine",
+				"Byzantine Julian",
 				function (JD) {
 					var J = cal[1].fromJD(JD);
 					var M = (J[1] + 3) % 12 + 1;
@@ -2018,7 +2016,7 @@
 				DMYInput(30, IcelandicMonths, 30)
 			);
 			cal[31] = new Cal(
-				"Bangladeshi (2019 version)",
+				"Bangladeshi national (2019 version)",
 				function (JD) {
 					var G = cal[0].fromJD(JD);
 					var GY = G[2];
@@ -2066,7 +2064,7 @@
 				DMYInput(31, BengaliMonths, 31)
 			);
 			cal[32] = new Cal(
-				"Bangladeshi (pre-2019 version)",
+				"Bangladeshi national (pre-2019 version)",
 				function (JD) {
 					var G = cal[0].fromJD(JD);
 					var GY = G[2];
@@ -2393,6 +2391,103 @@
 				},
 				DMYInput(38, CallippicMonths, 30)
 			);*/
+			cal[38] = new Cal(
+				"Shire Reckoning",
+				function (JD) {
+					var G = cal[0].fromJD(JD);
+					var Gregorian_D = G[0];
+					var Gregorian_M = G[1];
+					var Gregorian_Y = G[2];
+					var ref_Y = Gregorian_Y;
+					if (Gregorian_M < 6 || (Gregorian_M === 6 && Gregorian_D < 22)) {
+						ref_Y--;
+					}
+					var day_count = JD - cal[0].toJD([22, 6, ref_Y]);
+					var D, M;
+					if (day_count === 0) {
+						D = 2;
+						M = 14;
+					} else if (day_count < 183) {
+						D = mod(day_count - 1, 30) + 1;
+						M = floor((day_count - 1) / 30) + 7;
+					} else if (day_count < 363) {
+						D = mod(day_count - 183, 30) + 1;
+						M = floor((day_count - 183) / 30) + 1;
+					} else if (day_count === 363) {
+						D = 1;
+						M = 14;
+					} else if (day_count === 364) {
+						D = 1;
+						M = 15;
+					} else {
+						D = 1;
+						M = 16;
+					}
+					var Y = Gregorian_Y;
+					if (Gregorian_M === 12 && Gregorian_D >= 21) {
+						Y++;
+					}
+					return [D, M, Y];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var ref_Y = Y;
+					if (M <= 6 || (M === 13 && D === 2) || (M === 14 && D === 1) || M >= 15) {
+						ref_Y--;
+					}
+					var JD = cal[0].toJD([22, 6, ref_Y]);
+					if (M === 14 && D === 2) {
+						// Nothing.
+					} else if (M >= 14) {
+						JD += 363 + M - 14;
+					} else if (M >= 7) {
+						JD += (M - 7) * 30 + D;
+					} else {
+						JD += 182 + (M - 1) * 30 + D;
+					}
+					return JD;
+				},
+				function (A, JD) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					var result = [""];
+					var dayOfTheWeek = "&nbsp;";
+					var shortForm = "";
+					var dayIndicator = "";
+					if (M === 13) {
+						shortForm = D + "Y";
+					} else if (M === 14) {
+						shortForm = D + "L";
+					} else if (M === 15) {
+						shortForm = "MY";
+					} else if (M === 16) {
+						shortForm = "OL";
+					} else {
+						shortForm = D + "/" + M;
+					}
+					if (M <= 14) {
+						var day_count = 0;
+						if (M >= 13) {
+							day_count = 5 + D;
+						} else {
+							day_count = mod(M - 1, 6) * 30 + D;
+						}
+						dayOfTheWeek = ShireWeek[mod(day_count, 7)] + ",";
+						dayIndicator = D + " ";
+					}
+					return [dayOfTheWeek, dayIndicator + ShireMonths[M] + " " + Y, "(" + shortForm + "/" + Y + ")"];
+				},
+				function (A) {
+					var D = A[0];
+					var M = A[1];
+					var Y = A[2];
+					return (M >= 1 && (M <= 15 || (M === 16 && isGregorianLeap(Y))) && D >= 1 && D <= 30 && (M != 13 && M != 14 || D <=2));
+				},
+				DMYInput(38, ShireMonths, 30)
+			);
 			//Today
 			var run = function () {
 				var now = new Date();
@@ -2466,7 +2561,7 @@
 				}
 			}
 			//Setup
-			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 23, 15, 37, 27, 28, 29, 30, 36];
+			var order = [0, 1, 22, 2, 11, 12, 26, 5, 35, 21, 16, 17, 18, 20, 31, 32, 34, 6, 7, 24, 10, 8, 9, 13, 3, 4, 25, 33, 14, 19, 15, 37, 27, 28, 23, 29, 30, 38, 36];
 			var setup = function () {
 				var todaySelect = "";
 				var fromSelect = "";
@@ -2635,7 +2730,7 @@
 				</div>
 				<div class="justify">
 					<p>
-						<span id="firstCalDisplay" class="resultBox"><span class="small">Choose the calendars to convert between and enter a date above.</span></span>
+						<span id="firstCalDisplay" class="resultBox"><span class="small">Choose the calendars to convert between<br>and enter a date above.</span></span>
 					</p>
 				</div>
 				<div class="justify">
@@ -2643,15 +2738,17 @@
 				</div>
 				<div class="justify">
 					<p>
-						<span id="secondCalDisplay" class="resultBox"><span class="small">Click 'Convert' and the result will appear here.</span></span>
+						<span id="secondCalDisplay" class="resultBox"><span class="small">Click &lsquo;Convert&rsquo; and the result will appear here.</span></span>
 					</p>
 				</div>
 			</div>
-			<p id="shortcuts"><span class="btn" onClick="applyToday()">Today</span> &nbsp; <span class="btn" onClick="increment(1)">+1 day</span> &nbsp; <span class="btn" onClick="increment(-1)">&minus;1 day</span> &nbsp; <span class="btn" onClick="swap()">Swap</span></p>
+			<p id="shortcuts"><span class="btn" onClick="applyToday()">Today</span> &nbsp; <span class="btn" onClick="increment(-1)">&minus;1 day</span> &nbsp; <span class="btn" onClick="increment(1)">+1 day</span> &nbsp; <span class="btn" onClick="swap()">Swap</span></p>
 		</div>
 		<hr>
 		<div id="footer">
-			<p>N.B. This converter serves only <i>arithmetic</i> calendars (ie. calendars determined by fixed rules) as opposed to <i>observational</i> calendars (ie. calendars determined by astronomical observation).<br>Apologies if your favourite calendar is observational. More sincere apologies if your favourite calendar is arithemtic but not (yet) served here.<br>&#169; Joshua, 2024.</p>
+			<p>All conversions apply at midday on the day in question.</p>
+			<p>N.B. This converter serves only <i>arithmetic</i> calendars (ie. calendars determined by fixed rules) as opposed to <i>observational</i> calendars (ie. calendars determined by astronomical observation).<br>Apologies if your favourite calendar is observational. More sincere apologies if your favourite calendar is arithemtic but not (yet) served here.</p>
+			<p>&copy; Joshua, 2021, 2025.</p>
 		</div>
 		<div id="home">
 			<a href="index.html">

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+	<!--Julian Easter Calculator, 23/4/2023-->
+	<!--Version 1.0.0, 27/2/2025-->
+	<head>
+		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
+		<link rel="icon" type="image/x-icon" href="images/logo.png">
+		<title>Julian Easter Calculator</title>
+		<meta name="keywords" content="Easter, calculator, compute, Orthodox Easter calculator, Orthodox Easter, Julian Easter, Coptic Easter, Ethiopian Easter, Pascha">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="stylesheets/easter.css">
+		<style>
+			:root {
+				--julian-colour: #8B0000;
+				--gregorian-colour: #283053;
+				--revised-colour: #5b5b02;
+				--coptic-colour: #501d5d;
+				--ethiopian-colour: #b64b04;
+				--box-text-colour: #FFFFF0;
+				--gold: #e0ac2a;
+			}
+			body {
+				background-color: #efecdc;
+			}
+			#pagetitle {
+				font-size: 4.5vmin;
+				margin: 0;
+				font-family: 'Eagle Lake', serif;
+				color: var(--julian-colour)
+				/*line-height: 1;*/
+			}
+			#main-box {
+				background-color: var(--julian-colour);
+				color: var(--box-text-colour);
+			}
+			#date-tile {
+				grid-row: 1;
+				grid-column: 1;
+			}
+			#details-tile {
+				grid-row: 1;
+				grid-column: 2;
+			}
+			#calendars-tile {
+				grid-row: 2;
+				grid-column: 1 / 3;
+			}
+			.table {
+				border-color: var(--box-text-colour);
+			}
+			.table-divide-under {
+				border-bottom: 0.15vmin solid var(--box-text-colour);
+			}
+			#calendars-box {
+				background-color: var(--gold);
+				border-radius: 3vmin;
+				width: 70vmin;
+				padding: 1vmin 2vmin 2vmin;
+				margin: 3vmin auto 0;
+			}
+			#calendars-container {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 2vmin;
+			}
+			.altCalendarBox {
+				border-radius: 1vmin;
+				padding: 0.7vmin;
+			}
+			.altCalendarName {
+				font-size: 1.8vmin;
+				margin: 0.7vmin 0;
+			}
+			.altCalendarDate {
+				margin: 0.7vmin 0;
+			}
+			#gregorianBox {
+				background-color: var(--gregorian-colour);
+			}
+			#revisedBox {
+				background-color: var(--revised-colour);
+			}
+			#copticBox {
+				background-color: var(--coptic-colour);
+			}
+			#ethiopianBox {
+				background-color: var(--ethiopian-colour);
+			}
+			.julian {
+				color: var(--julian-colour);
+			}
+			.gregorian {
+				color: var(--gregorian-colour);
+			}
+			.revised {
+				color: var(--revised-colour);
+			}
+			.coptic {
+				color: var(--coptic-colour);
+			}
+			.ethiopian {
+				color: var(--ethiopian-colour);
+			}
+			#alt-calendar-input-container {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				font-size: 2.1vmin;
+				margin: 4vmin auto 0;
+				width: 72vmin;
+			}
+			.alt-calendar-input-line-intro {
+				margin: 0 0 1vmin;
+			}
+			.alt-calendar-input-line {
+				margin: 0;
+			}
+			.alt-year-input {
+				padding: 0.7vmin;
+				width: 9vmin;
+			}
+		</style>
+	</head>
+	<body onLoad="start()">
+		<script src="scripts/maths.js"></script>
+		<script src="scripts/dom.js"></script>
+		<script>
+			var year = 0;
+			var isLeapYear = function (Y) {
+				return mod(Y, 4) === 0;
+			}
+			var yearLength = function (Y) {
+				var result = 365;
+				if (isLeapYear(Y)) {
+					result++;
+				}
+				return result;
+			}
+			var monthNames = [0, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; // January = 1
+			var CopticMonths = [0, "Thout", "Paopi", "Hathor", "Koiak", "Tobi", "Meshir", "Paremhat", "Parmouti", "Pashons", "Paoni", "Epip", "Mesori", "Pi Kogi Enavot"];
+			var EthiopianMonths = [0, "M&#228;sk&#228;r&#228;m", "&#7788;&#601;q&#601;mt", "&#7722;&#601;dar", "Ta&#7723;&#347;a&#347;", "T&#601;rr", "Y&#228;katit", "M&#228;gabit", "Miyazya", "G&#601;nbo", "S&#228;ne", "&#7722;amle", "N&#228;hase", "&#7766;agume"];
+			var JulianYear_to_CopticYear = -284;
+			var CopticYear_to_EthiopianYear = 276;
+			var monthLengths = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+			var monthLengthsMarchFirst = [31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29]; // March = 0
+			var MarchDayToDate = function (marchDay, y) { //1 => 1 March. Works for dates around 1 March.
+				var D = marchDay;
+				var Y = y;
+				if (D <= 0) {
+					Y--;
+					D += yearLength(y);
+				}
+				var i = 0;
+				while (D > monthLengthsMarchFirst[i]) {
+					D -= monthLengthsMarchFirst[i];
+					i++;
+				}
+				var M = mod(i + 2, 12) + 1;
+				if (M <= 2) {
+					Y++;
+				}
+				return [D, M, Y];
+			}
+			var JulianDateString = function (A) {
+				var D = A[0];
+				var M = A[1];
+				return D + " " + monthNames[M];
+			}
+			var dateString = function (A, months) {
+				var D = A[0];
+				var M = A[1];
+				var Y = A[2];
+				return D + " " + months[M] + " " + Y;
+			}
+			var alphabet = ["A", "B", "C", "D", "E", "F", "G"];
+			var JulianEaster = function (Y) {
+				var a = mod(Y, 19);
+				var b = floor(Y / 4)
+				var c = mod(19 * a + 15, 30);
+				var f = mod(6 * (Y + b), 7);
+				var d = mod(6 * c + f + 6, 7);
+				var e = 22 + c + d;
+				var g = mod(f + 2, 7);
+				var h = mod(g + 1, 7);
+				// Extract values:
+				var domLetter = alphabet[g];
+				if (isLeapYear(Y)) {
+					domLetter = alphabet[h] + domLetter;
+				}
+				var fullMoon = c + 21;
+				var lunarCycle = a + 1;
+				var solarCycle = mod(Y + 8, 28) + 1;
+				return {easter: e, domLetter: domLetter, fullMoon: fullMoon, lunarCycle: lunarCycle, solarCycle: solarCycle};
+			}
+			var Julian_to_JD = function (J) {
+				var D = J[0];
+				var M = J[1];
+				var Y = J[2];
+				if (M <= 2) {
+					Y--;
+					M += 12;
+				}
+				var E = floor(365.25 * (Y + 4716));
+				var F = floor(30.6001 * (M + 1));
+				return D + E + F - 1524.5 + 0.5;
+			}
+			var JD_to_Julian = function (JD) {
+				var diff = 1721058;
+				var T = mod(JD - diff, 4 * 365 + 1);
+				var yearLength = function (x) {
+					var result = 365;
+					if (x % 4 === 0) {
+						result++;
+					}
+					return result;
+				}
+				var mL = function (x, y) {
+					var result = monthLengths[x];
+					if (yearLength(y) === 366 && x === 2) {
+						result = 29;
+					}
+					return result;
+				}
+				var j = 0;
+				while (T - yearLength(j) >= 0) {
+					T -= yearLength(j);
+					j++;
+				}
+				var Y = floor((JD - diff) / (4 * 365 + 1)) * 4 + j;
+				var k = 1;
+				while (T - mL(k, j) >= 0) {
+					T -= mL(k, j);
+					k++;
+				}
+				return [T + 1, k, Y];
+			}
+			Gregorian_to_JD = function (G) {
+				var D = G[0];
+				var M = G[1];
+				var Y = G[2];
+				if (M <= 2) {
+					Y--;
+					M += 12;
+				}
+				var A = floor(Y / 100);
+				var B = floor(A / 4);
+				var C = 2 - A + B;
+				var E = floor(365.25 * (Y + 4716));
+				var F = floor(30.6001 * (M + 1));
+				return C + D + E + F - 1524.5 + 0.5;
+			}
+			var JD_to_Gregorian = function (JD) {
+				var diff = 1721060;
+				var T = mod(JD - diff, 400 * 365 + 97);
+				var yearLength = function (x) {
+					var result = 365;
+					if (x % 400 === 0 || (x % 4 === 0 && x % 100 != 0)) {
+						result++;
+					}
+					return result;
+				}
+				var mL = function (x, y) {
+					var result = monthLengths[x];
+					if (yearLength(y) === 366 && x === 2) {
+						result = 29;
+					}
+					return result;
+				}
+				var j = 0;
+				while (T - yearLength(j) >= 0) {
+					T -= yearLength(j);
+					j++;
+				}
+				var Y = floor((JD - diff) / (400 * 365 + 97)) * 400 + j;
+				var k = 1;
+				while (T - mL(k, j) >= 0) {
+					T -= mL(k, j);
+					k++;
+				}
+				return [T + 1, k, Y];
+			}
+			var JD_to_RevisedJulian = function (JD) {
+				var diff = 1721426;
+				var T = mod(JD - diff, 900 * 365 + 218);
+				var yearLength = function (x) {
+					var result = 365;
+					if (x % 900 === 200 || x % 900 === 600 || (x % 4 === 0 && x % 100 != 0)) {
+						result++;
+					}
+					return result;
+				}
+				var mL = function (x, y) {
+					var result = monthLengths[x];
+					if (yearLength(y) === 366 && x === 2) {
+						result = 29;
+					}
+					return result;
+				}
+				var j = 1;
+				while (T - yearLength(j) >= 0) {
+					T -= yearLength(j);
+					j++;
+				}
+				var Y = floor((JD - diff) / (900 * 365 + 218)) * 900 + j;
+				var k = 1;
+				while (T - mL(k, j) >= 0) {
+					T -= mL(k, j);
+					k++;
+				}
+				return [T + 1, k, Y];
+			}
+			var JD_to_Coptic = function (JD) {
+				var diff = 2454356;
+				var T = mod(JD - diff, 4 * 365 + 1);
+				var j = 0;
+				while (T - 365 >= 0 && j < 3) {
+					T -= 365;
+					j++;
+				}
+				var D = T % 30 + 1;
+				var M = floor(T / 30) + 1;
+				var Y = floor((JD - diff) / (4 * 365 + 1)) * 4 + j + 1724;
+				return [D, M, Y];
+			}
+			var Coptic_to_Ethiopian = function (C) {
+				return [C[0], C[1], C[2] + CopticYear_to_EthiopianYear];
+			}
+			var getValidIntegerInput = function (id) {
+				var str = getValue(id);
+				var no = Number(str);
+				var result = 0.5;
+				if (no % 1 === 0 && str != "" && abs(no) <= Number.MAX_SAFE_INTEGER) {
+					result = no;
+				}
+				return result;
+			}
+			var mainRun = function (Y) {
+				year = Y;
+				var E = JulianEaster(Y);
+				var EasterDate = MarchDayToDate(E.easter, Y);
+				setHTML("year-display", Y);
+				setHTML("date", JulianDateString(EasterDate));
+				setHTML("dominical-letter", E.domLetter);
+				setHTML("full-moon", JulianDateString(MarchDayToDate(E.fullMoon, Y)));
+				setHTML("lunar-cycle", E.lunarCycle);
+				setHTML("solar-cycle", E.solarCycle);
+				var JD = Julian_to_JD(EasterDate);
+				console.log(JD); 
+				setHTML("gregorian", dateString(JD_to_Gregorian(JD), monthNames));
+				setHTML("revised",  dateString(JD_to_RevisedJulian(JD), monthNames));
+				var CopticDate = JD_to_Coptic(JD);
+				setHTML("coptic",  dateString(CopticDate, CopticMonths));
+				setHTML("ethiopian", dateString(Coptic_to_Ethiopian(CopticDate), EthiopianMonths));
+			}
+			var mainGo = function () {
+				var Y = getValidIntegerInput("main-input");
+				if (Y % 1 === 0) {
+					mainRun(Y);
+					setHTML("main-error-line", "&nbsp;");
+				} else {
+					setHTML("main-error-line", "Error");
+				}
+			}
+			var copticGo = function () {
+				var Y = getValidIntegerInput("coptic-input");
+				if (Y % 1 === 0) {
+					mainRun(Y - JulianYear_to_CopticYear);
+					setHTML("main-error-line", "&nbsp;");
+				} else {
+					setHTML("main-error-line", "Error");
+				}
+			}
+			var ethiopianGo = function () {
+				var Y = getValidIntegerInput("ethiopian-input");
+				if (Y % 1 === 0) {
+					mainRun(Y - JulianYear_to_CopticYear - CopticYear_to_EthiopianYear);
+					setHTML("main-error-line", "&nbsp;");
+				} else {
+					setHTML("main-error-line", "Error");
+				}
+			}
+			var nextYear = function () {
+				mainRun(year + 1);
+			}
+			var previousYear = function () {
+				mainRun(year - 1);
+			}
+			var start = function () {
+				var now = new Date();
+				var JD = Gregorian_to_JD([now.getDate(), now.getMonth() + 1, now.getFullYear()]);
+				var JulianNow = JD_to_Julian(JD);
+				var yearToShow = JulianNow[2];
+				if (JulianNow[1] > 5) {
+					yearToShow++;
+				}
+				mainRun(yearToShow);
+			}
+			var key = function (event, module) {
+				var k = event.key.toLowerCase();
+				if (k === "enter") {
+					if (module === 0) {
+						mainGo();
+					} else if (module === 1) {
+						copticGo();
+					} else if (module === 2) {
+						ethiopianGo();
+					}
+				}
+			}
+		</script>
+		<div id="home">
+			<a href="index.html">
+				<img src="images/logo.png" id="homeLogo">
+			</a>
+		</div>
+		<div id="header" class="centretext">
+			<p id="subtitle">Presenting a</p>
+			<p id="pagetitle">Julian Easter Calculator</p>
+			<p class="spiel">The following calculator exclusively uses the Julian method to find the date of Easter, which is currently used by most of Eastern Christianity and the cultures it has influenced. This holiday is often called &lsquo;Orthodox Easter&rsquo; to distinguish it from the Easter more widely celebrated in the West. The Julian method was the standard method throughout Europe from around the tenth century until 1582, when the Catholic Church instituted the Gregorian calendar and the Gregorian method of determining the date of Easter. Most of Western Christianity would eventually follow suit. The British Empire (encompassing many modern anglophone countries) last used the Julian method for the Easter of 1752.</p>
+			<p class="spiel">The calculator mainly uses the <span class="julian">Julian</span> calendar. However, years can also be entered from the <span class="coptic">Coptic</span> and <span class="ethiopian">Ethiopian</span> calendars, which are synchronised with the Julian calendar. The date of Julian Easter is also given in the <span class="gregorian">Gregorian</span> and <span class="revised">Revised Julian</span> calendars, although these calendars are not synchronised with the Julian calendar or each other.</p>
+			<p class="spiel"><a href="easter-calculator.html">Go to a Gregorian Easter calculator.</a></p>
+		</div>
+		<div id="main" class="centretext text">
+			<p id="main-input-line-intro">Enter <span class="julian">Julian</span> year:</p>
+			<div id="main-input-container">
+				<div class="increment-btn-container justify-left" id="increment-btn-container-left">
+					<div class="btn smallbutton increment-btn" onClick="previousYear()">Previous</div>
+				</div>
+				<div id="main-input-line-container">
+					<p id="main-input-line"><input type="number" id="main-input" placeholder="year" onkeydown="key(event, 0)"> &nbsp; <span class="btn bigbutton" id="mainbutton" onClick="mainGo()">Compute</span></p>
+				</div>
+				<div class="increment-btn-container justify-right" id="increment-btn-container-right">
+					<div class="btn smallbutton increment-btn" onCLick="nextYear()">Next</div>
+				</div>
+			</div>
+			<p id="main-error-line">&nbsp;</p>
+			<div id="main-box" class="box">
+				<p id="year-display-intro">Julian year</p>
+				<p id="year-display-line">&#8764; &nbsp; <span id="year-display"></span> <span class="smallcaps">ad</span> &nbsp; &#8765;</p>
+				<div id="container">
+					<div id="date-tile" class="justify ">
+						<div>
+							<p id="date-intro-text">Julian calendar date of Julian Easter:</p>
+							<p id="date"></p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div id="details-tile">
+						<p class="table-heading">Details</p>
+						<div id="details-table" class="table">
+							<div class="cell details-cell">Solar cycle year</div>
+							<div class="cell details-cell" id="solar-cycle"></div>
+							<div class="cell details-cell table-divide-under">Dominical letter</div>
+							<div class="cell details-cell table-divide-under" id="dominical-letter"></div>
+							<div class="cell details-cell">Lunar cycle year</div>
+							<div class="cell details-cell" id="lunar-cycle"></div>
+							<div class="cell details-cell">Paschal full moon</div>
+							<div class="cell details-cell" id="full-moon"></div>
+						</div>
+					</div>
+					<div id="calendars-tile">
+						<div id="calendars-box">
+							<p class="table-heading">Julian Easter in other calendars:</p>
+							<div id="calendars-container">
+								<div class="altCalendarBox" id="gregorianBox">
+									<p class="altCalendarName">Gregorian calendar</p>
+									<p class="altCalendarDate"><span id="gregorian"></span> <span class="smallcaps">ad</span></p>
+								</div>
+								<div class="altCalendarBox" id="revisedBox">
+									<p class="altCalendarName">Revised Julian calendar</p>
+									<p class="altCalendarDate"><span id="revised"></span> <span class="smallcaps">ad</span></p>
+								</div>
+								<div class="altCalendarBox" id="copticBox">
+									<p class="altCalendarName">Coptic calendar</p>
+									<p class="altCalendarDate"><span id="coptic"></span> <span class="smallcaps">am</span></p>
+								</div>
+								<div class="altCalendarBox" id="ethiopianBox">
+									<p class="altCalendarName">Ethiopian calendar</p>
+									<p class="altCalendarDate"><span id="ethiopian"></span> <span class="smallcaps">ad</span></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="alt-calendar-input-container">
+				<div class="alt-calendar-input-line-container">
+					<p class="alt-calendar-input-line-intro">Enter <span class="coptic">Coptic</span> year:</p>
+					<p class="alt-calendar-input-line"><input type="number" class="alt-year-input" id="coptic-input" placeholder="year" onkeydown="key(event, 1)"> &nbsp; <span class="btn smallbutton" onClick="copticGo()">Compute</span></p>
+				</div>
+				<div class="alt-calendar-input-line-container">
+					<p class="alt-calendar-input-line-intro">Enter <span class="ethiopian">Ethiopian</span> year:</p>
+					<p class="alt-calendar-input-line"><input type="number" class="alt-year-input" id="ethiopian-input" placeholder="year" onkeydown="key(event, 2)"> &nbsp; <span class="btn smallbutton" onClick="ethiopianGo()">Compute</span></p>
+				</div>
+			</div>
+		</div>
+		<div class="centretext" id="footer">
+			<p class="spiel"><a target="_blank" href="calendrical-conversions.html">Convert this date to even more calendars.</a></p>
+			<p id="footer-line">Not associated with any Christian denomination or organisation. Nothing on this page is intended to imply that you should or should not celebrate any particular religious holiday; do whatever you want.<br>&copy; Joshua, 2025.</p>
+		</div>
+	</body>
+</html>

@@ -3,26 +3,28 @@
 	<!--
 		Look, I made a website.
 	-->
+	<!-- Version 5.0 -- 26/4/2025 -->
 	<head>
-		<title>Joshua's website</title>
+		<title>Home</title>
 		<link rel="stylesheet" href="fonts/fonts.css">
+		<link rel="stylesheet" href="stylesheets/common.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Literata&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Outfit&display=swap" rel="stylesheet">
 		<style>
 			:root {
 				--colour-one: #ffd700;
-				--colour-two: #800080;
-				--bg-colour: #ffffff;
+				--colour-two: #ffd700; /*#62428a00;*/
+				--colour-three: #ffd700;
+				--bg-colour: #f9f9f9;
 				--title-colour: #000000;
+				--tile-colour: #bfbfbf;
+				--tile-hover-colour: #cccccc;
+				--tile-active-colour: #999999;
 			}
 			a:link, a:visited {
-				color: inherit;
 				text-decoration: inherit;
 				cursor: pointer;
-			}
-			a:link:active, a:visited:active {
-				color: inherit;
 			}
 			body {
 				margin: 0;
@@ -31,12 +33,18 @@
 			}
 			#header {
 				width: 100%;
-				background: var(--colour-one);
+				/*background: var(--colour-one);*/
 				margin: 0;
 			}
 			#titleBox {
 				margin: auto;
-				padding: 9vmin 3vmin;
+				padding: 10vmin 0;
+				z-index: 3;
+				position: relative;
+			}
+			#titleBar {
+				height: 7vmin;
+				background-color: var(--colour-two);
 			}
 			#subheader {
 				background-color: var(--colour-two);
@@ -65,32 +73,37 @@
 				}
 			}
 			.tilebox {
-				padding: 1.2vmin;
-				color: var(--colour-two);
+				padding: 1vmin;
 			}
 			.tile {
 				display: block;
 				width: 100%;
 				height: 100%;
 				background-color: transparent;
-				border-radius: 2.4vmin;
+				border-radius: 3vmin;
 				cursor: pointer;
-				border: 5px solid var(--colour-two);
-				color: var(--colour-two);
-				transition: background-color 0.5s, color 0.5s;
+				background-color: none;
+				color: #333333;
+				transition: background-color 0.3s, color 0.2s;
 				text-align: center;
 				font-size: 3.6vmin;
 				padding: 3.6vmin 2.4vmin;
 				box-sizing: border-box;
-				font-family: Arial, Emoji, Symbols, Symbols2, NewEmoji, sans-serif;
+				font-family: 'Outfit', Arial, Emoji, Symbols, Symbols2, NewEmoji, sans-serif;
 			}
 			.tile:hover {
-				background-color: var(--colour-two);
-				color: var(--bg-colour);
+				background-color: var(--tile-hover-colour);
+				color: black;
 			}
 			.tile:active {
-				background-color: transparent;
-				color: var(--colour-two);
+				background-color: var(--tile-active-colour);
+			}
+			.tile-text {
+				margin: 0;
+			}
+			.tile-icon {
+				font-size: 6vmin;
+				margin-bottom: 1vmin;
 			}
 			.justify {
 				display: flex;
@@ -116,7 +129,7 @@
 				line-height: 1.6;
 			}
 			#headLogo {
-				height: 14.4vmin;
+				height: 20vmin;
 				margin: auto;
 				display: block;
 			}
@@ -143,6 +156,38 @@
 				font-size: 1.8vmin;
 				margin: 3.6vmin 1.2vmin;
 			}
+			.colourbox {
+				position: absolute;
+				width: 100%;
+				left: 0;
+				z-index: 2;
+			}
+			#colourbox1 {
+				top: 0;
+				height: 40vmin;
+				background-color: var(--colour-one);
+			}
+			#colourbox2 {
+				top: 25vmin;
+				height: 15vmin;
+				background-color: var(--colour-two);
+			}
+			#colourbox3 {
+				top: 20vmin;
+				height: 5vmin;
+				background-color: var(--colour-three);
+			}
+			#headerBar {
+				background-color: var(--colour-two);
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				font-size: 20px;
+				box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+				height: 80px;
+				z-index: 1;
+			}
 		</style>
 		<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
 		<link rel="icon" type="image/x-icon" href="images/logo.png">
@@ -153,7 +198,7 @@
 			var start = function () {
 				var now = new Date();
 				var hol = holiday(now.getDate(), now.getMonth() + 1, now.getFullYear(), now.getHours());
-				//var hol = holiday(3, 3, 2023, 15);
+				//var hol = holiday(18, 4, 2025, 15);
 				if (hol != Holidays.length) {
 					document.getElementById("greeting").innerHTML = '<span title="' + Holidays[hol].name.substring(0, 1).toUpperCase() + Holidays[hol].name.substring(1) + '">' + Holidays[hol].message + '</span>';
 					document.getElementById("holiday").innerHTML = " Today celebrating " + Holidays[hol].name + ".";
@@ -161,15 +206,23 @@
 						var root = document.querySelector(':root');
 						root.style.setProperty('--colour-one', Holidays[hol].colour1);
 						root.style.setProperty('--colour-two', Holidays[hol].colour2);
-						root.style.setProperty('--title-colour', Holidays[hol].colour3);
+						root.style.setProperty('--colour-three', Holidays[hol].colour3);
 					}
 				}
 			}
 		</script>
 		<div id="header">
+			<div class="colourbox" id="colourbox1"></div>
+			<div class="colourbox" id="colourbox2"></div>
+			<div class="colourbox" id="colourbox3"></div>
 			<div id="titleBox">
 				<img id="headLogo" src="images/logo.png">
-				<p id="title">Joshua&#8217;s website</p>
+			</div>
+			<!--<div id="titleBar"></div>-->
+			<div id="headerBar">
+				<div id="home">
+					<img src="images/logo.png" id="homeLogo">
+				</div>
 			</div>
 		</div>
 		<div id="body">
@@ -177,53 +230,99 @@
 			<!--<p id="about">Sometimes I make things.</p>-->
 			<div id="tiles">
 				<div class="tilebox justify">
-					<a class="tile justify" href="beagle.html">&#128269;<br>Beagle<br>Search</a>
+					<a class="tile" href="beagle.html">
+						<p class="tile-text tile-icon">&#128269;</p>
+						<p class="tile-text tile-title">Beagle<br>Search</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="astronomical-clock.html">&#127771;<br>Astronomical<br>Clock</a>
+					<a class="tile" href="astronomical-clock.html">
+						<p class="tile-text tile-icon">&#127771;</p>
+						<p class="tile-text tile-title">Astronomical<br>Clock</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="calendrical-conversions.html">&#128197;<br>Calendrical<br>Conversions</a>
+					<a class="tile" href="calendrical-conversions.html">
+						<p class="tile-text tile-icon">&#128197;</p>
+						<p class="tile-text tile-title">Calendrical<br>Conversions</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="dials.html">&#128339;<br>Dials<br>(a clock)</a>
+					<a class="tile" href="dials.html">
+						<p class="tile-text tile-icon">&#128339;</p>
+						<p class="tile-text tile-title">Dials<br>(a clock)</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="horoscope.html">&#9811;<br>Horoscope<br>Generator</a>
+					<a class="tile" href="horoscope.html">
+						<p class="tile-text tile-icon">&#9811;</p>
+						<p class="tile-text tile-title">Horoscope<br>Generator</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="english-numbers.html">&#128290;<!--&#10140;&#128288;--><br>English<br>Numbers</a>
+					<a class="tile" href="decimal-time.html">
+						<p class="tile-text tile-icon">&#128287;</p>
+						<p class="tile-text tile-title">Decimal<br>Time</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="zodiacal-clock.html">&#127774;<br>Zodiacal<br>Clock</a>
+					<a class="tile" href="zodiacal-clock.html">
+						<p class="tile-text tile-icon">&#127774;</p>
+						<p class="tile-text tile-title">Zodiacal<br>Clock</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="easter-calculator.html">&#128007;<br>Easter<br>Calculator</a>
+					<a class="tile" href="easter-calculator.html">
+						<p class="tile-text tile-icon">&#128007;</p>
+						<p class="tile-text tile-title">Easter<br>Calculator</p>
+					</a>
 				</div>
-				<!--<div class="tilebox justify">
-					<a class="tile justify" href="equation-of-time.html">&#128200;<br>Equation<br>of Time</a>
-				</div>-->
+				<!--
 				<div class="tilebox justify">
-					<a class="tile justify" href="local-time.html">&#8986;<br>Local<br>Time</a>
+					<a class="tile" href="equation-of-time.html">
+						<p class="tile-text tile-icon">&#128200;</p>
+						<p class="tile-text tile-title">Equation<br>of Time</p>
+					</a>
+				</div>
+				-->
+				<div class="tilebox justify">
+					<a class="tile" href="local-time.html">
+						<p class="tile-text tile-icon">&#8986;</p>
+						<p class="tile-text tile-title">Local<br>Time</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="decimal-time.html">&#128287;<br>Decimal<br>Time</a>
+					<a class="tile" href="english-numbers.html">
+						<p class="tile-text tile-icon">&#128290;</p>
+						<p class="tile-text tile-title">English<br>Numbers</p>
+					</a>
 				</div>
 				<div class="tilebox justify">
-					<a class="tile justify" href="us-stars.html">&#127482;&#127480;<br>U.S.<br>Stars</a>
+					<a class="tile" href="us-stars.html">
+						<p class="tile-text tile-icon">&#127482;&#127480;</p>
+						<p class="tile-text tile-title">U.S.<br>Stars</p>
+					</a>
 				</div>
-				<!--<div class="tilebox justify">
-					<a class="tile justify" href="flag-resizing.html">&#127988;<br>Flag<br>Resizing</a>
-				</div>-->
+				<!--
 				<div class="tilebox justify">
-					<a class="tile justify" href="sitemap.html">&#128642;<br>Other<br>things</a>
+					<a class="tile" href="flag-resizing.html">
+						<p class="tile-text tile-icon">&#127988;</p>
+						<p class="tile-text tile-title">Flag<br>Resizing</p>
+					</a>
+				</div>
+				-->
+				<div class="tilebox justify">
+					<a class="tile" href="sitemap.html">
+						<p class="tile-text tile-icon">&#128642;</p>
+						<p class="tile-text tile-title">Other<br>things</p>
+					</a>
 				</div>
 			</div>
 			<div id="quotebox">
 				<p id="quote">&#8220;Painfully boring.&#8221;</p>
 				<p id="attr">- Most people.</p>
 			</div>
-			<div id="footer">&#169; Joshua, 2023. Hosted on Github Pages.<span id="holiday"></span></div>
+			<div id="footer">&#169; Joshua, 2025. Hosted on Github Pages.<span id="holiday"></span></div>
 		</div>
 	</body>
 </html>
