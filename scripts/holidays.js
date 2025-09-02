@@ -244,6 +244,13 @@ var ChristmasEve = ["&#127850;&#129371;", "&#127877;", "&#129420;"];
 //List of holidays
 var Holidays = [
 	new Hol(
+		"National Flag Day", // The one after the protests by morons.
+		function (D) {
+			return D.y === 2025 && D.m === 9 && D.d === 3;
+		},
+		img("flag.png") + " &nbsp; " + img("red-ensign.png") + "<br><span style='font-size: 0.3em; color: #666666'>Just to clarify &ndash; this is not a sign of support for any recent protests or the silly people who participated. It's just it's National Flag Day today... I like flags.</span>",
+	),
+	new Hol(
 		"the Coronation of King Charles III",
 		function (D) {
 			return D.y === 2023 && D.m === 5 && (D.d === 6 || D.d === 7);
