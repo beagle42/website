@@ -480,6 +480,11 @@ var Holidays = [
 		img("flag.png") + " &nbsp; " + img("red-ensign.png"),
 	),
 	new Hol(
+		"Australian Citizenship Day",
+		isDate(17, 9),
+		"&#127462;&#127482;"
+	),
+	new Hol(
 		"King's Birthday (Qld.)",
 		function (D) {
 			return D.m === 10 && D.d === mod(D.DL + 1, 7) + 1;
